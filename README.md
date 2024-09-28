@@ -4,8 +4,6 @@
 
 2024/9/27 by DKZ
 
-![scast_flow](https://github.com/user-attachments/assets/b740c129-fe61-475a-9f27-234db6b6381e)
-
 [🔱SCAST](https://davidkingzyb.github.io/template/SCAST_TS.html) is a programmatic tool that converts code into UML diagrams and flowcharts.
 
 Only supports code written in TypeScript and Object-Oriented Programming (OOP) paradigm for now. 
