@@ -1,5 +1,5 @@
-var D3M=(function(){
-    function IndentedTree(data){
+var D3M = (function () {
+    function IndentedTree(data) {
         const format = d3.format(",");
         const nodeSize = 22;
         const root = d3.hierarchy(data).eachBefore((i => d => d.index = i++)(0));
@@ -9,21 +9,21 @@ var D3M=(function(){
 
         const columns = [
             {
-                label: "condition", 
-                value: d => d.value, 
-                format:d=>d.condition?d.condition.value:'', 
+                label: "condition",
+                value: d => d.value,
+                format: d => d.condition ? d.condition.value : '',
                 x: 700
             },
             {
-                label: "type", 
-                value: d => d.value, 
-                format:d=>d.type, 
+                label: "type",
+                value: d => d.value,
+                format: d => d.type,
                 x: 840
             },
             {
-                label: "poi", 
-                value: d => d.value, 
-                format:(d) => d.poi?d.poi.line+':'+d.poi.start:'-',
+                label: "poi",
+                value: d => d.value,
+                format: (d) => d.poi ? d.poi.line + ':' + d.poi.start : '-',
                 x: 900
             },
         ];
@@ -65,7 +65,7 @@ var D3M=(function(){
         node.append("title")
             .text(d => d.ancestors().reverse().map(d => d.data.name).join("/"));
 
-        for (const {label, value, format, x} of columns) {
+        for (const { label, value, format, x } of columns) {
             svg.append("text")
                 .attr("dy", "0.32em")
                 .attr("y", -nodeSize)
@@ -84,8 +84,8 @@ var D3M=(function(){
         return svg.node();
     }
 
-    function TidyTree(data){
-        const width = 928;
+    function TidyTree(data) {
+        const width = window.innerWidth - 20;
 
         const root = d3.hierarchy(data);
         const dx = 20;
@@ -96,8 +96,8 @@ var D3M=(function(){
         let x0 = Infinity;
         let x1 = -x0;
         root.each(d => {
-        if (d.x > x1) x1 = d.x;
-        if (d.x < x0) x0 = d.x;
+            if (d.x > x1) x1 = d.x;
+            if (d.x < x0) x0 = d.x;
         });
         const height = x1 - x0 + dx * 2;
 
@@ -122,9 +122,9 @@ var D3M=(function(){
         const node = svg.append("g")
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
-        .selectAll()
-        .data(root.descendants())
-        .join("g")
+            .selectAll()
+            .data(root.descendants())
+            .join("g")
             .attr("transform", d => `translate(${d.y},${d.x})`);
 
         node.append("circle")
@@ -142,8 +142,8 @@ var D3M=(function(){
         return svg.node();
     }
 
-    function ClusterTree(data){
-        const width = 928;
+    function ClusterTree(data) {
+        const width = window.innerWidth - 20;
         const root = d3.hierarchy(data);
         const dx = 20;
         const dy = width / (root.height + 1);
@@ -172,10 +172,10 @@ var D3M=(function(){
             .selectAll()
             .data(root.links())
             .join("path")
-                .attr("d", d3.linkHorizontal()
-                    .x(d => d.y)
-                    .y(d => d.x));
-        
+            .attr("d", d3.linkHorizontal()
+                .x(d => d.y)
+                .y(d => d.x));
+
         const node = svg.append("g")
             .attr("stroke-linejoin", "round")
             .attr("stroke-width", 3)
@@ -195,12 +195,12 @@ var D3M=(function(){
             .text(d => d.data.name)
             .attr("stroke", "white")
             .attr("paint-order", "stroke");
-        
+
         return svg.node();
     }
 
-    function RadialTidyTree(data){
-        const width = 928;
+    function RadialTidyTree(data) {
+        const width = window.innerWidth - 300;
         const height = width;
         const cx = width * 0.5; // adjust as needed to fit
         const cy = height * 0.59; // adjust as needed to fit
@@ -251,8 +251,8 @@ var D3M=(function(){
         return svg.node();
     }
 
-    function RadialClusterTree(data){
-        const width = 928;
+    function RadialClusterTree(data) {
+        const width = window.innerWidth - 300;
         const height = width;
         const cx = width * 0.5; // adjust as needed to fit
         const cy = height * 0.54; // adjust as needed to fit
@@ -303,44 +303,44 @@ var D3M=(function(){
         return svg.node();
     }
 
-    function EdgeBundling(d){
-        function _D3Tree2Network(d){
-            var r=[]
-            var map={}
-            for(let n of d.children){
-                SCAST.traverseAst(n,function(node){
-                    if(gD3.options[node.type]||gD3.options.all){
-                        if(!map['network.'+node.value]){
-                            map['network.'+node.value]=[]
+    function EdgeBundling(d) {
+        function _D3Tree2Network(d) {
+            var r = []
+            var map = {}
+            for (let n of d.children) {
+                SCAST.traverseAst(n, function (node) {
+                    if (gD3.options[node.type] || gD3.options.all) {
+                        if (!map['network.' + node.value]) {
+                            map['network.' + node.value] = []
                         }
-                        if(node.children&&node.children.length>0){
-                            for(let child of node.children){
-                                if(!map['network.'+child.value]){
-                                    map['network.'+child.value]=[]
+                        if (node.children && node.children.length > 0) {
+                            for (let child of node.children) {
+                                if (!map['network.' + child.value]) {
+                                    map['network.' + child.value] = []
                                 }
-                                map['network.'+node.value].push('network.'+child.value)
+                                map['network.' + node.value].push('network.' + child.value)
                             }
                         }
-                        
+
                     }
                 })
             }
-            for(let k in map){
-                r.push({name:k,imports:map[k]})
+            for (let k in map) {
+                r.push({ name: k, imports: map[k] })
             }
-            console.log('2network',r)
+            console.log('2network', r)
             return r
         }
-        
+
         var colorin = "#00f"
         var colorout = "#f00"
         var colornone = "#ccc"
-        var _d=[
-            {name:'m.a',imports:['m.b','m.c']},
-            {name:'m.b',imports:['m.c']},
-            {name:'m.c',imports:['m.a']},
+        var _d = [
+            { name: 'm.a', imports: ['m.b', 'm.c'] },
+            { name: 'm.b', imports: ['m.c'] },
+            { name: 'm.c', imports: ['m.a'] },
         ]
-        var data=hierarchy(_D3Tree2Network(d))
+        var data = hierarchy(_D3Tree2Network(d))
         function id(node) {
             return `${node.parent ? id(node.parent) + "." : ""}${node.data.name}`;
         }
@@ -348,27 +348,27 @@ var D3M=(function(){
             let root;
             const map = new Map;
             data.forEach(function find(data) {
-                const {name} = data;
+                const { name } = data;
                 if (map.has(name)) return map.get(name);
                 const i = name.lastIndexOf(delimiter);
                 map.set(name, data);
                 if (i >= 0) {
-                find({name: name.substring(0, i), children: []}).children.push(data);
-                data.name = name.substring(i + 1);
+                    find({ name: name.substring(0, i), children: [] }).children.push(data);
+                    data.name = name.substring(i + 1);
                 } else {
-                root = data;
+                    root = data;
                 }
                 return data;
             });
             return root;
-            }
-            function bilink(root) {
-                const map = new Map(root.leaves().map(d => [id(d), d]));
-                for (const d of root.leaves()) d.incoming = [], d.outgoing = d.data.imports.map(i => [d, map.get(i)]);
-                for (const d of root.leaves()) for (const o of d.outgoing) o[1].incoming.push(o);
-                return root;
-                }
-        const width = 954;
+        }
+        function bilink(root) {
+            const map = new Map(root.leaves().map(d => [id(d), d]));
+            for (const d of root.leaves()) d.incoming = [], d.outgoing = d.data.imports.map(i => [d, map.get(i)]);
+            for (const d of root.leaves()) for (const o of d.outgoing) o[1].incoming.push(o);
+            return root;
+        }
+        const width = window.innerWidth - 300;
         const radius = width / 2;
 
         const tree = d3.cluster()
@@ -393,7 +393,7 @@ var D3M=(function(){
             .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
             .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
             .text(d => d.data.name)
-            .each(function(d) { d.text = this; })
+            .each(function (d) { d.text = this; })
             .on("mouseover", overed)
             .on("mouseout", outed)
             .call(text => text.append("title").text(d => `${id(d)}
@@ -413,7 +413,7 @@ var D3M=(function(){
             .join("path")
             .style("mix-blend-mode", "multiply")
             .attr("d", ([i, o]) => line(i.path(o)))
-            .each(function(d) { d.path = this; });
+            .each(function (d) { d.path = this; });
 
         function overed(event, d) {
             link.style("mix-blend-mode", null);
@@ -435,13 +435,193 @@ var D3M=(function(){
 
         return svg.node();
     }
+
+
+    function disjointForce(data, dbClickCallback) { //{nodes:[{id,w,text}],links:[{source,target,value}]} w:width and collider radius value:line width
+        const width = window.innerWidth - 20;
+        const height = width;
+        const h = gD3fontSize * 2;
+
+        const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        const links = data.links.map(d => ({ ...d }));
+        const nodes = data.nodes.map(d => ({ ...d }));
+
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id))
+            .force("charge", d3.forceManyBody())
+            .force("x", d3.forceX())
+            .force("y", d3.forceY())
+            .force("collide", d3.forceCollide().radius(d => d.w / 2 + 10));
+
+        const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [-width / 2, -height / 2, width, height])
+            .attr("style", "max-width: 100%; height: auto;");
+
+        const gradient = svg.append("defs")
+            .append("linearGradient")
+            .attr("id", "gradient")
+            .attr("x1", "0%")
+            .attr("y1", "0%")
+            .attr("x2", "100%")
+            .attr("y2", "0%");
+
+        // 添加渐变色
+        gradient.append("stop")
+            .attr("offset", "0%")
+            .style("stop-color", "black")
+            .style("stop-opacity", 1);
+
+        gradient.append("stop")
+            .attr("offset", "100%")
+            .style("stop-color", "white")
+            .style("stop-opacity", 1);
+
+        const arrow = svg.append("g")
+            .attr("stroke", "url(#gradient)")
+            .attr("stroke-opacity", 0.6)
+            .selectAll("line")
+            .data(links)
+            .join("line")
+            .attr("stroke-width", d => Math.sqrt(d.value))
+            .attr("stroke-dasharray", d => d.dash || "");
+
+        const node = svg.append("g")
+            .selectAll('rect')
+            .data(nodes)
+            .join('rect')
+            .attr('height', d => h)
+            .attr('width', d => d.w)
+            .attr('fill', '#ececff')
+
+        const text = svg.append("g")
+            .selectAll('text')
+            .data(nodes)
+            .join('text')
+            .text(d => d.text)
+            .attr('x', d => d.x + d.w / 2)
+            .attr('y', d => d.y + h / 2)
+            .attr('text-anchor', 'middle')
+            .attr('dominant-baseline', 'central')
+            .attr("style", `font: ${gD3fontSize}px monospace;`);
+
+        text.on("dblclick", function (event, d) {
+            console.log(d);
+            dbClickCallback(d.id)
+        });
+
+        node.call(d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended));
+
+        simulation.on("tick", () => {
+
+            node
+                .attr("x", d => d.x - (d.w / 2))
+                .attr("y", d => d.y - h / 2);
+
+            text
+                .attr("x", d => d.x)
+                .attr("y", d => d.y);
+
+            arrow
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+        });
+
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+
+        return svg.node();
+    }
+
+    function treeMap(data) {
+        const width = window.innerWidth;
+        const height = width;
+        const color = d3.scaleSequential([8, 0], d3.interpolateMagma);
+
+        // Create the treemap layout.
+        const treemap = data => d3.treemap()
+            .size([width, height])
+            .paddingOuter(3)
+            .paddingTop(19)
+            .paddingInner(1)
+            .round(true)
+            (d3.hierarchy(data)
+                .sum(d => d.children.length)
+                .sort((a, b) => b.children?b.children.length:0 - a.children?a.children.length:0));
+        const root = treemap(data);
+
+        // Create the SVG container.
+        const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height])
+            .attr("style", "max-width: 100%; height: auto; overflow: visible; font: 10px sans-serif;");
+
+
+        const node = svg.selectAll("g")
+            .data(d3.group(root, d => d.height))
+            .join("g")
+            .selectAll("g")
+            .data(d => d[1])
+            .join("g")
+            .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+        node.append("rect")
+            .attr("fill", d => color(d.height))
+            .attr("width", d => d.x1 - d.x0)
+            .attr("height", d => d.y1 - d.y0);
+
+        node.append("clipPath")
+            .append("use")
+
+        node.append("text")
+            .selectAll("tspan")
+            .data(d => d.data.name.split(/(?=[A-Z][^A-Z])/g))
+            .join("tspan")
+            .attr("fill-opacity", (d, i, nodes) => i === nodes.length - 1 ? 0.7 : null)
+            .text(d => d);
+
+        node.filter(d => d.children).selectAll("tspan")
+            .attr("dx", 3)
+            .attr("y", 13);
+
+        node.filter(d => !d.children).selectAll("tspan")
+            .attr("x", 9999)
+            .attr("y", (d, i, nodes) => `${4 + i * 2}em`)
+
+
+        return svg.node();
+    }
     return {
-        IndentedTree:IndentedTree,
-        TidyTree:TidyTree,
-        ClusterTree:ClusterTree,
-        RadialTidyTree:RadialTidyTree,
-        RadialClusterTree:RadialClusterTree,
-        EdgeBundling:EdgeBundling,
+        IndentedTree: IndentedTree,
+        TidyTree: TidyTree,
+        ClusterTree: ClusterTree,
+        RadialTidyTree: RadialTidyTree,
+        RadialClusterTree: RadialClusterTree,
+        EdgeBundling: EdgeBundling,
+        disjointForce: disjointForce,
+        treeMap: treeMap,
     }
 
 })()
