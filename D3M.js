@@ -448,11 +448,11 @@ var D3M = (function () {
         const nodes = data.nodes.map(d => ({ ...d }));
 
         const simulation = d3.forceSimulation(nodes)
-            .force("link", d3.forceLink(links).id(d => d.id))
-            .force("charge", d3.forceManyBody())
+            .force("link", d3.forceLink(links).id(d => d.id).distance(d => d.dist ? d.dist : 30).strength(d => d.strength ? d.strength : 1))
+            // .force("charge", d3.forceManyBody())
             .force("x", d3.forceX())
             .force("y", d3.forceY())
-            .force("collide", d3.forceCollide().radius(d => d.w / 2 + 10));
+            .force("collide", d3.forceCollide(d => d.w / 2 + 10).strength(0.2));
 
         const svg = d3.create("svg")
             .attr("width", width)
@@ -460,27 +460,17 @@ var D3M = (function () {
             .attr("viewBox", [-width / 2, -height / 2, width, height])
             .attr("style", "max-width: 100%; height: auto;");
 
-        const gradient = svg.append("defs")
-            .append("linearGradient")
-            .attr("id", "gradient")
-            .attr("x1", "0%")
-            .attr("y1", "0%")
-            .attr("x2", "100%")
-            .attr("y2", "0%");
-
-        // 添加渐变色
-        gradient.append("stop")
-            .attr("offset", "0%")
-            .style("stop-color", "black")
-            .style("stop-opacity", 1);
-
-        gradient.append("stop")
-            .attr("offset", "100%")
-            .style("stop-color", "white")
-            .style("stop-opacity", 1);
-
         const arrow = svg.append("g")
-            .attr("stroke", "url(#gradient)")
+            .attr("stroke", "#333")
+            .attr("stroke-opacity", 0.6)
+            .selectAll("line")
+            .data(links)
+            .join("line")
+            .attr("stroke-width", d => Math.sqrt(d.value - 1))
+            .attr("stroke-dasharray", d => d.dash || "");
+
+        const line = svg.append("g")
+            .attr("stroke", "#555")
             .attr("stroke-opacity", 0.6)
             .selectAll("line")
             .data(links)
@@ -527,11 +517,16 @@ var D3M = (function () {
                 .attr("x", d => d.x)
                 .attr("y", d => d.y);
 
-            arrow
+            line
                 .attr("x1", d => d.source.x)
                 .attr("y1", d => d.source.y)
                 .attr("x2", d => d.target.x)
-                .attr("y2", d => d.target.y);
+                .attr("y2", d => d.target.y)
+            arrow
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x - (d.target.x - d.source.x) / 2)
+                .attr("y2", d => d.target.y - (d.target.y - d.source.y) / 2)
         });
 
         function dragstarted(event) {
@@ -554,6 +549,124 @@ var D3M = (function () {
         return svg.node();
     }
 
+    function forceDirectedTree(data) {
+        const width = window.innerWidth;
+        const height = width;
+
+        // Compute the graph and start the force simulation.
+        const root = d3.hierarchy(data);
+        const links = root.links();
+        const nodes = root.descendants();
+
+        var radiusMap={
+            num:1,
+            kw:1,
+            id:1,
+            str:1,
+            punc:1,
+            sp:1,
+            op:1,
+            Comment:2,
+            BlockStatement:2,
+            Condition:1,
+            Arguments:1,
+            Arg:1,
+            Variable:2,
+            ClassDefine:20,
+            InterfaceDefine:20,
+            NamespaceDefine:25,
+            MethodDefine:10,
+            PropertyDefine:5,
+            NewExpression:5,
+            CallExpression:5,
+            FunctionDefine:10,
+            LoopStatement:1,
+            IfStatement:1,
+            Expression:1,
+        }
+
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id).strength(1).distance(d=>40))
+            .force("charge", d3.forceManyBody().strength(-100))
+            .force("x", d3.forceX())
+            .force("y", d3.forceY());
+
+        // Create the container SVG.
+        const svg = d3.create("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [-width / 2, -height / 2, width, height])
+            .attr("style", "max-width: 100%; height: auto;");
+
+        // Append links.
+        const link = svg.append("g")
+            .attr("stroke", "#999")
+            .attr("stroke-opacity", 0.6)
+            .selectAll("line")
+            .data(links)
+            .join("line");
+
+        
+        // Append nodes.
+        const node = svg.append("g")
+            .attr("fill", "#fff")
+            .attr("stroke", "#000")
+            .attr("stroke-width", 1.5)
+            .selectAll("circle")
+            .data(nodes)
+            .join("circle")
+            .attr("fill", d => d.children ? null : "#000")
+            .attr("stroke", d => d.children ? null : "#fff")
+            .attr("r", d=>radiusMap[d.data.type])
+            .on("click",function(event,d){
+                console.log('click',d)
+            })
+            .call(drag(simulation));
+
+        node.append("title")
+            .text(d => d.data.name);
+
+        simulation.on("tick", () => {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            node
+                .attr("cx", d => d.x)
+                .attr("cy", d => d.y);
+        });
+
+        function drag() {
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+
+            return d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended);
+        }
+
+        // invalidation.then(() => simulation.stop());
+
+        return svg.node();
+    }
+
     function treeMap(data) {
         const width = window.innerWidth;
         const height = width;
@@ -568,7 +681,7 @@ var D3M = (function () {
             .round(true)
             (d3.hierarchy(data)
                 .sum(d => d.children.length)
-                .sort((a, b) => b.children?b.children.length:0 - a.children?a.children.length:0));
+                .sort((a, b) => b.children ? b.children.length : 0 - a.children ? a.children.length : 0));
         const root = treemap(data);
 
         // Create the SVG container.
@@ -622,6 +735,7 @@ var D3M = (function () {
         EdgeBundling: EdgeBundling,
         disjointForce: disjointForce,
         treeMap: treeMap,
+        forceDirectedTree: forceDirectedTree,
     }
 
 })()

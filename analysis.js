@@ -26,7 +26,7 @@ function load() {
             gAst[t[0]]['code']=c
             gAst[t[0]]['filetype']=t[1]
             html+=`<details id="detail_${t[0]}">
-                <summary>${r._filename}</summary>
+                <summary onclick="scrollToView('detail_${t[0]}')">${r._filename}</summary>
                 <pre><code class="language-${t[1]}" id="${t[0]}">${c.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
             $code.innerHTML=html;
@@ -35,9 +35,21 @@ function load() {
         }
         r.readAsText($file.files[i])
         r._filename=$file.files[i].name
-
     }
+}
 
+function scrollToView(id,dst){
+    setTimeout(
+        function(){
+            if(dst&&document.getElementById('code_con').open){
+                console.log('dst',dst)
+                document.getElementById(id).scrollIntoView()
+                window.scrollBy(0,dst)
+            }else{
+                document.getElementById(id).scrollIntoView({behavior:'smooth'})
+            }
+        },1
+    )
 }
 function showJson(){
     console.log('gAst',gAst)
@@ -53,7 +65,7 @@ function loadAstJson(){
     var html=''
     for(let ast in gAst){
         html+=`<details id="detail_${ast}">
-                <summary>${ast}.${gAst[ast].filetype}</summary>
+                <summary onclick="scrollToView('detail_${ast}')">${ast}.${gAst[ast].filetype}</summary>
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
     }
@@ -125,7 +137,7 @@ function renderMermaidFilter(){
                         gMermaid.FlowFilter[k]=false
                     }
                 } 
-                html+=`<input onchange="onMermaidFilter(this.value)" value="${k}" type="checkbox" id="mmdft_${k}" class="mmdft" ${gMermaid.FlowFilter[k]?"checked":""}/><a class="pointer" onclick="onFlowClick('${k}','${node._file}')">${gIconmap[node.type]}</a><label for="mmdft_${k}"> ${node.value} </label>`
+                html+=`<input onchange="onMermaidFilter(this.value)" value="${k}" type="checkbox" id="mmdft_${k}" class="mmdft" ${gMermaid.FlowFilter[k]?"checked":""}/><a class="pointer" onclick="onFlowClick('${k}','${node._file}')">${gIconmap[node.type]}</a><label onclick="onFlowClick('${k}','${node._file}')"> ${node.value} </label>`
             }
         }
     }
@@ -149,6 +161,7 @@ function onFlowClick(n,file){
     var node=gMermaid.FlowNode[n]
     if(!node)return
     console.log(`flow click ${n} ${file}(${node.poi.line}:${node.poi.start})`,node)
+    document.getElementById('code_con').open=open;
     var $detail=document.getElementById('detail_'+file)
     $detail.open=true
     var $line=document.querySelectorAll(`#detail_${file} .hljs-ln-line`)
@@ -293,14 +306,14 @@ function genMermaid(){
                     r.Flow=r.Flow.replaceAll(node._flow_str,'')
                     delete r.FDPNode[node._flow_id]
                     r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${r.FlowOne[node.value]}\n`
-                    r.FDPLinks.push({source:node._flow_from,target:r.FlowOne[node.value],value:1,dash:"5,5"})
+                    r.FDPLinks.push({source:node._flow_from,target:r.FlowOne[node.value],value:2,dash:"5,5",dist:100,strength:0.1})
                 }else{
                     r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${node._flow_id}\n`
-                    r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:1,dash:"5,5"})
+                    r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
                 }
             }else if((node.type=="IfStatement"||node.type=="LoopStatement")&&r.showIf){
                 r.FlowLink+=`${node._flow_from} -..-> ${r.showCondition&&node._flow_condition||''} ${node._flow_id}\n`
-                r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:1,dash:"5,5"})
+                r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
             }
         }
     }
@@ -345,13 +358,13 @@ function genMermaid(){
                 if(r.FlowNode[f]&&r.FlowNode[f].type=="InterfaceDefine"){
                     r.FDPNode[f]={id:f,w:f.length*gD3fontSize/1.6+gD3fontSize*2,text:`{${f}}`}
                     r.UML+=`  ${f} <|.. ${node.value}\n`
-                    r.FlowLink+=`${f} ===> ${node.value}\n` 
-                    r.FDPLinks.push({source:node.value,target:f,value:6})
+                    r.FlowLink+=`${f} ==> ${node.value}\n` 
+                    r.FDPLinks.push({source:node.value,target:f,value:6,dist:200,dash:'2,2'})
                 }else{
                     if(r.FDPNode[f]===undefined)r.FDPNode[f]={id:f,w:f.length*gD3fontSize/1.6+gD3fontSize*2,text:`[${f}]`}
                     r.UML+=`  ${f} <|-- ${node.value}\n`
                     r.FlowLink+=`${f} ==o ${node.value}\n` 
-                    r.FDPLinks.push({source:f,target:node.value,value:6})
+                    r.FDPLinks.push({source:f,target:node.value,value:6,dist:200,dash:"2,2"})
                 }
             }
         }
@@ -411,7 +424,7 @@ function genMermaid(){
         }
         if(cls.value){
             r.FlowLink+=`${cls.value} --o ${member._flow_id}\n`
-            r.FDPLinks.push({source:cls.value,target:member._flow_id,value:4})
+            r.FDPLinks.push({source:cls.value,target:member._flow_id,value:2})
         }
         if(r.showCall)_doBody(member,file)    
         function _doBody(node,file){
@@ -574,11 +587,18 @@ function genD3(){
                 case 'MethodDefine':
                     if(node.level&&level_symbol[node.level]){
                         node.name=`${level_symbol[node.level]}${node.value}()`
+                    }else{
+                        node.name=`:${node.value}()`
                     }
+                    break;
+                case 'FunctionDefine':
+                    node.name=`:${node.value}()`
                     break;
                 case 'PropertyDefine':
                     if(node.level&&level_symbol[node.level]){
                         node.name=`${level_symbol[node.level]}${node.value}`
+                    }else{
+                        node.name=`${node.value}`
                     }
                     break;
                 case 'NamespaceDefine':

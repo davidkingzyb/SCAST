@@ -5,108 +5,56 @@
     <meta charset="UTF-8">
     <title>SCAST TypeScript</title>
 
-    <style>
-        details {
-            margin-top: 10px;
-            cursor: pointer;
-        }
-
-        .opcls {
-            margin: 10px 10px 0 10px;
-            display: grid;
-            grid-template-columns: repeat(8, 25px 160px);
-
-        }
-
-        .opclsfilter {
-            margin: 10px 10px 0 10px;
-            display: grid;
-            grid-template-columns: repeat(8, 25px 25px 160px);
-
-        }
-
-        .opcls>input {
-            width: 20px;
-        }
-
-        .opcls>label {
-            width: 160px;
-            overflow: hidden;
-            height: 24px;
-        }
-
-        textarea {
-            margin-top: 10px;
-        }
-
-        button {
-            margin-left: 10px;
-            font-size: 18px;
-        }
-
-        summary {
-            font-weight: bold;
-            font-size: 22px;
-        }
-
-        input {
-            font-size: 18px;
-        }
-
-        select {
-            font-size: 18px;
-        }
-
-        .pointer {
-            cursor: pointer;
-        }
-
-        .jump {
-            font-size: 34px;
-        }
-    </style>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/typescript/5.0.4/typescript.min.js"></script>
 
+    <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/csharp.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
-    <script
-        src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
     <script src="https://unpkg.com/@alenaksu/json-viewer@2.0.0/dist/json-viewer.bundle.js"></script>
-
     <script src="https://cdn.observableusercontent.com/npm/d3@7.9.0/dist/d3.min.js"></script>
     <script src="./D3M.js"></script>
 
 </head>
 
-<body>
+<body style="margin-bottom: 90px;">
     <div id="title" style="position: fixed;left:10px;bottom: 10px;">
         <span class="pointer jump"
-            onclick="javascript:void(document.getElementById('load').scrollIntoView({behavior:'smooth'}))">️🔱</span>
-        <h1 style="display: inline;" class="pointer"> SCAST.ts</h1>
+            onclick="scrollToView('load',-60)">️🔱</span>
+        <h1 style="display: inline;" class="pointer"> SCAST.ts </h1>
         <span class="pointer jump"
-            onclick="javascript:void(document.getElementById('mermaidHead').scrollIntoView({behavior:'smooth'}))">🧜‍♀️</span>
+            onclick="javascript:void(document.getElementById('code_con').open=!document.getElementById('code_con').open)">🧾</span>
         <span class="pointer jump"
-            onclick="javascript:void(document.getElementById('mermaidUML').scrollIntoView({behavior:'smooth'}))">📇</span>
+            onclick="scrollToView('mermaidHead',-window.innerHeight/2-20)">🧜‍♀️</span>
         <span class="pointer jump"
-            onclick="javascript:void(document.getElementById('mermaidFlow').scrollIntoView({behavior:'smooth'}))">🌊</span>
+            onclick="scrollToView('mermaidUML',-window.innerHeight/2-20)">📇</span>
         <span class="pointer jump"
-            onclick="javascript:void(document.getElementById('FDP').scrollIntoView({behavior:'smooth'}))">❄️</span>
+            onclick="scrollToView('mermaidFlow',-window.innerHeight/2-20)">🌊</span>
         <span class="pointer jump"
-            onclick="javascript:void(document.getElementById('D3Select').scrollIntoView({behavior:'smooth'}))">🌳</span>
-        <a href="https://davidkingzyb.github.io/blogmd/50.html">alpha by DKZ</a>
+            onclick="scrollToView('FDP',-window.innerHeight/2-20)">❄️</span>
+        <span class="pointer jump"
+            onclick="scrollToView('D3Select',-window.innerHeight/2-20)">🌳</span>
+        <span class="pointer jump"
+            onclick="javascript:void(document.getElementById('outline_con').open=!document.getElementById('outline_con').open)">👁️‍🗨️</span>
+        <a href="https://davidkingzyb.github.io/blogmd/50.html"> by DKZ</a>
     </div>
-    <input type='file' id='codefile' multiple />
-    <button id="load" class="pointer" onclick="load()" title="generate AST">🔱</button>
-    <br>
-    <div id="code">
-        <textarea name="" style="width: 90%;height: 200px;" id="codetext">
-
-        </textarea>
+    <div class="m10" id="load_con">
+        <input type='file' id='codefile' multiple />
+        <button id="load" class="pointer" onclick="load()" title="generate AST">🔱</button>
     </div>
+    <div class="m10">
+        <textarea name="" style="width: 90%;height: 100px;" id="codetext"></textarea>
+    </div>
+    <details id="code_con" open>
+        <summary>codes</summary>
+        <div id="code"></div>
+    </details>
+    <details id="outline_con" open>
+        <summary>outline</summary>
+        <div id="mmdfilter_con" class="opclsfilter"></div>
+    </details>
     <details>
         <summary onclick="showJson()">json
             <input id="searchinput" type="text">
@@ -141,8 +89,6 @@
         </div>
         <textarea name="" id="textUML" style="width: 45%;height:250px;"></textarea>
         <textarea name="" id="textFlow" style="width: 45%;height:250px;"></textarea>
-        <div id="mmdfilter_con" class="opclsfilter">
-        </div>
         <div id="mermaidPane">
             <pre class="mermaid" id="mermaidUML"></pre>
             <pre class="mermaid" id="mermaidFlow"></pre>
@@ -157,6 +103,7 @@
                 <option value="ClusterTree">ClusterTree</option>
                 <option value="RadialTidyTree">RadialTidyTree</option>
                 <option value="RadialClusterTree">RadialClusterTree</option>
+                <option value="forceDirectedTree">ForceDirectedTree</option>
                 <option value="EdgeBundling">EdgeBundling</option>
             </select>
             <button onclick="genD3()" title="generate D3">🌳</button>
@@ -269,7 +216,7 @@
                         return cls
                     }
 
-                    function traverseMethod(node) {
+                    function traverseMethod(node) {//todo method detail
                         // console.log("traverseMethod",node)
                         return []
                     }

@@ -1,0 +1,89 @@
+
+body{
+    margin: 0;
+}
+.m10{
+    margin: 10px;
+}
+#load_con{
+    margin-top: 60px;
+}
+#code_con{
+    position: fixed;
+    top:0;
+    left: 0;
+    background-color: #111;
+    max-height: 50%;
+    overflow-x: auto;
+    margin: 0 200px 0 0 ;
+    /* margin: 0; */
+    padding: 10px;
+    color:white;
+    z-index:9;
+}
+#code details{
+    float: left;
+    margin: 0px 10px 0 0;
+}
+details {
+    margin: 10px;
+    cursor: pointer;
+}
+.opcls {
+    margin: 10px 0 ;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 25px 160px);
+}
+#outline_con{
+    overflow-y: auto;
+    position:fixed;
+    top:0;
+    right:0;
+    width: 200px;
+    max-height: 100%;
+    /* visibility:hidden; */
+    background-color: #111;
+    color:white;
+    padding: 10px;
+    margin: 0;
+    z-index: 10;
+}
+.opclsfilter{
+    
+    display: grid;
+    grid-template-columns: repeat(1 , 25px 25px 130px);
+}
+#filter_btn{
+    position: fixed;
+    top:0;
+    right:0;
+    font-size: 34px;
+}
+.opcls>input {
+    width: 20px;
+}
+.opcls>label {
+    width: 160px;
+    overflow: hidden;
+    height: 24px;
+}
+button {
+    margin-left: 10px;
+    font-size: 18px;
+}
+summary {
+    font-weight: bold;
+    font-size: 22px;
+}
+input {
+    font-size: 18px;
+}
+select {
+    font-size: 18px;
+}
+.pointer {
+    cursor: pointer;
+}
+.jump {
+    font-size: 34px;
+}
