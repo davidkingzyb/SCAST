@@ -27,8 +27,8 @@ function loadAstJson(aststr){
     var html=''
     for(let ast in gAst){
         let analysis=gAst[ast].analysis?`<details class="analysis_details"><summary class="analysis_summery">Analysis</summary><pre class="code_analysis">${gAst[ast].analysis}</pre></details>`:''
-        html+=`<details id="detail_${ast}">
-                <summary onclick="scrollToView('detail_${ast}')">${ast}<a onclick="jumpOllama('${ast}')">🦙</a></summary>
+        html+=`<details id="detail_${ast.replace('.','_')}">
+                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">🦙</a></summary>
                 ${analysis}
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
@@ -39,7 +39,21 @@ function loadAstJson(aststr){
     showJson()
 }
 
-
+function fixedCon(idname,status){
+    var $con=document.getElementById(idname)
+    if(status==0){
+        $con.open=false
+    }else if(status==1){
+        $con.open=true
+    }else if(status==-1){
+        $con.open=!$con.open;
+    }else if(status==2){
+        $con.style.maxHeight="90%"
+        setTimeout(()=>{
+            $con.open=true
+        },10)
+    }
+}
 function scrollToView(id,dst){
     setTimeout(
         function(){
@@ -49,7 +63,7 @@ function scrollToView(id,dst){
                 window.scrollBy(0,dst)
             }else{
                 document.getElementById(id).scrollIntoView({behavior:'smooth'})
-            }
+            }  
         },1
     )
 }
@@ -142,6 +156,9 @@ function reMermaid(){
     gMermaid.Flow=$textFlow.value
     gMermaid.FlowLink=''
     renderMermaid()
+    setTimeout(()=>{
+        document.getElementById('mermaid_conf_con').open=false;
+    },10)
 }
 function onFDPClick(id){
     var node=gMermaid.FlowNode[id]
@@ -160,7 +177,8 @@ function onFlowClick(n,file){
     for(let $l of $line){
         if($l.getAttribute('data-line-number')==node.poi.line){
             $l.style.backgroundColor = "red";
-            $l.scrollIntoView({behavior:'smooth'})
+            $l.scrollIntoView()
+            document.getElementById('code_con').scrollBy(0,-100)
             setTimeout(()=>{
                 $l.style.backgroundColor = "#994a43";
             },3000)

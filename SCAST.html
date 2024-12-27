@@ -28,42 +28,57 @@
 </head>
 
 <body style="margin-bottom: 90px;">
-    <div id="title" style="position: fixed;left:10px;bottom: 10px;z-index: 999;">
+    <div id="title">
         <span class="pointer jump"
             onclick="scrollToView('load',-60)">️🔱</span>
         <h1 style="display: inline;" class="pointer"> SCAST </h1>
         <span class="pointer jump"
-            onclick="javascript:void(document.getElementById('code_con').open=!document.getElementById('code_con').open)">🧾</span>
-        <span class="pointer jump"
-            onclick="scrollToView('mermaidHead',-window.innerHeight/2-20)">🧜‍♀️</span>
-        <span class="pointer jump"
-            onclick="scrollToView('mermaidUML',-window.innerHeight/2-20)">📇</span>
+            onclick="scrollToView('mermaidUML',-window.innerHeight/2-20)">🧜‍♀️</span>
         <span class="pointer jump"
             onclick="scrollToView('mermaidFlow',-window.innerHeight/2-20)">🌊</span>
         <span class="pointer jump"
             onclick="scrollToView('FDP',-window.innerHeight/2-20)">❄️</span>
         <span class="pointer jump"
             onclick="scrollToView('D3Select',-window.innerHeight/2-20)">🌳</span>
-        <span class="pointer jump"
-            onclick="javascript:void(document.getElementById('outline_con').open=!document.getElementById('outline_con').open)">👁️‍🗨️</span>
         <a href="https://davidkingzyb.github.io/blogmd/50.html"> by DKZ</a>
     </div>
+    <details id="code_con" open>
+        <summary id="code_con_summary">codes <a onclick="fixedCon('code_con',2)" title="max height">↕️</a></summary>
+        <div id="code">
+            <textarea name="" id="codetext" placeholder="paste code here or select from file"></textarea>
+        </div>
+    </details>
+    <details id="mermaid_conf_con">
+        <summary>mermaid <a onclick="reMermaid()" title="refresh mermaid">🔄️</a></summary>
+        <div id="mermaid_conf_panel">
+            <textarea name="" id="textUML" placeholder="Mermaid classDiagram UML code"></textarea><br>
+            <textarea name="" id="textFlow" placeholder="Mermaid flowchart code"></textarea>
+            <div id="mermaidOption" class="opcls">
+            <input type="checkbox" id="mmdop_relation" class="mmdops" checked /><label for="mmdop_relation">UML
+                Relationship</label>
+            <input type="checkbox" id="mmdop_method" class="mmdops" checked /><label for="mmdop_method">OOP</label>
+            <input type="checkbox" id="mmdop_call" class="mmdops" checked /><label for="mmdop_call">Call Detail</label>
+            <input type="checkbox" id="mmdop_idone" class="mmdops" checked /><label for="mmdop_idone">One ID</label>
+            <input type="checkbox" id="mmdop_if" class="mmdops" /><label for="mmdop_if">If and Loop</label>
+            <input type="checkbox" id="mmdop_condition" class="mmdops" /><label for="mmdop_condition">Condition</label>
+            <input type="checkbox" id="mmdop_namespace" class="mmdops" /><label for="mmdop_namespace">use
+                Namespace</label>
+            </div>
+        </div>
+    </details>
+    <details id="d3_conf_con">
+        <summary>D3</summary>
+        <div id="D3Option" class="opcls"></div>
+    </details>
+    <details id="outline_con">
+        <summary>outline</summary>
+        <div id="mmdfilter_con" class="opclsfilter"></div>
+    </details>
     <div class="m10" id="load_con">
         <input type='file' id='codefile' multiple />
         <button id="load" class="pointer" onclick="load()" title="generate AST">🔱</button>
         <button id="ai" class="pointer" onclick="aiAnalysis()" title="AI Analysis">🦙</button>
     </div>
-    <div class="m10">
-        <textarea name="" style="width: 90%;height: 100px;" id="codetext"></textarea>
-    </div>
-    <details id="code_con" open>
-        <summary>codes <a onclick="javascript:void(document.getElementById('code_con').style.maxHeight='90%')" title="max height">↕️</a></summary>
-        <div id="code"></div>
-    </details>
-    <details id="outline_con" open>
-        <summary>outline</summary>
-        <div id="mmdfilter_con" class="opclsfilter"></div>
-    </details>
     <details>
         <summary onclick="showJson()">json
             <input id="searchinput" type="text">
@@ -77,26 +92,11 @@
     <details open>
         <summary id="mermaidHead">mermaid UML & Flow
             <button onclick="genMermaid()" title="generate mermaid">🧜‍♀️</button>
-            <button onclick="reMermaid()" title="refresh mermaid uml">🔄️</button>
             <button onclick="storageMermaid()" title="save mermaid to storage">📥</button>
             <button onclick="loadMermaid()" title="load mermaid from storage">📤</button>
             <button onclick="saveMermaid()" title="save mermaid uml">💾</button>
             <button onclick="scaleMermaid()" title="scale mermaid">🔛</button>
         </summary>
-        <div id="mermaidOption" class="opcls">
-            <input type="checkbox" id="mmdop_relation" class="mmdops" checked /><label for="mmdop_relation">UML
-                Relationship</label>
-            <input type="checkbox" id="mmdop_method" class="mmdops" checked /><label for="mmdop_method">OOP</label>
-            <input type="checkbox" id="mmdop_call" class="mmdops" checked /><label for="mmdop_call">Call Detail</label>
-            <input type="checkbox" id="mmdop_idone" class="mmdops" checked /><label for="mmdop_idone">One ID</label>
-            <input type="checkbox" id="mmdop_if" class="mmdops" /><label for="mmdop_if">If and Loop</label>
-            <input type="checkbox" id="mmdop_condition" class="mmdops" /><label for="mmdop_condition">Condition</label>
-            <input type="checkbox" id="mmdop_namespace" class="mmdops" /><label for="mmdop_namespace">use
-                Namespace</label>
-        </div>
-        <textarea name="" id="textUML" style="width: 45%;height:250px;"></textarea>
-        <textarea name="" id="textFlow" style="width: 45%;height:250px;"></textarea>
-        
         <div id="mermaidPane">
             <pre class="mermaid" id="mermaidUML"></pre>
             <pre class="mermaid" id="mermaidFlow"></pre>
@@ -104,7 +104,7 @@
         <div id="FDP"></div>
     </details>
     <details open>
-        <summary>D3 Tree & Diagram
+        <summary>D3&nbsp;&nbsp;
             <select id="D3Select">
                 <option value="IndentedTree">IndentedTree</option>
                 <!-- <option value="treeMap">TreeMap</option> -->
@@ -121,14 +121,15 @@
             <button onclick="fontSizeD3Minus(4)" title="scale D3 font size">➖</button>
             <button onclick="fontSizeD3Plus(4)" title="scale D3 font size bigger">➕</button>
         </summary>
-        <div id="D3Option" class="opcls"></div>
         <div id="D3Diagram"></div>
     </details>
 
 </body>
 <script>
     initFile()
-
+    setTimeout(()=>{
+        fixedCon('code_con',0)
+    },500)
 
     mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
     renderD3Option()

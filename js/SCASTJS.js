@@ -4,7 +4,7 @@ var SCASTJS=(function(){
     }
 
     function getAst(code){
-        return acorn.parse(code, {ecmaVersion: 2020})
+        return acorn.parse(code, {ecmaVersion: 2020,locations:true})
     }
     function traverseAst(node,callback){
 
