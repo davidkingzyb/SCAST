@@ -9,7 +9,17 @@ var SCASTPY=(function(){
         return filbert.parse(code)
     }
     function traverseAst(node,callback){
-
+        console.log('traverseAst',node.type,node)
+        callback&&callback(node)
+        Object.keys(node).forEach((key) => {
+            const item = node[key]
+            if (Array.isArray(item)) {
+              item.forEach((sub) => {
+                sub.type && traverseAst(sub, callback)
+              })
+            }
+            item && item.type && traverseAst(item, callback)
+          })
     }
     function analysisMermaid(node,file,r){
 

@@ -31,6 +31,7 @@ function load() {
             }
             gAst[r._filename]['code']=c
             gAst[r._filename]['filetype']=t[1]
+            gAst[r._filename]['filename']=t[0]
             html+=`<details id="detail_${t[0]}_${t[1]}">
                 <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} <a onclick="jumpOllama('${r._filename}')">🦙</a></summary>
                 <pre><code class="language-${t[1]}" id="${t[0]}">${c.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
@@ -124,9 +125,6 @@ function genMermaid(){
 
 }
 
-
-
-
 var gD3 = {tree: {},options:{
     all:false,
     num:false,
@@ -169,9 +167,16 @@ function genD3(){
 
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
-        SCAST.traverseAst(d3node,(node)=>{
-            SCAST.analysisD3(node,file)
-        })
+        if(file.indexOf('.js')>=0){
+            SCASTJS.traverseAst(d3node,(node)=>{
+                SCASTJS.analysisD3(node,file)
+            })
+        }else{
+            SCAST.traverseAst(d3node,(node)=>{
+                SCAST.analysisD3(node,file)
+            })    
+        }
+        
         r.children.push(d3node)
     }
     gD3.tree=r;
