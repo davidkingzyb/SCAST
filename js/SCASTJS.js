@@ -4,6 +4,7 @@ var SCASTJS=(function(){
         ecmaVersion: 2022,
         locations:true,
         ranges:true,
+        sourceType:'module',
     }
     var EStree={}
     var AST={}
@@ -149,6 +150,34 @@ var SCASTJS=(function(){
                 return getRangeCode(node.test)
             case "ArrayPattern":
                 return getArgs(node.elements)
+            case "ObjectPattern":
+                return getArgs(node.properties)
+            case "TemplateLiteral":
+                return getArgs(node.quasis)
+            case "RestElement":
+                return "..."+getValue(node.argument)
+            case "BinaryExpression":
+                return node.operator
+            case "ClassDeclaration":
+                return `class ${getValue(node.id)}${':'+getValue(node.superClass)}`
+            case "MethodDefinition":
+                return `${node.static?'static':''}${node.kind}`
+            case "ImportDeclaration":
+                return getValue(node.source)
+            case "ImportSpecifier":
+                return getValue(node.imported)
+            case "ImportDefaultSpecifier":
+                return node.local.name
+            case "ImportNamespaceSpecifier":
+                return node.local.name
+            case "ExportNamedDeclaration":
+                return getValue(node.source)
+            case "ExportSpecifier":
+                return getValue(node.exported)
+            case "ExportAllDeclaration":
+                return getValue(node.source)
+            case "ExportDefaultDeclaration":
+                return getValue(node.declaration)
             default:
                 return node.type.replace('Statement','').replace('Declaration','').replace('Expression','');
         }
@@ -262,9 +291,33 @@ var SCASTJS=(function(){
             case "ConditionalExpression":
                 node.children=[node.consequent,node.alternate]
                 break
-            
-            
-            
+            case "YieldExpression":
+                node.children=[node.argument]
+                break
+            case "TemplateLiteral":
+                node.children=node.expressions
+                break
+            case "BinaryExpression":
+                node.children=[node.left,node.right]
+                break
+            case "AssignmentPattern":
+                node.children=[node.left,node.right]
+                break
+            case "ClassDeclaration":
+                node.children=[node.body]
+                break
+            case "ClassBody":
+                node.children=node.body
+                break
+            case "MethodDefinition":
+                node.children=[node.value]
+                break
+            case "ImportDeclaration":
+                node.children=node.specifiers
+                break
+            case "ExportNamedDeclaration":
+                node.children=node.specifiers
+                break
         }
 
     }

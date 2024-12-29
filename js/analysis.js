@@ -10,7 +10,7 @@ function load() {
             <summary>code</summary>
             <pre><code class="language-cs" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
         </details>`;
-        gAst.code=SCAST.getAst($codetext.value,'code')
+        gAst.code=SCASTJS.getAst($codetext.value,'code')
         gAst.code['code']=$codetext.value
         gAst.code['filetype']=''
         $code.innerHTML=html;
@@ -169,15 +169,15 @@ function genD3(){
 
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
-        if(file.indexOf('.js')>=0){
+        // if(file.indexOf('.js')>=0){
             SCASTJS.traverseAst(d3node,(node)=>{
                 SCASTJS.analysisD3(node,file)
             })
-        }else{
-            SCAST.traverseAst(d3node,(node)=>{
-                SCAST.analysisD3(node,file)
-            })    
-        }
+        // }else{
+        //     SCAST.traverseAst(d3node,(node)=>{
+        //         SCAST.analysisD3(node,file)
+        //     })    
+        // }
         
         r.children.push(d3node)
     }
