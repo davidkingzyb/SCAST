@@ -26,6 +26,8 @@ function load() {
                 gAst[r._filename]=SCASTPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else if(t[1]=='js'){
                 gAst[r._filename]=SCASTJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
+            }else if (t[1]=='ts'){
+                gAst[r._filename]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else{
                 gAst[r._filename]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }

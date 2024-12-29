@@ -1,4 +1,14 @@
 var SCASTJS=(function(){
+
+    const option={
+        ecmaVersion: 2022,
+        locations:true,
+        ranges:true,
+    }
+    var EStree={}
+    var AST={}
+    var Code='';
+
     var types={
         "FunctionDeclaration":true,
         "VariableDeclarator":false,
@@ -6,12 +16,12 @@ var SCASTJS=(function(){
         "Program":true,
         "BlockStatement":false,
     }
-    var EStree={}
-    var AST={}
+    
     function getAst(code){
-        EStree=acorn.parse(code, {ecmaVersion: 2022,locations:true})
-        AST=pruneJsonTree(EStree)
-        console.log("SCASTJS ESTree",EStree,AST)
+        Code = code;
+        EStree=acorn.parse(code, option)
+        // AST=pruneJsonTree(EStree)
+        console.log("SCASTJS ESTree",EStree)
         return EStree
     }
     function traverseAst(node,callback){
@@ -28,6 +38,9 @@ var SCASTJS=(function(){
         })
     }
 
+    function getTokenizer(code){
+        const tokens=[...acorn.tokenizer(code,option)]
+    }
     function pruneJsonTree(json) {
         if (json && typeof json === 'object') {
           if (Array.isArray(json)) {
@@ -54,8 +67,14 @@ var SCASTJS=(function(){
         }
     }
 
-    function analysisMermaid(node,file,r){
+    function loc2poi(loc){
+        return {line:loc.start.line,start:loc.start.column}
+    }
 
+    function getRangeCode(node){
+        if(node==null)return ''
+        var result=Code.slice(node.range[0],node.range[1])
+        return result
     }
 
     function getValue(node){
@@ -76,7 +95,7 @@ var SCASTJS=(function(){
             case "VariableDeclarator":
                 return getValue(node.id)
             case "ExpressionStatement":
-                return ''//getValue(node.expression) //todo getExpression
+                return getRangeCode(node)
             case "BlockStatement":
                 return "{}"
             case "MemberExpression":
@@ -86,19 +105,23 @@ var SCASTJS=(function(){
             case "RegExpLiteral":
                 return node.regex.pattern
             case "IfStatement":
-                return 'if '+getValue(node.test)
+                return getRangeCode(node.test)
             case "SwitchStatement":
-                return 'switch '+getValue(node.discriminant)
+                return getRangeCode(node.discriminant)
             case "SwitchCase":
-                return 'case '+getValue(node.test)
+                return getRangeCode(node.test)
+            case "CatchClause":
+                return getRangeCode(node.param)
             case "WhileStatement":
-                return 'while '+getValue(node.test)
+                return getRangeCode(node.test)
             case "DoWhileStatement":
-                return 'do '+getValue(node.test)
+                return getRangeCode(node.test)
             case "ForStatement":
-                return 'for '+getValue(node.test)
+                return getRangeCode(node.test)
             case "ForInStatement":
-                return `for ${getValue(node.left)} in ${getValue(node.right)}`
+                return `${getRangeCode(node.left)} in ${getRangeCode(node.right)}`
+            case "ForOfStatement":
+                return `${getRangeCode(node.left)} in ${getRangeCode(node.right)}`
             case "Property":
                 return getValue(node.key)
             default:
@@ -106,14 +129,12 @@ var SCASTJS=(function(){
         }
     }
 
-    function loc2poi(loc){
-        return {line:loc.start.line,start:loc.start.column}
-    }
+    
 
     function analysisD3(node,file){
-        console.log('js analysisD3',node.type,node)
         node.name=getValue(node)
         node.poi=loc2poi(node.loc)
+        console.log('js analysisD3',node.type,node.name,node)
         switch(node.type){
             case "Program":
                 node.children=node.body
@@ -124,6 +145,9 @@ var SCASTJS=(function(){
                 node.children=[node.body]
                 break
             case "CallExpression":
+                node.children=node.arguments
+                break
+            case "NewExpression":
                 node.children=node.arguments
                 break
             case "VariableDeclarator":
@@ -174,6 +198,9 @@ var SCASTJS=(function(){
             case "ForInStatement":
                 node.children=[node.body]
                 break
+            case "ForOfStatement":
+                node.children=[node.body]
+                break
             case "ArrayExpression":
                 node.children=node.elements
                 break
@@ -185,6 +212,10 @@ var SCASTJS=(function(){
                 break
             
         }
+
+    }
+
+    function analysisMermaid(node,file,r){
 
     }
 
