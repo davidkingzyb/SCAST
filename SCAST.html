@@ -5,23 +5,23 @@
     <meta charset="UTF-8">
     <title>SCAST</title>
 
-    <script src="./lib/acorn.js"></script>
-
-    <script src="./lib/filbert.js"></script>
+    <script src="./lib/acorn.js" async></script>
+    <script src="./lib/filbert.js" async></script>
+    <script src="./lib/typescript.min.js" async></script>
 
     <link rel="stylesheet" href="./scast.css">
     <link rel="stylesheet" href="./lib/vs2015.min.css">
-    <script src="./lib/highlight.min.js"></script>
-    <script src="./lib/highlightjs-line-numbers.min.js"></script>
-    <script src="./lib/json-viewer.bundle.js"></script>
+    <script src="./lib/highlight.min.js" async></script>
+    <script src="./lib/highlightjs-line-numbers.min.js" async></script>
 
-    <script src="./lib/d3.min.js"></script>
-    <script src="./js/D3M.js"></script>
-    <script src="./lib/mermaid.min.js"></script>
+    <script src="./lib/json-viewer.bundle.js" async></script>
 
-    <script src="./js/SCAST.js"></script>
-    <script src="./js/SCASTPY.js"></script>
-    <script src="./js/SCASTJS.js"></script>
+    <script src="./lib/d3.min.js" async></script>
+    <script src="./js/D3M.js" async></script>
+    <script src="./js/SCAST.js" async></script>
+    <script src="./js/SCASTPY.js" async></script>
+    <script src="./js/SCASTJS.js" async></script>
+    
     <script src="./js/common.js"></script>
     <script src="./js/ai.js"></script>
     <script src="./js/analysis.js"></script>
@@ -131,10 +131,14 @@
         fixedCon('code_con',0)
     },500)
 
-    mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
     renderD3Option()
 
     
+</script>
+<script src="./lib/mermaid.min.js">
+</script>
+<script>
+mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
 </script>
 
 </html>

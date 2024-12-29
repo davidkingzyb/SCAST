@@ -10,11 +10,6 @@ var SCASTJS=(function(){
     var Code='';
 
     var types={
-        "FunctionDeclaration":true,
-        "VariableDeclarator":false,
-        "CallExpression":true,
-        "Program":true,
-        "BlockStatement":false,
     }
     
     function getAst(code){
@@ -77,6 +72,20 @@ var SCASTJS=(function(){
         return result
     }
 
+    function getArgs(nodes){
+        var result=''
+        for (let node of nodes){
+            // if(node.type=="ArrowFunctionExpression"){
+            //     result+='()=>{},'
+            // }else if(node.type=="FunctionExpression"){
+            //     result+='function,'
+            // }else{
+                result+=getValue(node)+','
+            // }
+        }
+        return result
+    }
+
     function getValue(node){
         if(node===null||node===undefined)return ''
         switch(node.type){
@@ -84,8 +93,16 @@ var SCASTJS=(function(){
                 return node.filename
             case "Identifier":
                 return node.name
+            case "Literal":
+                return node.raw
+            case "TemplateElement":
+                return node.value.raw
             case "FunctionDeclaration":
-                return getValue(node.id)
+                return `function ${getValue(node.id)}(${getArgs(node.params)})`
+            case "FunctionExpression":
+                return `function(${getArgs(node.params)})`
+            case "ArrowFunctionExpression":
+                return `(${getArgs(node.params)})=>{}`
             case "CallExpression":
                 return getValue(node.callee)
             case "NewExpression":
@@ -95,35 +112,43 @@ var SCASTJS=(function(){
             case "VariableDeclarator":
                 return getValue(node.id)
             case "ExpressionStatement":
-                return getRangeCode(node)
+                return ''//getRangeCode(node)
             case "BlockStatement":
                 return "{}"
             case "MemberExpression":
                 return getValue(node.property)
-            case "Literal":
-                return node.raw
             case "RegExpLiteral":
                 return node.regex.pattern
             case "IfStatement":
-                return getRangeCode(node.test)
+                return 'if '+getRangeCode(node.test)
             case "SwitchStatement":
-                return getRangeCode(node.discriminant)
+                return 'switch '+getRangeCode(node.discriminant)
             case "SwitchCase":
-                return getRangeCode(node.test)
+                return 'case '+getRangeCode(node.test)
             case "CatchClause":
-                return getRangeCode(node.param)
+                return 'catch '+getRangeCode(node.param)
             case "WhileStatement":
-                return getRangeCode(node.test)
+                return 'while '+getRangeCode(node.test)
             case "DoWhileStatement":
-                return getRangeCode(node.test)
+                return 'do '+getRangeCode(node.test)
             case "ForStatement":
-                return getRangeCode(node.test)
+                return 'for '+getRangeCode(node.test)
             case "ForInStatement":
                 return `${getRangeCode(node.left)} in ${getRangeCode(node.right)}`
             case "ForOfStatement":
                 return `${getRangeCode(node.left)} in ${getRangeCode(node.right)}`
             case "Property":
                 return getValue(node.key)
+            case "UnaryExpression":
+                return node.operator
+            case "UpdateExpression":
+                return getValue(node.argument)+node.operator
+            case 'LogicalExpression':
+                return node.operator
+            case "ConditionalExpression":
+                return getRangeCode(node.test)
+            case "ArrayPattern":
+                return getArgs(node.elements)
             default:
                 return node.type.replace('Statement','').replace('Declaration','').replace('Expression','');
         }
@@ -144,11 +169,20 @@ var SCASTJS=(function(){
             case "FunctionDeclaration":
                 node.children=[node.body]
                 break
+            case "FunctionExpression":
+                node.children=[node.body]
+                break
+            case "ArrowFunctionExpression":
+                node.children=[node.body]
+                break
             case "CallExpression":
                 node.children=node.arguments
                 break
             case "NewExpression":
                 node.children=node.arguments
+                break
+            case "VariableDeclaration":
+                node.children=node.declarations||[]
                 break
             case "VariableDeclarator":
                 node.children=[node.init]
@@ -161,9 +195,6 @@ var SCASTJS=(function(){
                 break
             case "MemberExpression":
                 node.children=[node.object]
-                break
-            case "VariableDeclaration":
-                node.children=node.declarations||[]
                 break
             case "ReturnStatement":
                 node.children=[node.argument]
@@ -210,6 +241,29 @@ var SCASTJS=(function(){
             case "Property":
                 node.children=[node.value]
                 break
+            case "SequenceExpression":
+                node.children=node.expressions
+                break
+            case "AwaitExpression":
+                node.children=[node.argument]
+                break
+            case "SpreadElement":
+                node.children=[node.argument]
+                break
+            case "AssignmentExpression":
+                node.children=[node.left,node.right]
+                break
+            case "LogicalExpression":
+                node.children=[node.left,node.right];
+                break
+            case "UnaryExpression":
+                node.children=[node.argument]
+                break
+            case "ConditionalExpression":
+                node.children=[node.consequent,node.alternate]
+                break
+            
+            
             
         }
 
