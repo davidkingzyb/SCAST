@@ -2,5 +2,3 @@ js/SCAST.js
 js/ai.js
 lib/SCAST.min.js
 _test
-.gitignore_gogs
-.gitignore_github
