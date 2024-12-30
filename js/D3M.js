@@ -308,22 +308,47 @@ var D3M = (function () {
             var r = []
             var map = {}
             for (let n of d.children) {
-                SCAST.traverseAst(n, function (node) {
-                    if (gD3.options[node.type] || gD3.options.all) {
-                        if (!map['network.' + node.value]) {
-                            map['network.' + node.value] = []
-                        }
-                        if (node.children && node.children.length > 0) {
-                            for (let child of node.children) {
-                                if (!map['network.' + child.value]) {
-                                    map['network.' + child.value] = []
-                                }
-                                map['network.' + node.value].push('network.' + child.value)
+                console.log('tree2network',n)
+                if(n.filetype=='js'){
+                    SCASTJS.traverseAst(n, function (node) {
+                        if(!node.name)return
+                        var nodename=node.name.replace(/[^0-9a-zA-Z]/g, '_')
+                        if (gD3.conf.estreeops[node.type] || gD3.conf.estreeops.all) {
+                            if (!map['network.' + nodename]) {
+                                map['network.' + nodename] = []
                             }
-                        }
+                            if (node.children && node.children.length > 0) {
+                                for (let child of node.children) {
+                                    if(!child||!child.name)continue
+                                    let childname=child.name.replace(/[^0-9a-zA-Z]/g, '_')
+                                    if (!map['network.' + childname]) {
+                                        map['network.' + childname] = []
+                                    }
+                                    map['network.' + nodename].push('network.' + childname)
+                                }
+                            }
 
-                    }
-                })
+                        }
+                    })
+                }else{
+                    SCAST.traverseAst(n, function (node) {
+                        if (gD3.conf.scastops[node.type] || gD3.conf.scastops.all) {
+                            if (!map['network.' + node.value]) {
+                                map['network.' + node.value] = []
+                            }
+                            if (node.children && node.children.length > 0) {
+                                for (let child of node.children) {
+                                    if (!map['network.' + child.value]) {
+                                        map['network.' + child.value] = []
+                                    }
+                                    map['network.' + node.value].push('network.' + child.value)
+                                }
+                            }
+
+                        }
+                    })
+                }
+                
             }
             for (let k in map) {
                 r.push({ name: k, imports: map[k] })

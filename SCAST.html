@@ -18,9 +18,9 @@
 
     <script src="./lib/d3.min.js" async></script>
     <script src="./js/D3M.js" async></script>
-    <script src="./js/SCAST.js" async></script>
-    <script src="./js/SCASTPY.js" async></script>
-    <script src="./js/SCASTJS.js" async></script>
+    <script src="./js/SCAST.js"></script>
+    <script src="./js/SCASTPY.js"></script>
+    <script src="./js/SCASTJS.js"></script>
     
     <script src="./js/common.js"></script>
     <script src="./js/ai.js"></script>
@@ -29,8 +29,7 @@
 
 <body style="margin-bottom: 90px;">
     <div id="title">
-        <span class="pointer jump"
-            onclick="scrollToView('load',-60)">️🔱</span>
+        <span class="pointer jump">️🔱</span>
         <h1 style="display: inline;" class="pointer"> SCAST </h1>
         <span class="pointer jump"
             onclick="scrollToView('mermaidUML',-window.innerHeight/2-20)">🧜‍♀️</span>
@@ -68,18 +67,28 @@
     </details>
     <details id="d3_conf_con">
         <summary>D3</summary>
-        <div id="D3Option" class="opcls"></div>
+        <details>
+            <summary>SCAST</summary>
+            <div id="D3Option" class="opcls"></div>
+        </details>
+        <details>
+            <summary>ESTree</summary>
+            <div id="D3ESTree" class="opcls"></div>
+        </details>
     </details>
     <details id="outline_con">
         <summary>outline</summary>
         <div id="mmdfilter_con" class="opclsfilter"></div>
     </details>
-    <div class="m10" id="load_con">
+    <div class="" id="load_con">
+        <label class="input-file-button" for="codefile" title="open files">📄</label>
         <input type='file' id='codefile' multiple />
         <button id="load" class="pointer" onclick="load()" title="generate AST">🔱</button>
+        <button onclick="genMermaid()" title="generate mermaid">🧜‍♀️</button>
+        <button onclick="genD3()" title="generate D3">🌳</button>
         <button id="ai" class="pointer" onclick="aiAnalysis()" title="AI Analysis">🦙</button>
     </div>
-    <details>
+    <details class="json_con">
         <summary onclick="showJson()">json
             <input id="searchinput" type="text">
             <button onclick="search()" title="search">🔍</button>
@@ -127,13 +136,7 @@
 </body>
 <script>
     initFile()
-    setTimeout(()=>{
-        fixedCon('code_con',0)
-    },500)
-
     renderD3Option()
-
-    
 </script>
 <script src="./lib/mermaid.min.js">
 </script>

@@ -127,33 +127,7 @@ function genMermaid(){
 
 }
 
-var gD3 = {tree: {},options:{
-    all:false,
-    num:false,
-    kw:false,
-    id:false,
-    str:false,
-    punc:false,
-    sp:false,
-    op:false,
-    Comment:false,
-    ClassDefine:true,
-    InterfaceDefine:true,
-    NamespaceDefine:true,
-    MethodDefine:true,
-    PropertyDefine:true,
-    Variable:true,
-    NewExpression:true,
-    CallExpression:true,
-    FunctionDefine:true,
-    LoopStatement:true,
-    IfStatement:true,
-    Expression:false,
-    BlockStatement:false,
-    // Condition:false,
-    Arguments:false,
-    Arg:false,
-}}
+var gD3 = {tree: {},conf:{}}
 var level_symbol={
     'public':'+',
     "private":'-',
@@ -163,28 +137,35 @@ var level_symbol={
 }
 function genD3(){
     var r={name:'file',children:[]}
+    gD3.conf={
+        scastops:getSCASTD3Option(),
+        estreeops:getESTreeD3Option(),
+        fontsize:gD3fontSize,
+    }
     
-    getD3Option()
-    console.log('D3 options',gD3.options)
+    console.log('D3 config',gD3.conf)
 
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
-        // if(file.indexOf('.js')>=0){
+        SCASTJS.setD3Config(gD3.conf)
+        if(file.indexOf('.js')>=0){
             SCASTJS.traverseAst(d3node,(node)=>{
                 SCASTJS.analysisD3(node,file)
             })
-        // }else{
-        //     SCAST.traverseAst(d3node,(node)=>{
-        //         SCAST.analysisD3(node,file)
-        //     })    
-        // }
-        
+        }else{
+            SCAST.setD3Config(gD3.conf)
+            SCAST.traverseAst(d3node,(node)=>{
+                SCAST.analysisD3(node,file)
+            })    
+        }
         r.children.push(d3node)
     }
     gD3.tree=r;
+    
     var D3Select=document.getElementById('D3Select').value;
     gD3.select=D3Select;
     console.log('gD3',gD3)
+
     renderD3(D3Select,gD3.tree)
 }
 

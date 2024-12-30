@@ -314,7 +314,7 @@ var SCASTTS=(function(){
         node.children=[]
         if(node.body&&node.body.length>0){
             for(let b of node.body){
-                if(gD3.options[b.type]||gD3.options.all){
+                if(d3config.scastops[b.type]||d3config.scastops.all){
                     node.children.push(b)
                 }
             }
@@ -360,13 +360,18 @@ var SCASTTS=(function(){
                 node.name=node.value
         }
     }
+    var d3config={}
+    function setD3Config(conf){
+        d3config=conf
+    }
 
     return {
         getAst:getAst,
         traverseAst:traverseAst,
         analysisMermaid:analysisMermaid,
         analysisD3:analysisD3,
-        types:types
+        types:types,
+        setD3Config:setD3Config
     }
 
 })()

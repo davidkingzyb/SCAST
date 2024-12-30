@@ -1,6 +1,4 @@
 
-
-
 var pre_search=null
 var searchIterator=null
 function search(){
@@ -235,20 +233,36 @@ function fontSizeD3Plus(v){
     gD3fontSize=gD3fontSize+v
 }
 function renderD3Option(){
-    var html=''
-    for(let op in gD3.options){
-        html+=`<input type="checkbox" id="d3op_${op}" class="d3ops" ${gD3.options[op]?"checked":''} /><label for="d3op_${op}">${op}</label> `
+    var html=`<input type="checkbox" id="d3op_all" class="d3ops"/><label for="d3op_all">all</label> `
+    for(let op in SCAST.types){
+        html+=`<input type="checkbox" id="d3op_${op}" class="d3ops" ${SCAST.types[op]?"checked":''} /><label for="d3op_${op}">${op}</label> `
     }
     document.getElementById("D3Option").innerHTML=html
-}
-function getD3Option(){
-    for(let op in gD3.options){
-        gD3.options[op]=document.getElementById('d3op_'+op).checked
+    var html=`<input type="checkbox" id="d3esop_all" class="d3ops"/><label for="d3esop_all">all</label> `
+    for(let op in SCASTJS.types){
+        html+=`<input type="checkbox" id="d3esop_${op}" class="d3ops" ${SCASTJS.types[op]?"checked":''} /><label for="d3esop_${op}">${op}</label> `
     }
+    document.getElementById("D3ESTree").innerHTML=html
+}
+function getSCASTD3Option(){
+    var result=JSON.parse(JSON.stringify(SCAST.types))
+    for(let op in result){
+        result[op]=document.getElementById('d3op_'+op).checked
+    }
+    result['all']=document.getElementById('d3op_all').checked
+    return result
+}
+function getESTreeD3Option(){
+    var result=JSON.parse(JSON.stringify(SCASTJS.types))
+    for(let op in result){
+        result[op]=document.getElementById('d3esop_'+op).checked
+    }
+    result['all']=document.getElementById('d3esop_all').checked
+    return result
 }
 function scaleD3(){
-    gMermaidScale++;
-    document.getElementById("D3Diagram").style.width=`${100*gMermaidScale}%`
+    gD3Scale++;
+    document.getElementById("D3Diagram").style.width=`${100*gD3Scale}%`
 }
 function clearD3(){
     document.getElementById('D3Diagram').innerHTML='';

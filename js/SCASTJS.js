@@ -11,6 +11,76 @@ var SCASTJS=(function(){
     var Code='';
 
     var types={
+        "Program":true,
+        "BlockStatement":true,
+        "ExpressionStatement":true,
+
+        "Identifier":true,
+        "Literal":false,
+        "TemplateElement":false,
+        "RegExpLiteral":false,
+
+        "FunctionDeclaration":true,
+        "FunctionExpression":true,
+        "ArrowFunctionExpression":true,
+        "CallExpression":true,
+        "ReturnStatement":false,
+        "YieldExpression":false,
+
+        "NewExpression":true,
+        "VariableDeclaration":true,
+        "VariableDeclarator":true,
+        "MemberExpression":true,
+        "ChainExpression":false,
+        "ArrayExpression":true,
+        "ObjectExpression":true,
+        "SequenceExpression":false,
+        "ArrayPattern":true,
+        "ObjectPattern":true,
+
+        "IfStatement":true,
+        "SwitchStatement":true,
+        "SwitchCase":true,
+        "ConditionalExpression":true,
+
+        "ThrowStatement":false,
+        "TryStatement":true,
+        "CatchClause":true,
+
+        "WhileStatement":true,
+        "DoWhileStatement":true,
+        "ForStatement":true,
+        "ForInStatement":true,
+        "ForOfStatement":true,
+        "ContinueStatement":false,
+        "BreakStatement":false,
+
+        "ClassDeclaration":true,
+        "ClassBody":true,
+        "ThisExpression":false,
+        "Property":true,
+        "PropertyDefinition":true,
+        "MethodDefinition":true,
+
+        "AwaitExpression":true,
+        "SpreadElement":false,
+        "AssignmentExpression":false,
+        "LogicalExpression":false,
+        "UnaryExpression":false,
+        "TemplateLiteral":false,
+        "BinaryExpression":false,
+        "AssignmentPattern":false,
+        "UpdateExpression":false,
+
+        "ImportDeclaration":false,
+        "ImportSpecifier":false,
+        "ImportDefaultSpecifier":false,
+        "ImportNamespaceSpecifier":false,
+        "ExportNamedDeclaration":false,
+        "ExportSpecifier":false,
+        "ExportAllDeclaration":false,
+        "ExportDefaultDeclaration":false,
+        "PropertyDefinition":false,
     }
     
     function getAst(code){
@@ -76,19 +146,16 @@ var SCASTJS=(function(){
     function getArgs(nodes){
         var result=''
         for (let node of nodes){
-            // if(node.type=="ArrowFunctionExpression"){
-            //     result+='()=>{},'
-            // }else if(node.type=="FunctionExpression"){
-            //     result+='function,'
-            // }else{
-                result+=getValue(node)+','
-            // }
+            result+=getValue(node)+','
         }
         return result
     }
 
     function getValue(node){
         if(node===null||node===undefined)return ''
+        if(d3config.estreeops[node.type]===false&&d3config.estreeops.all==false){
+            return ''
+        }
         switch(node.type){
             case "Program":
                 return node.filename
@@ -161,7 +228,7 @@ var SCASTJS=(function(){
             case "ClassDeclaration":
                 return `class ${getValue(node.id)}${':'+getValue(node.superClass)}`
             case "MethodDefinition":
-                return `${node.static?'static':''}${node.kind}`
+                return `${node.static?'static':''} ${node.kind} ${getValue(node.key)}`
             case "ImportDeclaration":
                 return getValue(node.source)
             case "ImportSpecifier":
@@ -178,6 +245,8 @@ var SCASTJS=(function(){
                 return getValue(node.source)
             case "ExportDefaultDeclaration":
                 return getValue(node.declaration)
+            case "PropertyDefinition":
+                return getValue(node.key)
             default:
                 return node.type.replace('Statement','').replace('Declaration','').replace('Expression','');
         }
@@ -318,6 +387,16 @@ var SCASTJS=(function(){
             case "ExportNamedDeclaration":
                 node.children=node.specifiers
                 break
+            case "ChainExpression":
+                node.children=[node.expression]
+                break
+            case "PropertyDefinition":
+                node.children=[node.value]
+                break
+
+        }
+        if(d3config.estreeops[node.type]===false&&d3config.estreeops.all==false){
+            node.children=[]
         }
 
     }
@@ -326,13 +405,17 @@ var SCASTJS=(function(){
 
     }
 
-    
+    var d3config={estreeops:types,fontsize:14}
+    function setD3Config(conf){
+        d3config=conf
+    }
 
     return {
         getAst:getAst,
         traverseAst:traverseAst,
         analysisMermaid:analysisMermaid,
         analysisD3:analysisD3,
+        setD3Config:setD3Config,
         types:types,
     }
 
