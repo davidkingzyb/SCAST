@@ -1,5 +1,6 @@
 js/SCAST.js
-lib/SCAST.min.js
 js/ai.js
-test
-js/analysisSCAST.js
+lib/SCAST.min.js
+_test
+.gitignore_gogs
+.gitignore_github
