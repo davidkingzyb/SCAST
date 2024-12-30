@@ -1,11 +1,21 @@
 var SCASTTS=(function(){
     var types={
-
+        ClassDefine:true,
+        InterfaceDefine:true,
+        NamespaceDefine:true,
+        MethodDefine:true,
+        PropertyDefine:true,
+        Variable:true,
+        NewExpression:true,
+        CallExpression:true,
+        FunctionDefine:true,
+        LoopStatement:true,
+        IfStatement:true,
     }
 
     function getAst(code){
         const sourceFile = ts.createSourceFile(
-            file,
+            'tsfile',
             code,
             ts.ScriptTarget.ES2015,
         /*setParentNodes */ true
@@ -375,3 +385,5 @@ var SCASTTS=(function(){
     }
 
 })()
+
+SCAST=SCASTTS

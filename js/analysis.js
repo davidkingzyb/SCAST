@@ -124,7 +124,7 @@ function genMermaid(){
     console.log('gMermaid',gMermaid)
     renderMermaid()
     renderMermaidFilter()
-
+    scrollToView('mermaidUML',-window.innerHeight/2-20)
 }
 
 var gD3 = {tree: {},conf:{}}
@@ -167,5 +167,6 @@ function genD3(){
     console.log('gD3',gD3)
 
     renderD3(D3Select,gD3.tree)
+    scrollToView('D3Select',-window.innerHeight/2-20)
 }
 

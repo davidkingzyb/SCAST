@@ -233,16 +233,17 @@ function fontSizeD3Plus(v){
     gD3fontSize=gD3fontSize+v
 }
 function renderD3Option(){
+    var eshtml=`<input type="checkbox" id="d3esop_all" class="d3ops"/><label for="d3esop_all">all</label> `
+    for(let op in SCASTJS.types){
+        eshtml+=`<input type="checkbox" id="d3esop_${op}" class="d3ops" ${SCASTJS.types[op]?"checked":''} /><label for="d3esop_${op}">${op}</label> `
+    }
+    document.getElementById("D3ESTree").innerHTML=eshtml
+
     var html=`<input type="checkbox" id="d3op_all" class="d3ops"/><label for="d3op_all">all</label> `
     for(let op in SCAST.types){
         html+=`<input type="checkbox" id="d3op_${op}" class="d3ops" ${SCAST.types[op]?"checked":''} /><label for="d3op_${op}">${op}</label> `
     }
     document.getElementById("D3Option").innerHTML=html
-    var html=`<input type="checkbox" id="d3esop_all" class="d3ops"/><label for="d3esop_all">all</label> `
-    for(let op in SCASTJS.types){
-        html+=`<input type="checkbox" id="d3esop_${op}" class="d3ops" ${SCASTJS.types[op]?"checked":''} /><label for="d3esop_${op}">${op}</label> `
-    }
-    document.getElementById("D3ESTree").innerHTML=html
 }
 function getSCASTD3Option(){
     var result=JSON.parse(JSON.stringify(SCAST.types))
