@@ -12,9 +12,9 @@
 
 support plan
 - typescript 
-- csharp
+- csharp (use a custom parser no longer supported in future)
 - javascript (use [acorn](https://github.com/acornjs/acorn) doing)
-- python (use [filbert](https://github.com/differentmatt/filbert) todo)
+- python (use [filbert](https://github.com/differentmatt/filbert) later)
 
 The underlying principle involves leveraging a TypeScript parser to parse the code into an Abstract Syntax Tree (AST), followed by static analysis, and finally utilizing [Mermaid](https://github.com/mermaid-js/mermaid-live-editor) and [D3](https://github.com/d3/d3) for visualization.
 
