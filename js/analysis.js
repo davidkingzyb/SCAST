@@ -147,10 +147,15 @@ function genD3(){
 
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
-        SCASTJS.setD3Config(gD3.conf)
         if(file.indexOf('.js')>=0){
+            SCASTJS.setD3Config(gD3.conf)
             SCASTJS.traverseAst(d3node,(node)=>{
                 SCASTJS.analysisD3(node,file)
+            })
+        }else if(file.indexOf('.py')>=0){
+            SCASTPY.setD3Config(gD3.conf)
+            SCASTPY.traverseAst(d3node,(node)=>{
+                SCASTPY.analysisD3(node,file)
             })
         }else{
             SCAST.setD3Config(gD3.conf)
