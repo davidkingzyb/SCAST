@@ -82,6 +82,11 @@ var SCASTJS=(function(){
         "ExportDefaultDeclaration":false,
         "PropertyDefinition":false,
     }
+
+    var d3config={estreeops:types,fontsize:14}
+    function setD3Config(conf){
+        d3config=conf
+    }
     
     function getAst(code){
         Code = code;
@@ -92,7 +97,8 @@ var SCASTJS=(function(){
     }
     function traverseAst(node,callback){
         // console.log('traverseAst js', node);
-        callback&&callback(node)
+        var isreturn=callback(node)
+        if(isreturn===true)return
         Object.keys(node).forEach((key) => {
             const item = node[key]
             if (Array.isArray(item)&&key!='children') {
@@ -402,12 +408,73 @@ var SCASTJS=(function(){
     }
 
     function analysisMermaid(node,file,r){
+        switch(node.type){
+            case "FunctionDeclaration":
+                traverseFunction(node,{},file)
+                return true
+            case "ClassDeclaration":
+                if(!r.showMethod)break//
+                traverseClass()
+                return true
+            case "MethodDefinition":
+                if(r.showMethod)break//when not traverse class
+                traverseMethod(node,{},file)
+                return true
+            case "ObjectExpression":
 
-    }
+                return true
+            case "VariableDeclaration":
+                return true
+        }
 
-    var d3config={estreeops:types,fontsize:14}
-    function setD3Config(conf){
-        d3config=conf
+        function traverseFunction(member,cls,file){//member:function cls:parent function
+            console.log('traverse function',member)
+            member._value=getValue(member.id)
+            var method=cls._flow_id?member._value+'_'+cls._flow_id:member._value
+            r.FlowOne[member._value]=method//todo 处理不同类同名方法
+            member._flow_id=method
+            member._flow_from=cls._flow_id
+            member._file=file
+            if(r.FlowFilter[member._flow_id]===false)return;
+            r.FlowNode[member._flow_id]=member;
+            r.FDPNode[member._flow_id]={id:member._flow_id,w:member._value.length*gD3fontSize/1.6+gD3fontSize*3,text:`${member._value}()`}
+            r.Flow+=`    ${member._flow_id}([${member._value}])\nclick ${member._flow_id} "javascript:void(onFlowClick('${member._flow_id}','${file}'))"\n`
+            if(cls._flow_id){
+                r.FlowLink+=`${cls._flow_id} --o ${member._flow_id}\n`
+                r.FDPLinks.push({source:cls._flow_id,target:member._flow_id,value:2})
+            }
+            if(r.showCall){
+                traverseAst(member.body,(n)=>{
+                    return doBlock(n,member,file,r)
+                })
+            } 
+        }
+        function doBlock(n,node,file,r){
+            if(n.type=="FunctionDeclaration"){
+                traverseFunction(n,node,file)
+                return true
+            }
+            if(n.type=="CallExpression"){
+                n._file=file
+                n._value=getValue(n)
+                n._flow_id=n._value+'_'+node._flow_id
+                n._flow_from=node._flow_id
+                r.FlowNode[n._flow_id]=n
+                n._flow_str=`        ${n._flow_id}([${n._value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                r.FDPNode[n._flow_id]={id:n._flow_id,w:n._value.length*gD3fontSize/1.6+gD3fontSize*2,text:n._value+'()'}
+                r.Flow+=n._flow_str
+                r.FlowLink+=`${node._flow_id} --> ${n._flow_id}\n`
+                r.FDPLinks.push({source:node._flow_id,target:n._flow_id,value:6,dist:200,dash:"2,2"})
+                console.log('call',n)
+                return true
+            }
+        }
+
+        function traverseClass(){}
+
+        function traverseMethod(member,cls,file){
+
+        }
     }
 
     return {
@@ -417,6 +484,7 @@ var SCASTJS=(function(){
         analysisD3:analysisD3,
         setD3Config:setD3Config,
         types:types,
+        loc2poi:loc2poi,
     }
 
 })()
