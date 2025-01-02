@@ -48,16 +48,7 @@ function load() {
 }
 
 var gMermaid;
-var gIconmap={
-    "NewExpression":'🆕',
-    "CallExpression":'📞',
-    "FunctionDefine":'🟦',
-    "InterfaceDefine":'🔌',
-    // "IfStatement":'🔷',
-    // "LoopStatement":'🔵',
-    "MethodDefine":'Ⓜ️',
-    "ClassDefine":'🆑',
-}
+
 
 function genMermaid(){
     var r={
@@ -115,11 +106,12 @@ function genMermaid(){
             let node=r.FlowNode[nk]
             if(r.FlowFilter[node._flow_id]===false)continue
             if(node.type=='NewExpression'||node.type=='CallExpression'){
-                if(r.idone&&r.FlowOne[node.value]){
+                if(r.idone&&(r.FlowOne[node.value]||r.FlowOne[node._value])){
+                    //click twice
                     r.Flow=r.Flow.replaceAll(node._flow_str,'')
                     delete r.FDPNode[node._flow_id]
-                    r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${r.FlowOne[node.value]}\n`
-                    r.FDPLinks.push({source:node._flow_from,target:r.FlowOne[node.value],value:2,dash:"5,5",dist:100,strength:0.1})
+                    r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${r.FlowOne[node.value||node._value]}\n`
+                    r.FDPLinks.push({source:node._flow_from,target:r.FlowOne[node.value||node._value],value:2,dash:"5,5",dist:100,strength:0.1})
                 }else{
                     r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${node._flow_id}\n`
                     r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
