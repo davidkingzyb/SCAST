@@ -262,7 +262,7 @@ var SCASTJS=(function(){
     function analysisD3(node,file){
         node.name=getValue(node)
         node.poi=loc2poi(node.loc)
-        console.log('js analysisD3',node.type,node.name,node)
+        // console.log('js analysisD3',node.type,node.name,node)
         switch(node.type){
             case "Program":
                 node.children=node.body
@@ -438,6 +438,7 @@ var SCASTJS=(function(){
             node._flow_id=node._value
             r.FlowNode[node._flow_id]=node;
             r.FlowOne[node._flow_id]=node._value
+            r.Flow+=`    ${node._value}[${node._value}]\nclick ${node._value} "javascript:void(onFlowClick('${node._value}','${file}'))"\n`
             r.FDPNode[node._flow_id]={id:node._value,w:node._value.length*gD3fontSize/1.6+gD3fontSize*2,text:`[${node._value}]`}
             r.UMLClass[node._value]={}
             r.UML+=`  class ${node._value}{\n`;
@@ -473,9 +474,11 @@ var SCASTJS=(function(){
             member._value=getValue(member)
             member._flow_id=member._value
             member._flow_prop=`|${member._value.replaceAll('|','\|').replaceAll('[','').replaceAll(']','')}|`
+            // if(r.FlowFilter[member._flow_id]===false)return;
+            // r.FlowNode[member._flow_id]=member;
             r.UML+=`    ${member._value}\n`
-            r.FDPNode[member._value]={id:member._value,w:member._value.length*gD3fontSize/1.6+gD3fontSize*2,text:`${member._value}`}
             console.log('traverse property',n)
+            if(!r.showCall)return true
             var n=member.value
             if(n.type=="CallExpression"){
                 n._file=file
@@ -515,7 +518,7 @@ var SCASTJS=(function(){
         }
 
         function traverseFunction(member,cls,file,symbol){//member:function cls:parent function
-            console.log('traverse function',member)
+            // console.log('traverse function',member)
             member._value=getValue(member.id)
             var method=cls._flow_id?member._value+'_'+cls._flow_id:member._value
             r.FlowOne[member._value]=method//todo 处理不同类同名方法
@@ -542,6 +545,33 @@ var SCASTJS=(function(){
             if(n.type=="FunctionDeclaration"){
                 traverseFunction(n,node,file)
                 return true
+            }else if(n.type=="IfStatement"){
+                n._file=file
+                n._value="if"
+                n._flow_id=n._value+n.start+'_'+node._flow_id
+                n._flow_from=node._flow_id
+                r.FlowNode[n._flow_id]=n
+                if(r.showIf){
+                    r.Flow+=`        ${n._flow_id}{${n._value}}\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                    r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:'🔷'}
+                }  
+                if(n.test&&getRangeCode(n.test))n._flow_condition='|'+getRangeCode(n.test).replaceAll('|','｜').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
+                if(r.showIf&&n.consequent){
+                    traverseAst(n.consequent,(nn)=>{
+                        return doBlock(nn,n,file,r)
+                    })
+                }
+                if(r.showIf&&n.alternate){
+                    traverseAst(n.alternate,(nn)=>{
+                        doBlock(nn,node,file,r)
+                        if(n.alternate.type=="BlockStatement"){
+                            return false
+                        }
+                        return true
+                    })
+                }
+                if(r.showIf)return true
+                
             }else if(n.type=="CallExpression"){
                 n._file=file
                 n._value=getValue(n)
@@ -564,29 +594,6 @@ var SCASTJS=(function(){
                 r.FDPNode[n._flow_id]={id:n._flow_id,w:n._value.length*gD3fontSize/1.6+gD3fontSize*2,text:n._value}
                 r.Flow+=n._flow_str
                 return true
-            }else if(n.type=="IfStatement"){
-                n._file=file
-                n._value='if'
-                n._flow_id=n._value+'_'+node._flow_id
-                n._flow_from=node._flow_id
-                r.FlowNode[n._flow_id]=n
-                if(r.showIf){
-                    r.Flow+=n.type=="IfStatement"?`        ${n._flow_id}{${n._value}}\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`:`        ${n._flow_id}((${n._value}))\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
-                    r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:n.type=="IfStatement"?'🔷':'🔵'}
-                }  
-                if(n.test&&getRangeCode(n.test))n._flow_condition='|'+getRangeCode(n.test).replaceAll('|','｜').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
-                if(n.consequent){
-                    traverseAst(n.consequent,(n)=>{
-                        doBlock(n.consequent,n,file,r)
-                        return true
-                    })
-                }
-                if(n.alternate){
-                    traverseAst(n.alternate,(n)=>{
-                        doBlock(n.alternate,n,file,r)
-                        return true
-                    })
-                }
             }
         }
 
