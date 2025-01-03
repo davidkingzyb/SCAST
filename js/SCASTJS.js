@@ -483,7 +483,7 @@ var SCASTJS=(function(){
         }
 
         function traverseFunction(member,cls,file,symbol){//member:function cls:parent function
-            // console.log('traverse function',member)
+            console.log('traverse function',member)
             member._value=getValue(member.id)
             var method=cls._flow_id?member._value+'_'+cls._flow_id:member._value
             r.FlowOne[member._value]=method//todo 处理不同类同名方法
@@ -506,6 +506,7 @@ var SCASTJS=(function(){
             if(symbol)r.UML+=`    ${member._value}()\n`
         }
         function doBlock(n,node,file,r){
+            if(!n)return
             if(n.type=="FunctionDeclaration"){
                 traverseFunction(n,node,file)
                 return true
@@ -546,9 +547,9 @@ var SCASTJS=(function(){
                         return true
                     })
                 }
-                if(n.consequent){
-                    traverseAst(n.alternatet,(n)=>{
-                        doBlock(n.alternatet,n,file,r)
+                if(n.alternate){
+                    traverseAst(n.alternate,(n)=>{
+                        doBlock(n.alternate,n,file,r)
                         return true
                     })
                 }
