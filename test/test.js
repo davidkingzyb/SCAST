@@ -1,8 +1,9 @@
 var varfunc=function(a){
-
 }
 function func(e){
+    func1(1)
     function func1(e){
+        func2(2)
         function func2(e){
             
         }
@@ -11,10 +12,14 @@ function func(e){
 
 var obj={objfunc:function(e){
 
-},arrfunc:(e)=>{}}
+},arrfunc:(e)=>{
+
+},a:1,b:2}
 
 
 class Animal {
+    name=getN()
+    species=new Sp()
     constructor(name, species) {
         this.name = name;
         this.species = species;
@@ -33,6 +38,7 @@ class Dog extends Animal {
 
     makeSound() {
         console.log(`${this.name} barks`);
+        func()
     }
 
     fetch() {
