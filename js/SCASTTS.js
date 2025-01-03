@@ -49,9 +49,9 @@ var SCASTTS=(function(){
             }
 
             function traverseClass(node) {
-                // console.log('traverseClass',node)
-                var cls = { type: 'ClassDefine', value: node.name.escapedText, body: [], extends: [] }
-                for (let extend of node.heritageClauses) {
+                console.log('traverseClass',node)
+                var cls = { type: 'ClassDefine', value: node.name.escapedText, body: [], extends: [],poi:sourceFile.getLineAndCharacterOfPosition(node.getStart()) }
+                for (let extend of node.heritageClauses||[]) {
                     console.log('extend', extend.types[0].expression)
                     cls.extends.push(extend.types[0].expression.escapedText || extend.types[0].expression.expression.escapedText)
                 }
@@ -102,7 +102,7 @@ var SCASTTS=(function(){
         callback && callback(node)
         if (node.body && node.body.length > 0) {
             for (let n of node.body) {
-                SCAST.traverseAst(n, callback)
+                traverseAst(n, callback)
             }
         }
     }
