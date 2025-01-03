@@ -143,7 +143,7 @@ var SCASTJS=(function(){
     }
 
     function getRangeCode(node){
-        if(node==null)return ''
+        if(node==null)return 'xx'
         var result=Code.slice(node.range[0],node.range[1])
         return result
     }
@@ -193,6 +193,7 @@ var SCASTJS=(function(){
             case "RegExpLiteral":
                 return node.regex.pattern
             case "IfStatement":
+                // console.log('if',getRangeCode(node.test),node.test)//bug load from store 
                 return 'if '+getRangeCode(node.test)
             case "SwitchStatement":
                 return 'switch '+getRangeCode(node.discriminant)

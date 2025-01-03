@@ -59,7 +59,7 @@ function genMermaid(){
         FlowOne:{},
         FlowFilter:gMermaid&&gMermaid.FlowFilter||{},  
         UMLClass:{},
-        showCondition:document.getElementById('mmdop_condition').checked,
+        showCondition:true,//document.getElementById('mmdop_condition').checked,
         showRelation:document.getElementById('mmdop_relation').checked,
         showMethod:document.getElementById('mmdop_method').checked,
         showIf:document.getElementById('mmdop_if').checked,
