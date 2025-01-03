@@ -516,6 +516,7 @@ var SCASTJS=(function(){
                 n._flow_id=n._value+'_'+node._flow_id
                 n._flow_from=node._flow_id
                 r.FlowNode[n._flow_id]=n
+                if(!r.FlowFilter[n._flow_id])return true
                 n._flow_str=`        ${n._flow_id}([${n._value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                 r.FDPNode[n._flow_id]={id:n._flow_id,w:n._value.length*gD3fontSize/1.6+gD3fontSize*2,text:n._value+'()'}
                 r.Flow+=n._flow_str
@@ -526,6 +527,7 @@ var SCASTJS=(function(){
                 n._flow_id=n._value+'_'+node._flow_id
                 n._flow_from=node._flow_id
                 r.FlowNode[n._flow_id]=n
+                if(!r.FlowFilter[n._flow_id])return true
                 n._flow_str=`        ${n._flow_id}[${n._value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                 r.FDPNode[n._flow_id]={id:n._flow_id,w:n._value.length*gD3fontSize/1.6+gD3fontSize*2,text:n._value}
                 r.Flow+=n._flow_str
