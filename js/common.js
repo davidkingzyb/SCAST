@@ -184,20 +184,30 @@ function onFlowClick(n,file){
         }
     }
 }
+var gIconmap={
+    "NewExpression":'🆕',
+    "CallExpression":'📞',
+    "FunctionDefine":'🟦',
+    "FunctionDeclaration":'🟦',
+    "InterfaceDefine":'🔌',
+    "MethodDefine":'Ⓜ️',
+    "ClassDefine":'🆑',
+}
 function renderMermaidFilter(){
     var html=''
     if(gMermaid){
         for(let k of Object.keys(gMermaid.FlowNode).sort()){
             let node=gMermaid.FlowNode[k]
             if(gIconmap[node.type]){
+                let nodev=node.value||node._value
                 if(gMermaid.FlowFilter[k]===undefined){
-                    if(gMermaid.FlowOne[node.value]){
+                    if(gMermaid.FlowOne[nodev]){
                         gMermaid.FlowFilter[k]=true
                     }else{
                         gMermaid.FlowFilter[k]=false
                     }
                 } 
-                html+=`<input onchange="onMermaidFilter(this.value)" value="${k}" type="checkbox" id="mmdft_${k}" class="mmdft" ${gMermaid.FlowFilter[k]?"checked":""}/><a class="pointer" onclick="onFlowClick('${k}','${node._file}')">${gIconmap[node.type]}</a><label onclick="onFlowClick('${k}','${node._file}')"> ${node.value} </label>`
+                html+=`<input onchange="onMermaidFilter(this.value)" value="${k}" type="checkbox" id="mmdft_${k}" class="mmdft" ${gMermaid.FlowFilter[k]?"checked":""}/><a class="pointer" onclick="onFlowClick('${k}','${node._file}')">${gIconmap[node.type]}</a><label onclick="onFlowClick('${k}','${node._file}')"> ${nodev} </label>`
             }
         }
     }

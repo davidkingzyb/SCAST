@@ -48,16 +48,7 @@ function load() {
 }
 
 var gMermaid;
-var gIconmap={
-    "NewExpression":'🆕',
-    "CallExpression":'📞',
-    "FunctionDefine":'🟦',
-    "InterfaceDefine":'🔌',
-    // "IfStatement":'🔷',
-    // "LoopStatement":'🔵',
-    "MethodDefine":'Ⓜ️',
-    "ClassDefine":'🆑',
-}
+
 
 function genMermaid(){
     var r={
@@ -81,9 +72,19 @@ function genMermaid(){
     for(let file in gAst){
         r.Flow+=`  subgraph ${file}\n   direction TB\n`;
         let namespace=null;
-        SCAST.traverseAst(gAst[file],(node)=>{
-            SCAST.analysisMermaid(node,file,r)
-        })
+        if(gAst[file].filetype=='js'){
+            SCASTJS.traverseAst(gAst[file],(node)=>{
+                node.poi=SCASTJS.loc2poi(node.loc)
+            })
+            SCASTJS.traverseAst(gAst[file],(node)=>{
+                return SCASTJS.analysisMermaid(node,file,r)
+            })
+        }else{
+            SCAST.traverseAst(gAst[file],(node)=>{
+                return SCAST.analysisMermaid(node,file,r)
+            })
+        }
+        
         if(namespace)r.Flow+=`  end\n`
         r.Flow+=`  end\n`
     }
@@ -105,11 +106,12 @@ function genMermaid(){
             let node=r.FlowNode[nk]
             if(r.FlowFilter[node._flow_id]===false)continue
             if(node.type=='NewExpression'||node.type=='CallExpression'){
-                if(r.idone&&r.FlowOne[node.value]){
+                if(r.idone&&(r.FlowOne[node.value]||r.FlowOne[node._value])){
+                    //click twice
                     r.Flow=r.Flow.replaceAll(node._flow_str,'')
                     delete r.FDPNode[node._flow_id]
-                    r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${r.FlowOne[node.value]}\n`
-                    r.FDPLinks.push({source:node._flow_from,target:r.FlowOne[node.value],value:2,dash:"5,5",dist:100,strength:0.1})
+                    r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${r.FlowOne[node.value||node._value]}\n`
+                    r.FDPLinks.push({source:node._flow_from,target:r.FlowOne[node.value||node._value],value:2,dash:"5,5",dist:100,strength:0.1})
                 }else{
                     r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${node._flow_id}\n`
                     r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
@@ -150,7 +152,7 @@ function genD3(){
         if(file.indexOf('.js')>=0){
             SCASTJS.setD3Config(gD3.conf)
             SCASTJS.traverseAst(d3node,(node)=>{
-                SCASTJS.analysisD3(node,file)
+                return SCASTJS.analysisD3(node,file)
             })
         }else if(file.indexOf('.py')>=0){
             SCASTPY.setD3Config(gD3.conf)
@@ -160,7 +162,7 @@ function genD3(){
         }else{
             SCAST.setD3Config(gD3.conf)
             SCAST.traverseAst(d3node,(node)=>{
-                SCAST.analysisD3(node,file)
+                return SCAST.analysisD3(node,file)
             })    
         }
         r.children.push(d3node)

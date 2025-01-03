@@ -1,3 +1,19 @@
+var varfunc=function(a){
+
+}
+function func(e){
+    function func1(e){
+        function func2(e){
+            
+        }
+    }
+}
+
+var obj={objfunc:function(e){
+
+},arrfunc:(e)=>{}}
+
+
 class Animal {
     constructor(name, species) {
         this.name = name;

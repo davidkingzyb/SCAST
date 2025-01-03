@@ -102,7 +102,7 @@ var SCASTTS=(function(){
         callback && callback(node)
         if (node.body && node.body.length > 0) {
             for (let n of node.body) {
-                SCAST.traverseAst(n, callback)
+                traverseAst(n, callback)
             }
         }
     }
