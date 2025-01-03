@@ -437,26 +437,22 @@ var SCASTJS=(function(){
             node._value=getValue(node.id)
             node._flow_id=node._value
             r.FlowNode[node._flow_id]=node;
-            r.FlowOne[node._flow_id]=node.value
+            r.FlowOne[node._flow_id]=node._value
             r.FDPNode[node._flow_id]={id:node._value,w:node._value.length*gD3fontSize/1.6+gD3fontSize*2,text:`[${node._value}]`}
             r.UMLClass[node._value]={}
             r.UML+=`  class ${node._value}{\n`;
             for(let member of node.body.body){
-                member._value=getValue(member)
-                member._flow_id=member._value
                 switch(member.type){
                     case "MethodDefinition":
+                        member._value=getValue(member)
+                        member._flow_id=member._value
                         let func=member.value
                         let _name=getValue(member.key)=="constructor"?'#'+node._value:getValue(member.key)
                         func.id={type:"Identifier",name:_name,loc:{start:{},end:{}}}
                         traverseFunction(func,node,file,true)
                         break;
                     case "PropertyDefinition":
-                        
-                        r.UML+=`    ${member._value}\n`
-                        r.FDPNode[member._value]={id:member._value,w:member._value.length*gD3fontSize/1.6+gD3fontSize*2,text:`${member._value}`}
-
-                        // doBlock(member.value,member,file,r)//new or call
+                        traverseProperty(member,node,file,r)
                         break
                 }
             }
@@ -470,6 +466,42 @@ var SCASTJS=(function(){
                     r.FlowLink+=`${f} ==o ${node._value}\n` 
                     r.FDPLinks.push({source:f,target:node._value,value:6,dist:200,dash:"2,2"})
                     
+            }
+        }
+
+        function traverseProperty(member,cls,file,r){
+            member._value=getValue(member)
+            member._flow_id=member._value
+            member._flow_prop=`|${member._value.replaceAll('|','\|').replaceAll('[','').replaceAll(']','')}|`
+            r.UML+=`    ${member._value}\n`
+            r.FDPNode[member._value]={id:member._value,w:member._value.length*gD3fontSize/1.6+gD3fontSize*2,text:`${member._value}`}
+            console.log('traverse property',n)
+            var n=member.value
+            if(n.type=="CallExpression"){
+                n._file=file
+                n._value=getValue(n)
+                n._flow_id=n._value+'_'+member._flow_id
+                n._flow_from=cls._flow_id
+                n._flow_prop=member._flow_prop
+                r.FlowNode[n._flow_id]=n
+                if(!r.FlowFilter[n._flow_id])return true
+                n._flow_str=`        ${n._flow_id}([${n._value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                r.FDPNode[n._flow_id]={id:n._flow_id,w:n._value.length*gD3fontSize/1.6+gD3fontSize*2,text:n._value+'()'}
+                r.Flow+=n._flow_str
+                return true
+            }else if(n.type=="NewExpression"){
+                n._file=file
+                n._value=getValue(n)
+                n._flow_id=n._value+'_'+member._flow_id
+                n._flow_from=cls._flow_id
+                n._flow_prop=member._flow_prop
+                r.FlowNode[n._flow_id]=n
+                if(!r.FlowFilter[n._flow_id])return true
+                r.UMLClass[cls._value][n._flow_id]=n;
+                n._flow_str=`        ${n._flow_id}[${n._value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                r.FDPNode[n._flow_id]={id:n._flow_id,w:n._value.length*gD3fontSize/1.6+gD3fontSize*2,text:`[${n._value}]`}
+                r.Flow+=n._flow_str
+                return true
             }
         }
 

@@ -95,7 +95,7 @@ function genMermaid(){
                 if(ucls===x||ucls===x.split('_')[0])continue
                 var v=r.UMLClass[ucls][x]
                 if(v.type=='NewExpression'){
-                    r.UML+=`${ucls}..>${v.value}\n`
+                    r.UML+=`${ucls}..>${v.value||v._value}\n`
                 }
             }
         }

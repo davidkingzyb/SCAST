@@ -1,4 +1,5 @@
 var varfunc=function(a){
+    func(1)
 }
 function func(e){
     func1(1)
@@ -18,8 +19,8 @@ var obj={objfunc:function(e){
 
 
 class Animal {
-    name=getN()
-    species=new Sp()
+    name=varfunc()
+    species=new Dog()
     constructor(name, species) {
         this.name = name;
         this.species = species;
