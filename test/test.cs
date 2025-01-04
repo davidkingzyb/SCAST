@@ -16,6 +16,13 @@ public class Animal
             cc()
         }
     }
+
+    public class SubClass{
+        public string subprop="aaa"
+        public void SubMethod(){
+            a()
+        }
+    }
 }
 
 public class Dog : Animal

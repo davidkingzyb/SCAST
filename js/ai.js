@@ -1,3 +1,4 @@
+gISAI=true
 async function aiAnalysis(){
     for(let ast in gAst){
         await codeAgent(gAst[ast])
