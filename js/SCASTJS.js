@@ -435,6 +435,7 @@ var SCASTJS=(function(){
             node._file=file
             node._value=getValue(node.id)
             node._flow_id=node._value
+            if(r.FlowFilter[node._value]===false)return;
             r.FlowNode[node._flow_id]=node;
             r.FlowOne[node._flow_id]=node._value
             r.Flow+=`    ${node._value}[${node._value}]\nclick ${node._value} "javascript:void(onFlowClick('${node._value}','${file}'))"\n`
@@ -476,7 +477,7 @@ var SCASTJS=(function(){
             // if(r.FlowFilter[member._flow_id]===false)return;
             // r.FlowNode[member._flow_id]=member;
             r.UML+=`    ${member._value}\n`
-            console.log('traverse property',n)
+            // console.log('traverse property',n)
             if(!r.showCall)return true
             var n=member.value
             if(n.type=="CallExpression"){
@@ -541,7 +542,7 @@ var SCASTJS=(function(){
             if(symbol)r.UML+=`    ${member._value}()\n`
         }
         function doBlock(n,node,file,r){
-            console.log('do block',n)
+            // console.log('do block',n)
             if(!n)return
             if(n.type=="FunctionDeclaration"){
                 traverseFunction(n,node,file)

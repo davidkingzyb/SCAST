@@ -191,7 +191,9 @@ var gIconmap={
     "FunctionDeclaration":'🟦',
     "InterfaceDefine":'🔌',
     "MethodDefine":'Ⓜ️',
+    "FunctionExpression":'Ⓜ️',
     "ClassDefine":'🆑',
+    "ClassDeclaration":'🆑',
 }
 function renderMermaidFilter(){
     var html=''
