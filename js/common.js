@@ -1,4 +1,4 @@
-
+var gISAI=false
 var pre_search=null
 var searchIterator=null
 function search(){
@@ -26,7 +26,7 @@ function loadAstJson(aststr){
     for(let ast in gAst){
         let analysis=gAst[ast].analysis?`<details class="analysis_details"><summary class="analysis_summery">Analysis</summary><pre class="code_analysis">${gAst[ast].analysis}</pre></details>`:''
         html+=`<details id="detail_${ast.replace('.','_')}">
-                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">🦙</a></summary>
+                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${gISAI==true?'🦙':''}</a></summary>
                 ${analysis}
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`

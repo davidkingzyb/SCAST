@@ -35,7 +35,7 @@ function load() {
             gAst[r._filename]['filetype']=t[1]
             gAst[r._filename]['filename']=t[0]
             html+=`<details id="detail_${t[0]}_${t[1]}">
-                <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} <a onclick="jumpOllama('${r._filename}')">🦙</a></summary>
+                <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} <a onclick="jumpOllama('${r._filename}')">${gISAI==true?'🦙':''}</a></summary>
                 <pre><code class="language-${t[1]}" id="${t[0]}">${c.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
             $code.innerHTML=html;
