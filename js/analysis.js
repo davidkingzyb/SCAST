@@ -116,7 +116,12 @@ function genMermaid(){
                     r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${node._flow_id}\n`
                     r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
                 }
-            }else if((node.type=="IfStatement"||node.type=="LoopStatement")&&r.showIf){
+            }else if(r.showIf
+                    &&(node.type=="IfStatement"||node.type=="LoopStatement"||
+                    node.type=="ForStatement"||node.type=="WhileStatement"||node.type=="DoWhileStatement"||node.type=="ForInStatement"||node.type=="ForOfStatement")
+                    
+                ){
+                //todo bug click mermaid first then check if and loop target undefined
                 r.FlowLink+=`${node._flow_from} -..-> ${r.showCondition&&node._flow_condition||''} ${node._flow_id}\n`
                 r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
             }

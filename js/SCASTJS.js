@@ -542,10 +542,29 @@ var SCASTJS=(function(){
             if(symbol)r.UML+=`    ${member._value}()\n`
         }
         function doBlock(n,node,file,r){
+            console.log('do block',n)
             if(!n)return
             if(n.type=="FunctionDeclaration"){
                 traverseFunction(n,node,file)
                 return true
+            }else if(n.type=="ForStatement"||n.type=="WhileStatement"||n.type=="DoWhileStatement"||n.type=="ForInStatement"||n.type=="ForOfStatement"){
+                n._file=file
+                n._value="for"
+                n._flow_id=n._value+n.start+'_'+node._flow_id
+                n._flow_from=node._flow_id
+                r.FlowNode[n._flow_id]=n
+                if(r.showIf){
+                    r.Flow+=`         ${n._flow_id}((${n._value}))\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                    r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:'🔵'}
+                }  
+                if(n.test&&getRangeCode(n.test))n._flow_condition='|'+getRangeCode(n.test).replaceAll('|','｜').replace('{','⌈').replace('}','⌋').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
+                if(n.right&&getRangeCode(n.right))n._flow_condition='|'+getRangeCode(n.right).replaceAll('|','｜').replace('{','⌈').replace('}','⌋').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
+                if(r.showIf&&n.body){
+                    traverseAst(n.body,(nn)=>{
+                        return doBlock(nn,n,file,r)
+                    })
+                }
+                if(r.showIf)return true
             }else if(n.type=="IfStatement"){
                 n._file=file
                 n._value="if"
