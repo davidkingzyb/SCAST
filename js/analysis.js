@@ -26,8 +26,6 @@ function load() {
                 gAst[r._filename]=SCASTPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else if(t[1]=='js'){
                 gAst[r._filename]=SCASTJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
-            }else if (t[1]=='ts'){
-                gAst[r._filename]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else{
                 gAst[r._filename]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }
@@ -78,6 +76,13 @@ function genMermaid(){
             })
             SCASTJS.traverseAst(gAst[file],(node)=>{
                 return SCASTJS.analysisMermaid(node,file,r)
+            })
+        }else if(gAst[file].filetype=='py'){
+            SCASTPY.traverseAst(gAst[file],(node)=>{
+                node.poi=SCASTPY.loc2poi(node.loc)
+            })
+            SCASTPY.traverseAst(gAst[file],(node)=>{
+                return SCASTPY.analysisMermaid(node,file,r)
             })
         }else{
             SCAST.traverseAst(gAst[file],(node)=>{
