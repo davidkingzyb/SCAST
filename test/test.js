@@ -1,5 +1,5 @@
 var varfunc=function(a){
-
+    if(a==0)return
 }
 
 

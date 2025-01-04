@@ -6,8 +6,6 @@ var SCASTJS=(function(){
         ranges:true,
         sourceType:'module',
     }
-    var EStree={}
-    var AST={}
     var Code='';
 
     var types={
@@ -86,12 +84,12 @@ var SCASTJS=(function(){
     function setD3Config(conf){
         d3config=conf
     }
+    function setCode(code){
+        Code = code;
+    }
     
     function getAst(code){
-        Code = code;
-        EStree=acorn.parse(code, option)
-        // AST=pruneJsonTree(EStree)
-        console.log("SCASTJS ESTree",EStree)
+        var EStree=acorn.parse(code, option)
         return EStree
     }
     function traverseAst(node,callback){
@@ -100,9 +98,9 @@ var SCASTJS=(function(){
         if(isreturn===true)return
         Object.keys(node).forEach((key) => {
             const item = node[key]
-            if (Array.isArray(item)&&key!='children') {
+            if (Array.isArray(item)&&key!='children'&&key!='range') {
               item.forEach((sub) => {
-                sub.type && traverseAst(sub, callback)
+                sub!==null&&sub.type && traverseAst(sub, callback)
               })
             }
             item && item.type && traverseAst(item, callback)
@@ -193,7 +191,6 @@ var SCASTJS=(function(){
             case "RegExpLiteral":
                 return node.regex.pattern
             case "IfStatement":
-                // console.log('if',getRangeCode(node.test),node.test)//bug load from store 
                 return 'if '+getRangeCode(node.test)
             case "SwitchStatement":
                 return 'switch '+getRangeCode(node.discriminant)
@@ -263,7 +260,7 @@ var SCASTJS=(function(){
     function analysisD3(node,file){
         node.name=getValue(node)
         node.poi=loc2poi(node.loc)
-        // console.log('js analysisD3',node.type,node.name,node)
+        // console.log('js analysisD3',node.type,node.name,node
         switch(node.type){
             case "Program":
                 node.children=node.body
@@ -281,6 +278,7 @@ var SCASTJS=(function(){
                 break
             case "CallExpression":
                 node.children=node.arguments
+                if(node.callee.type=="FunctionExpression")node.children.push(node.callee)//for self execute function
                 break
             case "NewExpression":
                 node.children=node.arguments
@@ -511,6 +509,7 @@ var SCASTJS=(function(){
 
         function traverseObject(n,node,file){
             for(let prop of n.properties){
+                if(!prop.value)continue
                 if(prop.value.type=="FunctionExpression"||prop.value.type=="ArrowFunctionExpression"){
                     prop.value.id={type:"Identifier",name:getValue(prop.key),loc:{start:{},end:{}}}
                     traverseFunction(prop.value,{},file)
@@ -628,6 +627,7 @@ var SCASTJS=(function(){
         setD3Config:setD3Config,
         types:types,
         loc2poi:loc2poi,
+        setCode:setCode
     }
 
 })()

@@ -2,11 +2,12 @@ var SCASTPY = (function () {
     var types = {
     }
     var Code = ''
-    var ESTree = {}
     function getAst(code) {
-        Code = code
-        ESTree = filbert.parse(code)
+        var ESTree = filbert.parse(code)
         return ESTree
+    }
+    function setCode(code){
+        Code = code;
     }
     function traverseAst(node, callback) {
         // console.log('traverseAst',node.type,node)
@@ -146,7 +147,7 @@ var SCASTPY = (function () {
     function analysisD3(node, file) {
         node.name = getValue(node)
         node.poi = loc2poi(node.loc)
-        console.log('js analysisD3', node.type, node.name, node)
+        // console.log('js analysisD3', node.type, node.name, node)
         switch (node.type) {
             case "Program":
                 node.children = node.body
@@ -515,7 +516,8 @@ var SCASTPY = (function () {
         analysisD3: analysisD3,
         setD3Config: setD3Config,
         types: types,
-        loc2poi:loc2poi
+        loc2poi:loc2poi,
+        setCode:setCode,
     }
 
 })()
