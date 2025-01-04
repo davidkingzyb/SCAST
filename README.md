@@ -11,12 +11,13 @@
 [📽️watch video](https://youtu.be/KYbGcD38gqM)
 
 support plan
+- javascript (use [acorn](https://github.com/acornjs/acorn))
 - typescript 
 - csharp (use a custom parser no longer supported in future)
-- javascript (use [acorn](https://github.com/acornjs/acorn) doing)
 - python (use [filbert](https://github.com/differentmatt/filbert) later)
+- vue (later)
 
-The underlying principle involves leveraging a TypeScript parser to parse the code into an Abstract Syntax Tree (AST), followed by static analysis, and finally utilizing [Mermaid](https://github.com/mermaid-js/mermaid-live-editor) and [D3](https://github.com/d3/d3) for visualization.
+The underlying principle involves leveraging a parser to parse the code into an Abstract Syntax Tree (AST), followed by static analysis, and finally utilizing [Mermaid](https://github.com/mermaid-js/mermaid-live-editor) and [D3](https://github.com/d3/d3) for visualization.
 
 You can try it [online](https://davidkingzyb.github.io/scast/SCAST.html) or just download this repo and open SCAST.html with browser.
 
@@ -31,4 +32,6 @@ Force Directed Graph
 More D3 Graph
 
 ![scast_d3](https://github.com/user-attachments/assets/11c4e11f-05e6-48b0-a3ee-c1e5f6a0816d)
+
+ESTree 
 

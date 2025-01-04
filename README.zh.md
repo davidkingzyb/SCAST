@@ -1,0 +1,35 @@
+# 🔱SCAST
+
+**代码静态分析可视化工具**
+
+2024/9/27 by DKZ
+
+![](https://davidkingzyb.github.io/blogmd/blogImg/scastbanner.png)
+
+[🔱SCAST](https://davidkingzyb.github.io/scast/SCAST.html) 可以将输入的代码转换为UML图和流程图，可用作整理流程架构，输出文档图表。
+
+[📽️视频](https://www.bilibili.com/video/BV1QK2QYXEPW)
+
+多种语言支持
+- javascript (使用[acorn](https://github.com/acornjs/acorn))
+- typescript 
+- csharp (一个定制的解析器，之后不再支持)
+- python (use [filbert](https://github.com/differentmatt/filbert) 功能不全)
+
+原理是将输入代码整理为AST树并对其进行静态分析，最后输出使用[Mermaid](https://github.com/mermaid-js/mermaid-live-editor) 和 [D3](https://github.com/d3/d3) 输出可视化图表.
+
+可以使用在线板门 [online](https://davidkingzyb.github.io/scast/SCAST.html) 或者下载源码双击html文件在浏览器中使用.
+
+![scast_uml](https://github.com/user-attachments/assets/0185738e-0815-4c92-8770-e9ff2b0da1d5)
+
+### 更新
+
+力导引图
+
+![FDP](https://github.com/user-attachments/assets/6a34b405-492e-4966-a075-fce60330bccf)
+
+其他 D3 图表
+
+![scast_d3](https://github.com/user-attachments/assets/11c4e11f-05e6-48b0-a3ee-c1e5f6a0816d)
+
+ESTree 

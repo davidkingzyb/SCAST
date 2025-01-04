@@ -26,16 +26,14 @@ function load() {
                 gAst[r._filename]=SCASTPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else if(t[1]=='js'){
                 gAst[r._filename]=SCASTJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
-            }else if (t[1]=='ts'){
-                gAst[r._filename]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else{
                 gAst[r._filename]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }
-            gAst[r._filename]['code']=c
+            gAst[r._filename]['code']=c.replace(/\r\n/g,'\n')
             gAst[r._filename]['filetype']=t[1]
             gAst[r._filename]['filename']=t[0]
             html+=`<details id="detail_${t[0]}_${t[1]}">
-                <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} <a onclick="jumpOllama('${r._filename}')">🦙</a></summary>
+                <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} <a onclick="jumpOllama('${r._filename}')">${gISAI==true?'🦙':''}</a></summary>
                 <pre><code class="language-${t[1]}" id="${t[0]}">${c.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
             $code.innerHTML=html;
@@ -73,11 +71,20 @@ function genMermaid(){
         r.Flow+=`  subgraph ${file}\n   direction TB\n`;
         let namespace=null;
         if(gAst[file].filetype=='js'){
+            SCASTJS.setCode(gAst[file].code)
             SCASTJS.traverseAst(gAst[file],(node)=>{
                 node.poi=SCASTJS.loc2poi(node.loc)
             })
             SCASTJS.traverseAst(gAst[file],(node)=>{
                 return SCASTJS.analysisMermaid(node,file,r)
+            })
+        }else if(gAst[file].filetype=='py'){
+            SCASTPY.setCode(gAst[file].code)
+            SCASTPY.traverseAst(gAst[file],(node)=>{
+                node.poi=SCASTPY.loc2poi(node.loc)
+            })
+            SCASTPY.traverseAst(gAst[file],(node)=>{
+                return SCASTPY.analysisMermaid(node,file,r)
             })
         }else{
             SCAST.traverseAst(gAst[file],(node)=>{
@@ -116,7 +123,12 @@ function genMermaid(){
                     r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${node._flow_id}\n`
                     r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
                 }
-            }else if((node.type=="IfStatement"||node.type=="LoopStatement")&&r.showIf){
+            }else if(r.showIf
+                    &&(node.type=="IfStatement"||node.type=="LoopStatement"||
+                    node.type=="ForStatement"||node.type=="WhileStatement"||node.type=="DoWhileStatement"||node.type=="ForInStatement"||node.type=="ForOfStatement")
+                    
+                ){
+                //todo bug click mermaid first then check if and loop target undefined
                 r.FlowLink+=`${node._flow_from} -..-> ${r.showCondition&&node._flow_condition||''} ${node._flow_id}\n`
                 r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
             }
@@ -150,11 +162,13 @@ function genD3(){
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
         if(file.indexOf('.js')>=0){
+            SCASTJS.setCode(gAst[file].code)
             SCASTJS.setD3Config(gD3.conf)
             SCASTJS.traverseAst(d3node,(node)=>{
                 return SCASTJS.analysisD3(node,file)
             })
         }else if(file.indexOf('.py')>=0){
+            SCASTPY.setCode(gAst[file].code)
             SCASTPY.setD3Config(gD3.conf)
             SCASTPY.traverseAst(d3node,(node)=>{
                 SCASTPY.analysisD3(node,file)
