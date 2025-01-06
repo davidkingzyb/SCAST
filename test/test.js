@@ -99,6 +99,8 @@ function testES5(t){
         throw new Error('test throw')
     }catch(err){
         console.warn('err',err)
+    }finally{
+        console.log('finally')
     }
 
     return 'ok'

@@ -20,7 +20,14 @@ public class Animal
     public class SubClass{
         public string subprop="aaa"
         public void SubMethod(){
-            a()
+            try{
+                throw new ArgumentException("throw");
+            }catch(Exception e){
+                atry()
+                throw e
+            }finally{
+                btry()
+            }
         }
     }
 }

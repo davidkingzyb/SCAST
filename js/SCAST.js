@@ -9,6 +9,7 @@ var SCAST=(function(){
         punc:false,
         sp:false,
         op:false,
+        t:false,//py
         Comment:false,
         ClassDefine:true,
         InterfaceDefine:true,
@@ -26,11 +27,23 @@ var SCAST=(function(){
         Condition:false,
         Arguments:false,
         Arg:false,
+        //py
+        ArrayExpression:true,
+        ObjectExpression:true,
+        TupleExpression:true,
+        WithStatement:true,
+        MemberExpression:true,
+        TryStatement:true,
+        ExceptStatement:true,
+        FinallyStatement:true,
+        Lambda:true,
+
+
     }
     function TokenStream(input) {
         var current = null;
-        var keywords = " break do in typeof case else instanceof var catch export new void class extends return while const finally super with continue for switch yield debugger function this default if throw delete import try constructor super";
-        var cskeywords = " abstract as base bool break byte case catch char checked class const continue decimal default delegate do double else enum event explicit extern false finally fixed float for foreach goto if implicit in int interface internal is lock long namespace new null object operator out override params private protected public readonly ref return sbyte sealed short sizeof stackalloc static string struct switch this throw true try typeof uint ulong unchecked unsafe ushort using virtual void volatile while  add and alias ascending args async await by descending dynamic equals from get global group init into join let nameof nint not notnull nuint on or orderby partial partial record remove select set unmanaged value var when where with yield"
+        var keywords = ["break","do","in","typeof","case","else","instanceof","var","catch","export","new","void","class","extends","return","while","const","finally","super","with","continue","for","switch","yield","debugger","function","this","default","if","throw","delete","import","try","constructor","super"]
+        var cskeywords = ["abstract","as","base","bool","break","byte","case","catch","char","checked","class","const","continue","decimal","default","delegate","do","double","else","enum","event","explicit","extern","false","finally","fixed","float","for","foreach","goto","if","implicit","in","int","interface","internal","is","lock","long","namespace","new","null","object","operator","out","override","params","private","protected","public","readonly","ref","return","sbyte","sealed","short","sizeof","stackalloc","static","string","struct","switch","this","throw","true","try","typeof","uint","ulong","unchecked","unsafe","ushort","using","virtual","void","volatile","while","add","and","alias","ascending","args","async","await","by","descending","dynamic","equals","from","get","global","group","init","into","join","let","nameof","nint","not","notnull","nuint","on","or","orderby","partial","partial","record","remove","select","set","unmanaged","value","var","when","where","with","yield"]       
         return {
             next  : next,
             peek  : peek,
@@ -38,7 +51,7 @@ var SCAST=(function(){
             croak : input.croak
         };
         function is_keyword(x) {
-            return keywords.indexOf(" " + x + " ") >= 0||cskeywords.indexOf(" " + x + " ") >= 0;
+            return keywords.indexOf(x) >= 0||cskeywords.indexOf(x) >= 0;
         }
         function is_digit(ch) {
             return /[0-9]/i.test(ch);
@@ -322,8 +335,8 @@ var SCAST=(function(){
         }
         function is_define(ch){
             var tok = input.peek();
-            var keywords=" public private protected sealed internal static class interface namespace "
-            return tok && tok.type == "kw" && ((!ch && keywords.indexOf(' '+tok.value+' ')>=0) || tok.value == ch) && tok;
+            var keywords=["public","private","protected","sealed","internal","static","class","interface","namespace"]
+            return tok && tok.type == "kw" && ((!ch && keywords.indexOf(tok.value)>=0) || tok.value == ch) && tok;
         }
         function parse_define(){
             var r={
