@@ -1,4 +1,4 @@
-var SCASTPY = (function () {
+var ESTREEPY = (function () {
     var types = {
     }
     var Code = ''
