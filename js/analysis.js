@@ -10,7 +10,7 @@ function load() {
             <summary>code</summary>
             <pre><code class="language-cs" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
         </details>`;
-        gAst.code=SCASTJS.getAst($codetext.value,'code')
+        gAst.code=ESTreeJS.getAst($codetext.value,'code')
         gAst.code['code']=$codetext.value
         gAst.code['filetype']=''
         $code.innerHTML=html;
@@ -23,9 +23,9 @@ function load() {
             let t=r._filename.split('.')
             var c=e.target.result
             if(t[1]=='py'){
-                gAst[r._filename]=SCASTPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
+                gAst[r._filename]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else if(t[1]=='js'){
-                gAst[r._filename]=SCASTJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
+                gAst[r._filename]=ESTreeJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else{
                 gAst[r._filename]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }
@@ -71,20 +71,20 @@ function genMermaid(){
         r.Flow+=`  subgraph ${file}\n   direction TB\n`;
         let namespace=null;
         if(gAst[file].filetype=='js'){
-            SCASTJS.setCode(gAst[file].code)
-            SCASTJS.traverseAst(gAst[file],(node)=>{
-                node.poi=SCASTJS.loc2poi(node.loc)
+            ESTreeJS.setCode(gAst[file].code)
+            ESTreeJS.traverseAst(gAst[file],(node)=>{
+                node.poi=ESTreeJS.loc2poi(node.loc)
             })
-            SCASTJS.traverseAst(gAst[file],(node)=>{
-                return SCASTJS.analysisMermaid(node,file,r)
+            ESTreeJS.traverseAst(gAst[file],(node)=>{
+                return ESTreeJS.analysisMermaid(node,file,r)
             })
         }else if(gAst[file].filetype=='py'){
-            SCASTPY.setCode(gAst[file].code)
-            SCASTPY.traverseAst(gAst[file],(node)=>{
-                node.poi=SCASTPY.loc2poi(node.loc)
+            ESTREEPY.setCode(gAst[file].code)
+            ESTREEPY.traverseAst(gAst[file],(node)=>{
+                node.poi=ESTREEPY.loc2poi(node.loc)
             })
-            SCASTPY.traverseAst(gAst[file],(node)=>{
-                return SCASTPY.analysisMermaid(node,file,r)
+            ESTREEPY.traverseAst(gAst[file],(node)=>{
+                return ESTREEPY.analysisMermaid(node,file,r)
             })
         }else{
             SCAST.traverseAst(gAst[file],(node)=>{
@@ -162,16 +162,16 @@ function genD3(){
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
         if(file.indexOf('.js')>=0){
-            SCASTJS.setCode(gAst[file].code)
-            SCASTJS.setD3Config(gD3.conf)
-            SCASTJS.traverseAst(d3node,(node)=>{
-                return SCASTJS.analysisD3(node,file)
+            ESTreeJS.setCode(gAst[file].code)
+            ESTreeJS.setD3Config(gD3.conf)
+            ESTreeJS.traverseAst(d3node,(node)=>{
+                return ESTreeJS.analysisD3(node,file)
             })
         }else if(file.indexOf('.py')>=0){
-            SCASTPY.setCode(gAst[file].code)
-            SCASTPY.setD3Config(gD3.conf)
-            SCASTPY.traverseAst(d3node,(node)=>{
-                SCASTPY.analysisD3(node,file)
+            ESTREEPY.setCode(gAst[file].code)
+            ESTREEPY.setD3Config(gD3.conf)
+            ESTREEPY.traverseAst(d3node,(node)=>{
+                ESTREEPY.analysisD3(node,file)
             })
         }else{
             SCAST.setD3Config(gD3.conf)

@@ -310,7 +310,7 @@ var D3M = (function () {
             for (let n of d.children) {
                 console.log('tree2network',n)
                 if(n.filetype=='js'){
-                    SCASTJS.traverseAst(n, function (node) {
+                    ESTreeJS.traverseAst(n, function (node) {
                         if(!node.name)return
                         var nodename=node.name.replace(/[^0-9a-zA-Z]/g, '_')
                         if (gD3.conf.estreeops[node.type] || gD3.conf.estreeops.all) {

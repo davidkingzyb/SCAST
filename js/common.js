@@ -246,8 +246,8 @@ function fontSizeD3Plus(v){
 }
 function renderD3Option(){
     var eshtml=`<input type="checkbox" id="d3esop_all" class="d3ops"/><label for="d3esop_all">all</label> `
-    for(let op in SCASTJS.types){
-        eshtml+=`<input type="checkbox" id="d3esop_${op}" class="d3ops" ${SCASTJS.types[op]?"checked":''} /><label for="d3esop_${op}">${op}</label> `
+    for(let op in ESTreeJS.types){
+        eshtml+=`<input type="checkbox" id="d3esop_${op}" class="d3ops" ${ESTreeJS.types[op]?"checked":''} /><label for="d3esop_${op}">${op}</label> `
     }
     document.getElementById("D3ESTree").innerHTML=eshtml
 
@@ -266,7 +266,7 @@ function getSCASTD3Option(){
     return result
 }
 function getESTreeD3Option(){
-    var result=JSON.parse(JSON.stringify(SCASTJS.types))
+    var result=JSON.parse(JSON.stringify(ESTreeJS.types))
     for(let op in result){
         result[op]=document.getElementById('d3esop_'+op).checked
     }

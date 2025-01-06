@@ -1,4 +1,4 @@
-var SCASTJS=(function(){
+var ESTreeJS=(function(){
 
     const option={
         ecmaVersion: 2022,
