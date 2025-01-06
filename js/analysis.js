@@ -10,7 +10,7 @@ function load() {
             <summary>code</summary>
             <pre><code class="language-cs" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
         </details>`;
-        gAst.code=ESTreeJS.getAst($codetext.value,'code')
+        gAst.code=ESTREEJS.getAst($codetext.value,'code')
         gAst.code['code']=$codetext.value
         gAst.code['filetype']=''
         $code.innerHTML=html;
@@ -25,7 +25,7 @@ function load() {
             if(t[1]=='py'){
                 gAst[r._filename]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else if(t[1]=='js'){
-                gAst[r._filename]=ESTreeJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
+                gAst[r._filename]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else{
                 gAst[r._filename]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }
@@ -71,17 +71,17 @@ function genMermaid(){
         r.Flow+=`  subgraph ${file}\n   direction TB\n`;
         let namespace=null;
         if(gAst[file].filetype=='js'){
-            ESTreeJS.setCode(gAst[file].code)
-            ESTreeJS.traverseAst(gAst[file],(node)=>{
-                node.poi=ESTreeJS.loc2poi(node.loc)
+            ESTREEJS.setCode(gAst[file].code)
+            ESTREEJS.traverseAst(gAst[file],(node)=>{
+                node.poi=ESTREEJS.loc2poi(node)
             })
-            ESTreeJS.traverseAst(gAst[file],(node)=>{
-                return ESTreeJS.analysisMermaid(node,file,r)
+            ESTREEJS.traverseAst(gAst[file],(node)=>{
+                return ESTREEJS.analysisMermaid(node,file,r)
             })
         }else if(gAst[file].filetype=='py'){
             ESTREEPY.setCode(gAst[file].code)
             ESTREEPY.traverseAst(gAst[file],(node)=>{
-                node.poi=ESTREEPY.loc2poi(node.loc)
+                node.poi=ESTREEPY.loc2poi(node)
             })
             ESTREEPY.traverseAst(gAst[file],(node)=>{
                 return ESTREEPY.analysisMermaid(node,file,r)
@@ -162,10 +162,10 @@ function genD3(){
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
         if(file.indexOf('.js')>=0){
-            ESTreeJS.setCode(gAst[file].code)
-            ESTreeJS.setD3Config(gD3.conf)
-            ESTreeJS.traverseAst(d3node,(node)=>{
-                return ESTreeJS.analysisD3(node,file)
+            ESTREEJS.setCode(gAst[file].code)
+            ESTREEJS.setD3Config(gD3.conf)
+            ESTREEJS.traverseAst(d3node,(node)=>{
+                return ESTREEJS.analysisD3(node,file)
             })
         }else if(file.indexOf('.py')>=0){
             ESTREEPY.setCode(gAst[file].code)
