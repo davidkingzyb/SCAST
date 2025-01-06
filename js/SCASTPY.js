@@ -774,7 +774,9 @@ var SCASTPY=(function(){
     function setD3Config(conf){
         d3config=conf
     }
-    function loc2poi(){}
+    function loc2poi(node){
+        return node.poi
+    }
     function setCode(){}
 
     return {
