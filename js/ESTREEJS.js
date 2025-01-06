@@ -1,4 +1,4 @@
-var ESTreeJS=(function(){
+var ESTREEJS=(function(){
 
     const option={
         ecmaVersion: 2022,
@@ -136,8 +136,8 @@ var ESTreeJS=(function(){
         }
     }
 
-    function loc2poi(loc){
-        return {line:loc.start.line,start:loc.start.column}
+    function loc2poi(node){
+        return {line:node.loc.start.line,start:node.loc.start.column}
     }
 
     function getRangeCode(node){
@@ -259,7 +259,7 @@ var ESTreeJS=(function(){
 
     function analysisD3(node,file){
         node.name=getValue(node)
-        node.poi=loc2poi(node.loc)
+        node.poi=loc2poi(node)
         // console.log('js analysisD3',node.type,node.name,node
         switch(node.type){
             case "Program":
