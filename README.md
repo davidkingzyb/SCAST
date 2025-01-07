@@ -12,9 +12,9 @@
 
 support plan
 - javascript (use [acorn](https://github.com/acornjs/acorn))
-- typescript 
+- typescript (use [typescript](https://www.typescriptlang.org/) for now [estree](https://typescript-eslint.io/) later)
 - csharp (use a custom parser no longer supported in future)
-- python (use [filbert](https://github.com/differentmatt/filbert) later)
+- python (ues a custom parser use [filbert](https://github.com/differentmatt/filbert) later)
 - vue (later)
 
 The underlying principle involves leveraging a parser to parse the code into an Abstract Syntax Tree (AST), followed by static analysis, and finally utilizing [Mermaid](https://github.com/mermaid-js/mermaid-live-editor) and [D3](https://github.com/d3/d3) for visualization.
