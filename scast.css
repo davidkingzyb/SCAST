@@ -93,6 +93,7 @@ body{
     width: 200px;
     padding: 10px;
 }
+
 #mmdfilter_con{
     margin-top: 50px;
 }
@@ -101,12 +102,20 @@ body{
     top:0;
     right: 220px;
     background-color: rgba(0,0,0,0.9);
-    overflow-x: auto;
-    padding: 10px;
     color:white;
     z-index:90;
     margin:0;
     max-height: 90%;
+    overflow: auto;
+    width: 200px;
+}
+#d3_conf_con>summary{
+    position: fixed;
+    width: 180px;
+    top:0;
+    right: 220px;
+    background-color: rgba(0,0,0,1);
+    padding: 10px;
 }
 details {
     margin: 10px;
