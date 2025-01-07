@@ -1,5 +1,6 @@
 var varfunc=function(a){
     if(a==0)return
+    var c=callc(a)
 }
 
 

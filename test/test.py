@@ -1,6 +1,6 @@
 class people:
-    name = ''
-    age = 0
+    name = propfunc()
+    age = testIF()
     __weight = 0
     def __init__(self,n,a,w):
         self.name = n
@@ -17,7 +17,6 @@ t = ('a','b',[1,2,4],{"a":1,"b":2,'arr':[2,1],'c':3})
 obj={"a":[1,2],"obj":{"a":1,'t':(1,2),'arr':[1,2]}}
 x = lambda a,b : a >b
 
-
 def testIF():# if has bug by filbert
     if a==1:
         a(1)
@@ -26,7 +25,8 @@ def testIF():# if has bug by filbert
     else:
         c()
     def b(b):
-        c(c)
+        cvar=cc(c)
+        await awt(a)
         def c(c):
             a(c)
 
@@ -50,9 +50,9 @@ docs
     try:
         raise Exception('test')
     except Exception as err:
-        print(err)
+        printexcept(err)
     finally:
-        print('finally')
+        printfinally('finally')
 
 def testFor():
     for x in range(10):

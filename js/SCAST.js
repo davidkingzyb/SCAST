@@ -814,6 +814,7 @@ function analysisMermaid(node,file,r){
                     if(!r.showMethod)traverseVariable(n,file)
                     else{_doBody(n,file)}
                 }else if(n.type=="BlockStatement"){
+                    // try catch structure etc all in block
                     n._flow_id=node._flow_id;
                     _doBody(n,file)
                 }
