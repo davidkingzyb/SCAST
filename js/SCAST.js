@@ -813,6 +813,9 @@ function analysisMermaid(node,file,r){
                     n._flow_id=node._flow_id;//not a flow node same as condition
                     if(!r.showMethod)traverseVariable(n,file)
                     else{_doBody(n,file)}
+                }else if(n.type=="BlockStatement"){
+                    n._flow_id=node._flow_id;
+                    _doBody(n,file)
                 }
             }
         }
@@ -902,8 +905,6 @@ var d3config={scastops:types,fontsize:14}
 function setD3Config(conf){
     d3config=conf
 }
-
- 
     return {
         getAst:getAst,
         traverseAst:traverseAst,
