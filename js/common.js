@@ -288,3 +288,37 @@ function saveD3(){//svg not work
     var svgnode=D3M[gD3.select](gD3.tree)
     _saveFile(svgnode.outerHTML,'StaticCodeAnalysis_'+gD3.select+'.svg')
 }
+
+function initCodeScaler(){
+    var isCodeScaler=false
+    var $scaler=document.getElementById('codescaler');
+    var $codecon=document.getElementById('code_con')
+    var $codepanel=document.getElementById('code_panel')
+    var $codescroll=document.getElementById('code_scroll')
+    $codecon.addEventListener('toggle',(e)=>{
+        if($codecon.open){
+            $codepanel.style.display = 'block';
+        }else{
+            $codepanel.style.display = 'none'
+        }
+    })
+    $scaler.addEventListener('mousedown',()=>{
+        isCodeScaler=true
+        document.body.style.userSelect='none'
+    })
+    document.addEventListener('mouseup',()=>{
+        // console.log('up')
+        isCodeScaler=false
+        document.body.style.userSelect=''
+    })
+    document.addEventListener('mousemove',(e)=>{
+        if(isCodeScaler){
+            var cx = e.clientX;
+            var cy = e.clientY;
+            $codepanel.style.width=(cx-15)+'px'
+            $codepanel.style.height=(cy-15)+'px'
+            $codescroll.style.width=(cx-15)+'px'
+            $codescroll.style.height=(cy-15)+'px'
+        }
+    })
+}

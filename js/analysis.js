@@ -10,7 +10,7 @@ function load() {
             <summary>code</summary>
             <pre><code class="language-cs" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
         </details>`;
-        gAst.code=ESTREEJS.getAst($codetext.value,'code')
+        gAst.code=SCAST.getAst($codetext.value,'code')
         gAst.code['code']=$codetext.value
         gAst.code['filetype']=''
         $code.innerHTML=html;
