@@ -43,11 +43,17 @@
         <a href="https://davidkingzyb.github.io/blogmd/50.html"> by DKZ</a>
     </div>
     <details id="code_con" open>
-        <summary id="code_con_summary">codes <a onclick="fixedCon('code_con',2)" title="max height">↕️</a></summary>
-        <div id="code">
-            <textarea name="" id="codetext" placeholder="paste code here or select from file"></textarea>
-        </div>
+        <summary id="code_con_summary">codes </summary>
     </details>
+    <div id="code_panel">
+        <div id="code_scroll">
+            <div id="code">
+                <textarea name="" id="codetext" placeholder="paste code here or select from file"></textarea>
+            </div>  
+        </div>
+              
+        <div id="codescaler"></div>
+    </div>
     <details id="mermaid_conf_con">
         <summary>mermaid <a onclick="reMermaid()" title="refresh mermaid">🔄️</a></summary>
         <div id="mermaid_conf_panel">
@@ -138,6 +144,7 @@
 <script>
     initFile()
     renderD3Option()
+    initCodeScaler()
 </script>
 <script src="./lib/mermaid.min.js">
 </script>
