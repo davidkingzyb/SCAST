@@ -1,0 +1,105 @@
+<html>
+    <head>
+        <title>Unity Docs Roadmap</title>
+        <link rel="stylesheet" href="./scast.css">
+        <style>
+#load_con_unity {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    padding: 10px;
+    z-index: 999;
+}
+#load_con_unity button{
+    font-size: 26px;
+    border: 0;
+    cursor: pointer;
+    padding: 0 6px
+}
+#load_con_unity input{
+    display: none;
+}
+        </style>
+        <script src="./lib/json-viewer.bundle.js" async></script>
+        <script src="./lib/d3.min.js"></script>
+        <script src="./js/D3M.js"></script>
+        <script src="./js/common.js"></script>
+        <script src="./js/analysis.js"></script>
+        <script src="./js/ESTREEJS.js"></script>
+    </head>
+    <body>
+        <div class="" id="load_con_unity">
+            <label class="input-file-button" for="codefile" title="1. open files">📄</label>
+            <input type='file' id='codefile' multiple />
+            <button id="load" class="pointer" onclick="loadUnity()" title="2. load unity toc">⛎</button>
+        </div>
+        <details class="json_con">
+            <summary onclick="showJson()">json
+                <input id="searchinput" type="text">
+                <button onclick="search()" title="search">🔍</button>
+            </summary>
+            <json-viewer id="json"></json-viewer>
+        </details>
+        <details open>
+            <summary>D3&nbsp;&nbsp;
+                <select id="D3Select">
+                    <option value="IndentedTree">IndentedTree</option>
+                    <!-- <option value="treeMap">TreeMap</option> -->
+                    <option value="TidyTree">TidyTree</option>
+                    <option value="ClusterTree">ClusterTree</option>
+                    <option value="RadialTidyTree">RadialTidyTree</option>
+                    <option value="RadialClusterTree">RadialClusterTree</option>
+                    <option value="forceDirectedTree">ForceDirectedTree</option>
+                    <option value="EdgeBundling">EdgeBundling</option>
+                </select>
+                <button onclick="genUnityD3()" title="generate D3">🌳</button>
+                <button onclick="clearD3()" title="clear D3">🧹</button>
+                <button onclick="scaleD3()" title="scale D3">🔛</button>
+                <button onclick="fontSizeD3Minus(4)" title="scale font size">➖</button>
+                <button onclick="fontSizeD3Plus(4)" title="scale font size">➕</button>
+            </summary>
+            <div id="D3Diagram"></div>
+        </details>
+        <script>
+var gAst={}
+function loadUnity() {
+    var $file = document.getElementById('codefile')
+    
+    for(let i=0;i<$file.files.length;i++){
+        let r = new FileReader()
+        r.onload = function (e) {
+            let t=r._filename.split('.')
+            var c=e.target.result
+            gAst[r._filename]=JSON.parse(c)
+            gAst[r._filename]['filetype']='js'
+            gAst[r._filename]['filename']='UnityDocsRoadmap'
+
+        }
+        r.readAsText($file.files[i])
+        r._filename=$file.files[i].name
+    }
+}
+var gD3 = {tree: {},conf:{
+    scastops:{},
+    estreeops:{},
+    fontsize:gD3fontSize,
+}}
+function genUnityD3(){
+    var r={name:'file',children:[]}
+    for(let file in gAst){
+        let d3node=JSON.parse(JSON.stringify(gAst[file]))
+        r.children.push(d3node)
+    }
+    gD3.tree=r
+    var D3Select=document.getElementById('D3Select').value;
+    gD3.select=D3Select;
+    console.log('gD3',gD3)
+    renderD3(D3Select,gD3.tree)
+    scrollToView('D3Select',-window.innerHeight/2-20)
+}
+
+
+        </script>
+    </body>
+</html>
