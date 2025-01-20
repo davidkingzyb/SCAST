@@ -291,6 +291,7 @@ function saveD3(){//svg not work
 
 function initCodeScaler(){
     var isCodeScaler=false
+    var isMax=false;
     var $scaler=document.getElementById('codescaler');
     var $codecon=document.getElementById('code_con')
     var $codepanel=document.getElementById('code_panel')
@@ -324,8 +325,20 @@ function initCodeScaler(){
     })
 
     $scaler.addEventListener('touchend',()=>{
-        $codepanel.style.width='90%'
-        $codepanel.style.height='90%'
+        if(isMax){
+            isMax=false
+            $codepanel.style.width='625px'
+            $codepanel.style.height='430px'
+            $codescroll.style.width='625px'
+            $codescroll.style.height='430px'
+        }else{
+            $codepanel.style.width='100vw'
+            $codepanel.style.height=(window.screen.height-110)+'px'
+            $codescroll.style.width='100vw'
+            $codescroll.style.height=(window.screen.height-110)+'px'
+            isMax=true
+        }
+        
     })
     
 }
