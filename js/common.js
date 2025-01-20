@@ -302,6 +302,7 @@ function initCodeScaler(){
             $codepanel.style.display = 'none'
         }
     })
+    
     $scaler.addEventListener('mousedown',()=>{
         isCodeScaler=true
         document.body.style.userSelect='none'
@@ -321,4 +322,10 @@ function initCodeScaler(){
             $codescroll.style.height=(cy-15)+'px'
         }
     })
+
+    $scaler.addEventListener('touchend',()=>{
+        $codepanel.style.width='90%'
+        $codepanel.style.height='90%'
+    })
+    
 }

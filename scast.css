@@ -57,6 +57,7 @@ body{
 }
 summary{
     cursor: pointer;
+    line-height: 32px;
 }
 #textFlow{
     width: 550px;
@@ -102,7 +103,7 @@ summary{
     overflow: auto;
     width: 625px;
     height: 430px;
-    padding: 10px;
+    /* padding: 10px; */
 }
 #code_con_summary{
     padding: 10px;
@@ -111,6 +112,10 @@ summary{
     left: 0;
     background-color: rgba(0,0,0,1);
     width: 100px;
+    line-height: 32px;
+}
+#code summary{
+    padding-left: 10px;
 }
 #code details{
     float: left;
@@ -125,6 +130,7 @@ summary{
     height: 400px;
     background-color: #333;
     color:#ccc;
+    margin: 10px 0 0 10px;
 }
 #outline_con{
     overflow-y: auto;
