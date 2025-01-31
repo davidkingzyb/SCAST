@@ -51,7 +51,7 @@ var SCASTPY=(function(){
             return /[0-9]/i.test(ch);
         }
         function is_id_start(ch) {
-            return /[a-zA-Z$_]/i.test(ch);
+            return /[a-zA-Z$_@]/i.test(ch);
         }
         function is_id(ch) {
             return is_id_start(ch) || "0123456789".indexOf(ch) >= 0;
@@ -423,6 +423,11 @@ var SCASTPY=(function(){
             }
             input.next()
             if(is_punc('('))r.arguments=parse_arguments()
+            if(is_op('->')){
+                input.next()
+                r.return=input.peek()
+                while(!is_sp(':'))input.next();
+            }
             if(is_sp(':'))r.body=parse_block().body
             for(let arg of r.arguments.body){
                 if(arg.value=='self'&&isclass){
@@ -808,13 +813,11 @@ var SCASTPY=(function(){
                 r.FlowLink+=`${cls._flow_id} --o ${member._flow_id}\n`
                 r.FDPLinks.push({source:cls._flow_id,target:member._flow_id,value:2})
             }
-            if(r.showCall){
+            if(r.showCall&&member.body){
                 for(let n of member.body){
                     doBlock(n,member,method)
                 }
             } 
-            
-
         }
         function doBlock(n,node,method){
                 // console.log('do block',method)
