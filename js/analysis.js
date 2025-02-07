@@ -58,7 +58,8 @@ function genMermaid(){
         FlowFilter:gMermaid&&gMermaid.FlowFilter||{},  
         UMLClass:{},
         showCondition:true,//document.getElementById('mmdop_condition').checked,
-        showRelation:document.getElementById('mmdop_relation').checked,
+        showRelation:true,//document.getElementById('mmdop_relation').checked,
+        canclick:document.getElementById('mmdop_click').checked,
         showMethod:document.getElementById('mmdop_method').checked,
         showIf:document.getElementById('mmdop_if').checked,
         idone:document.getElementById('mmdop_idone').checked,
@@ -133,6 +134,9 @@ function genMermaid(){
                 r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
             }
         }
+    }
+    if(!r.canclick){
+        r.Flow=r.Flow.replace(/\nclick(.+?)\n/g,'\n')
     }
     gMermaid=r;
     console.log('gMermaid',gMermaid)
