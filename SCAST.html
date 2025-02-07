@@ -22,6 +22,7 @@
     <script src="./js/ESTREEPY.js"></script>
     <script src="./js/ESTREEJS.js"></script>
     <script src="./js/SCAST.js"></script>
+    <script src="./js/SCASTPY.js"></script>
     
     <script src="./js/common.js"></script>
     <script src="./js/analysis.js"></script>
@@ -30,17 +31,17 @@
 
 <body style="margin-bottom: 90px;">
     <div id="title">
-        <span class="pointer jump">️🔱</span>
-        <h1 style="display: inline;" class="pointer"> SCAST </h1>
+        <span class="jump">️🔱</span>
+        <h1 style="display: inline;" class="pointer"><a href="https://github.com/davidkingzyb/SCAST" style="color:black;"> SCAST</a> </h1>
         <span class="pointer jump"
-            onclick="scrollToView('mermaidUML',-window.innerHeight/2-20)">🧜‍♀️</span>
+            onclick="scrollToView('mermaidUML',-window.innerHeight/2-20)" title="scroll to UML">🧜‍♀️</span>
         <span class="pointer jump"
-            onclick="scrollToView('mermaidFlow',-window.innerHeight/2-20)">🌊</span>
+            onclick="scrollToView('mermaidFlow',-window.innerHeight/2-20)" title="scroll to flow">🌊</span>
         <span class="pointer jump"
-            onclick="scrollToView('FDP',-window.innerHeight/2-20)">❄️</span>
+            onclick="scrollToView('FDP',-window.innerHeight/2-20)" title="scroll to FDG">❄️</span>
         <span class="pointer jump"
-            onclick="scrollToView('D3Select',-window.innerHeight/2-20)">🌳</span>
-        <a href="https://davidkingzyb.github.io/blogmd/50.html"> by DKZ</a>
+            onclick="scrollToView('D3Select',-window.innerHeight/2-20)" title="scroll to D3">🌳</span>
+        <!-- <a href="https://davidkingzyb.github.io/blogmd/50.html"> by DKZ</a> -->
     </div>
     <details id="code_con" open>
         <summary id="code_con_summary">codes </summary>
@@ -48,7 +49,17 @@
     <div id="code_panel">
         <div id="code_scroll">
             <div id="code">
-                <textarea name="" id="codetext" placeholder="paste code here or select from file"></textarea>
+                <textarea name="" id="codetext" placeholder="HOW TO USE
+
+1. paste code here  
+   or select from file by click 📄 at right corner
+2. click ️🔱 generate AST
+3. click 🧜‍♀️ analysis and show mermaid diagram
+   click 🧜‍♀️ again for more details
+   or click 🌳 show D3 diagram
+4. click 🦙 use ollama AI analysis code
+
+                                       © 2024 DKZ"></textarea>
             </div>  
         </div>
               
@@ -90,9 +101,9 @@
         <label class="input-file-button" for="codefile" title="1. open files">📄</label>
         <input type='file' id='codefile' multiple />
         <button id="load" class="pointer" onclick="load()" title="2. generate AST">🔱</button>
-        <button onclick="genMermaid()" title="3. generate mermaid 3.1 click twice for detail">🧜‍♀️</button>
-        <button onclick="genD3()" title="3.generate D3">🌳</button>
-        <button id="ai" class="pointer" style="display: none;" onclick="aiAnalysis()" title="3.AI Analysis">🦙</button>
+        <button onclick="genMermaid()" title="3. generate mermaid click twice for detail">🧜‍♀️</button>
+        <button onclick="genD3()" title="3. generate D3">🌳</button>
+        <button id="ai" class="pointer" onclick="aiAnalysis()" title="4.AI Analysis" disabled>🦙</button>
     </div>
     <details class="json_con">
         <summary onclick="showJson()">json

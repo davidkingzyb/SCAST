@@ -33,7 +33,7 @@ function load() {
             gAst[r._filename]['filetype']=t[1]
             gAst[r._filename]['filename']=t[0]
             html+=`<details id="detail_${t[0]}_${t[1]}">
-                <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} <a onclick="jumpOllama('${r._filename}')">${gISAI==true?'🦙':''}</a></summary>
+                <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} <a onclick="jumpOllama('${r._filename}')">${gISAI==true&&location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
                 <pre><code class="language-${t[1]}" id="${t[0]}">${c.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
             $code.innerHTML=html;
@@ -143,6 +143,7 @@ function genMermaid(){
     renderMermaid()
     renderMermaidFilter()
     scrollToView('mermaidUML',-window.innerHeight/2-20)
+    if(gISAI)document.getElementById('ai').disabled=false
 }
 
 var gD3 = {tree: {},conf:{}}
