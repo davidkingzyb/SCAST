@@ -26,7 +26,7 @@ function loadAstJson(aststr){
     for(let ast in gAst){
         let analysis=gAst[ast].analysis?`<details class="analysis_details"><summary class="analysis_summery">Analysis</summary><pre class="code_analysis">${gAst[ast].analysis}</pre></details>`:''
         html+=`<details id="detail_${ast.replace('.','_')}">
-                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${gISAI==true?'🦙':''}</a></summary>
+                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${gISAI==true&&location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
                 ${analysis}
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
@@ -90,7 +90,7 @@ function _saveFile(content, fileName) {
     }
     fd.append('content', content)
     fetch('/save', { method: "POST", body: fd }).then(resp => {
-
+        wtfmsg("save file ok")
     }).catch(err => {
         console.warn('save err')
     })
@@ -174,11 +174,11 @@ function onFlowClick(n,file){
     var $line=document.querySelectorAll(`#detail_${fileid} .hljs-ln-line`)
     for(let $l of $line){
         if($l.getAttribute('data-line-number')==node.poi.line){
-            $l.style.backgroundColor = "red";
+            $l.style.backgroundColor = "lightgreen";
             $l.scrollIntoView()
             document.getElementById('code_con').scrollBy(0,-100)
             setTimeout(()=>{
-                $l.style.backgroundColor = "#994a43";
+                $l.style.backgroundColor = "green";
             },3000)
             break;
         }
@@ -209,11 +209,19 @@ function renderMermaidFilter(){
                         gMermaid.FlowFilter[k]=false
                     }
                 } 
-                html+=`<input onchange="onMermaidFilter(this.value)" value="${k}" type="checkbox" id="mmdft_${k}" class="mmdft" ${gMermaid.FlowFilter[k]?"checked":""}/><a class="pointer" onclick="onFlowClick('${k}','${node._file}')">${gIconmap[node.type]}</a><label onclick="onFlowClick('${k}','${node._file}')"> ${nodev} </label>`
+                html+=`
+<input onchange="onMermaidFilter(this.value)" value="${k}" type="checkbox" id="mmdft_${k}" class="mmdft" ${gMermaid.FlowFilter[k]?"checked":""}/>
+<a class="pointer" onclick="onOutlineIconClick('${node._flow_id||nodev}')">${gIconmap[node.type]}</a>
+<label onclick="onFlowClick('${k}','${node._file}')" title="${node._analysis||''}"> ${nodev} </label>`
             }
         }
     }
     document.getElementById('mmdfilter_con').innerHTML=html
+}
+function onOutlineIconClick(_flow_id){
+    var node=gMermaid.FlowNode[_flow_id]
+    onFlowClick(_flow_id,node._file)
+    if(node._analysis)alert(node._analysis)
 }
 function onMermaidFilter(v){
     // console.log('mermaid filter', v);
@@ -341,4 +349,14 @@ function initCodeScaler(){
         
     })
     
+}
+
+function wtfmsg(m,time=3000){
+	var elem=document.createElement('div')
+	elem.className="wtfmsg "
+	elem.innerHTML=m
+	document.body.appendChild(elem)
+	setTimeout(()=>{
+		document.body.removeChild(elem)
+	},time)
 }
