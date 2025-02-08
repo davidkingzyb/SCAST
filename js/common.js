@@ -23,10 +23,8 @@ function loadAstJson(aststr){
     var $code=document.getElementById('code')
     var html=''
     for(let ast in gAst){
-        let analysis=gAst[ast].analysis?`<details class="analysis_details"><summary class="analysis_summery">Analysis</summary><pre class="code_analysis">${gAst[ast].analysis}</pre></details>`:''
         html+=`<details id="detail_${ast.replace('.','_')}">
                 <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
-                ${analysis}
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
     }

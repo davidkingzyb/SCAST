@@ -68,7 +68,7 @@ function genMermaid(){
         FDPNode:{},
         FDPLinks:[],
     }
-    for(let file in gAst){
+    for(let file in gAst){//generate FlowNode FlowOne UMLClass FDPNode Flow
         r.Flow+=`  subgraph ${file}\n   direction TB\n`;
         let namespace=null;
         if(gAst[file].filetype=='js'){
@@ -96,7 +96,7 @@ function genMermaid(){
         if(namespace)r.Flow+=`  end\n`
         r.Flow+=`  end\n`
     }
-    if(r.showRelation&&gMermaid){//第一次不渲染依赖
+    if(r.showRelation&&gMermaid){//第一次不渲染依赖 generate UML
         for(let ucls in r.UMLClass){//class 间依赖关系
             for(let x in r.UMLClass[ucls]){
                 if(gMermaid&&gMermaid.FlowFilter[x]==false)continue
@@ -109,13 +109,13 @@ function genMermaid(){
         }
     }
 
-    if(gMermaid&&r.showCall){//traverse FlowNode
+    if(gMermaid&&r.showCall){//traverse FlowNode update FlowLink FDPLinks, replace _flow_str in Flow
         for(let nk in r.FlowNode){
             let node=r.FlowNode[nk]
             if(r.FlowFilter[node._flow_id]===false)continue
+            // 连接方法内部细节调用线 click twice
             if(node.type=='NewExpression'||node.type=='CallExpression'){
                 if(r.idone&&(r.FlowOne[node.value]||r.FlowOne[node._value])){
-                    //click twice
                     r.Flow=r.Flow.replaceAll(node._flow_str,'')
                     delete r.FDPNode[node._flow_id]
                     r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${r.FlowOne[node.value||node._value]}\n`
@@ -127,7 +127,6 @@ function genMermaid(){
             }else if(r.showIf
                     &&(node.type=="IfStatement"||node.type=="LoopStatement"||
                     node.type=="ForStatement"||node.type=="WhileStatement"||node.type=="DoWhileStatement"||node.type=="ForInStatement"||node.type=="ForOfStatement")
-                    
                 ){
                 //todo bug click mermaid first then check if and loop target undefined
                 r.FlowLink+=`${node._flow_from} -..-> ${r.showCondition&&node._flow_condition||''} ${node._flow_id}\n`
@@ -137,6 +136,13 @@ function genMermaid(){
     }
     if(!r.canclick){
         r.Flow=r.Flow.replace(/\nclick(.+?)\n/g,'\n')
+    }
+    for(let file in gAst){
+        if(gAst[file].ai){//saved ai to _analysiii
+            for(let fid in gAst[file].ai){
+                r.FlowNode[fid]._analysis=gAst[file].ai[fid]
+            }
+        }
     }
     gMermaid=r;
     console.log('gMermaid',gMermaid)
