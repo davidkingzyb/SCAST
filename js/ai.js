@@ -1,4 +1,4 @@
-gOllamaHost="http://127.0.0.1:11434"
+gOllamaHost="/ollama_proxy"
 gModel=""
 
 async function aiAnalysis(){
