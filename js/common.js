@@ -1,4 +1,3 @@
-var gISAI=false
 var pre_search=null
 var searchIterator=null
 function search(){
@@ -26,7 +25,7 @@ function loadAstJson(aststr){
     for(let ast in gAst){
         let analysis=gAst[ast].analysis?`<details class="analysis_details"><summary class="analysis_summery">Analysis</summary><pre class="code_analysis">${gAst[ast].analysis}</pre></details>`:''
         html+=`<details id="detail_${ast.replace('.','_')}">
-                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${gISAI==true&&location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
+                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
                 ${analysis}
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
@@ -163,7 +162,7 @@ function onFDPClick(id){
     console.log(node)
     onFlowClick(id,node._file)
 }
-function onFlowClick(n,file){
+function onFlowClick(n,file,time=5000){
     var node=gMermaid.FlowNode[n]
     if(!node)return
     var fileid=file.replace('.','_')
@@ -174,15 +173,16 @@ function onFlowClick(n,file){
     var $line=document.querySelectorAll(`#detail_${fileid} .hljs-ln-line`)
     for(let $l of $line){
         if($l.getAttribute('data-line-number')==node.poi.line){
-            $l.style.backgroundColor = "lightgreen";
+            $l.style.backgroundColor = "#ffb02e";
             $l.scrollIntoView()
             document.getElementById('code_con').scrollBy(0,-100)
             setTimeout(()=>{
-                $l.style.backgroundColor = "green";
+                $l.style.backgroundColor = "#8b5600";
             },3000)
             break;
         }
     }
+    if(node._analysis)wtfmsg(`${gIconmap[node.type]}${node.value||node._value}:${node._analysis}`,time)
 }
 var gIconmap={
     "NewExpression":'🆕',
@@ -220,8 +220,7 @@ function renderMermaidFilter(){
 }
 function onOutlineIconClick(_flow_id){
     var node=gMermaid.FlowNode[_flow_id]
-    onFlowClick(_flow_id,node._file)
-    if(node._analysis)alert(node._analysis)
+    onFlowClick(_flow_id,node._file,-1)
 }
 function onMermaidFilter(v){
     // console.log('mermaid filter', v);
@@ -353,10 +352,18 @@ function initCodeScaler(){
 
 function wtfmsg(m,time=3000){
 	var elem=document.createElement('div')
-	elem.className="wtfmsg "
+	elem.className="wtfmsg"
 	elem.innerHTML=m
+    var bottom=(document.querySelectorAll('.wtfmsg').length+1)*50+10
+    elem.style.bottom=`${bottom}px`
 	document.body.appendChild(elem)
-	setTimeout(()=>{
-		document.body.removeChild(elem)
-	},time)
+    if(time<0){
+        elem.onclick=()=>{
+            document.body.removeChild(elem)
+        }
+    }else{
+        setTimeout(()=>{
+            document.body.removeChild(elem)
+        },time)
+    }
 }

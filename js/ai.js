@@ -1,6 +1,6 @@
-gISAI=true
 gOllamaHost="http://127.0.0.1:11434"
-gModel="qwen2.5:latest"
+gModel=""
+
 async function aiAnalysis(){
     var j=getOutlineJson()
     for(let file in gAst){
@@ -136,11 +136,39 @@ function outlineAgent(prompt,json){
     }).catch(err=>{
         wtfmsg('analysis by ollama AI fail.')
         console.warn('analysis by ollama AI fail.')
+        document.getElementById('ai').innerHTML='🦙'
+        document.getElementById('ai').disabled=false
         return false
     })
 }
 
-function codeAgent(asttop){
+function getModels(){
+    fetch(gOllamaHost+'/api/tags',{method:"GET",headers: {
+        'Content-Type': 'application/json'
+    }}).then(response=>{return response.json()}).then(resp=>{
+        console.log('get models',resp)
+        var models=resp.models||resp.data.models
+        let result = ''
+        for (let model of models) {
+            result += `<option value="${model.name}">${model.name}</option>`
+        }
+        document.getElementById('ai_models').innerHTML = result
+        document.getElementById('ai').style.display='inline'
+        gModel=models[0].name
+        return false
+    }).catch(err=>{
+        wtfmsg('Ollama get models fail.')
+        console.warn('Ollama get models fail')
+        return false
+    })
+}
+
+function onModelChange(){
+    gModel=document.getElementById('ai_models').value
+    console.log('model change',gModel)
+}
+
+function codeAgent(asttop){//abandon
     if (location.href.indexOf('davidkingzyb.tech') < 0) return
     var query={
         'stream':false,

@@ -83,13 +83,17 @@
         </div>
     </details>
     <details id="d3_conf_con">
-        <summary>D3</summary>
-        <details style="margin-top: 50px;">
-            <summary>SCAST</summary>
+        <summary>config</summary>
+        <details style="margin-top: 50px;" open>
+            <summary title="Ollama AI config" >AI</summary>
+            <select id="ai_models" onchange="onModelChange()"></select>
+        </details>
+        <details>
+            <summary title="D3 SCAST filter">SCAST</summary>
             <div id="D3Option" class="opcls"></div>
         </details>
         <details>
-            <summary>ESTree</summary>
+            <summary title="D3 ESTree filter">ESTree</summary>
             <div id="D3ESTree" class="opcls"></div>
         </details>
     </details>
@@ -103,7 +107,7 @@
         <button id="load" class="pointer" onclick="load()" title="2. generate AST">🔱</button>
         <button onclick="genMermaid()" title="3. generate mermaid click twice for detail">🧜‍♀️</button>
         <button onclick="genD3()" title="3. generate D3">🌳</button>
-        <button id="ai" class="pointer" onclick="aiAnalysis()" title="4.AI Analysis" disabled>🦙</button>
+        <button id="ai" class="pointer" style="display: none;" onclick="aiAnalysis()" title="4.AI Analysis" disabled>🦙</button>
     </div>
     <details class="json_con">
         <summary onclick="showJson()">json
@@ -155,6 +159,7 @@
     initFile()
     renderD3Option()
     initCodeScaler()
+    getModels()
 </script>
 <script src="./lib/mermaid.min.js">
 </script>

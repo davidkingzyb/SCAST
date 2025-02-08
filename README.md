@@ -23,15 +23,32 @@ You can try it [online](https://davidkingzyb.github.io/scast/SCAST.html) or just
 
 ![scast_uml](https://github.com/user-attachments/assets/0185738e-0815-4c92-8770-e9ff2b0da1d5)
 
-### Update
+## Update
 
-Force Directed Graph
+####　Ollama AI
+
+install [ollama](https://ollama.com/) first
+
+![ollama](https://github.com/user-attachments/assets/afe8f504-17f7-4897-9990-4baa4f66213d)
+
+#### ESTree 
+
+Compliant with ESTree specification AST parser
+
+#### Force Directed Graph
 
 ![FDP](https://github.com/user-attachments/assets/6a34b405-492e-4966-a075-fce60330bccf)
 
-More D3 Graph
+#### More D3 Graph
+
+- Indented tree
+- Tidy tree
+- Cluster tree
+- Tadial tidy tree
+- Radial cluster tree
+- Force directed tree
+- Edge bundling
 
 ![scast_d3](https://github.com/user-attachments/assets/11c4e11f-05e6-48b0-a3ee-c1e5f6a0816d)
 
-ESTree 
 

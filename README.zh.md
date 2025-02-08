@@ -22,14 +22,30 @@
 
 ![scast_uml](https://github.com/user-attachments/assets/0185738e-0815-4c92-8770-e9ff2b0da1d5)
 
-### 更新
+## 更新
 
-力导引图
+####　Ollama AI
+
+请先安装[ollama](https://ollama.com/)
+
+![ollama](https://github.com/user-attachments/assets/afe8f504-17f7-4897-9990-4baa4f66213d)
+
+#### ESTree
+
+兼容ESTree规范的AST paser
+
+#### 力导引图
 
 ![FDP](https://github.com/user-attachments/assets/6a34b405-492e-4966-a075-fce60330bccf)
 
-其他 D3 图表
+#### 其他 D3 图表
+
+- Indented tree
+- Tidy tree
+- Cluster tree
+- Tadial tidy tree
+- Radial cluster tree
+- Force directed tree
+- Edge bundling
 
 ![scast_d3](https://github.com/user-attachments/assets/11c4e11f-05e6-48b0-a3ee-c1e5f6a0816d)
-
-ESTree 

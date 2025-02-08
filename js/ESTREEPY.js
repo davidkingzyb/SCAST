@@ -362,7 +362,7 @@ var ESTREEPY = (function () {
             // if(r.FlowFilter[member._flow_id]===false)return;
             // r.FlowNode[member._flow_id]=member;
             r.UML += `    ${member._value}\n`
-            console.log('traverse property', n)
+            // console.log('traverse property', n)
             if (!r.showCall) return true
             var n = member.value
             if (n.type == "CallExpression") {
@@ -426,7 +426,7 @@ var ESTREEPY = (function () {
             if (symbol) r.UML += `    ${member._value}()\n`
         }
         function doBlock(n, node, file, r) {
-            console.log('do block', n)
+            // console.log('do block', n)
             if (!n) return
             if (n.type == "FunctionDeclaration") {
                 traverseFunction(n, node, file)
