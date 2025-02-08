@@ -25,7 +25,7 @@ You can try it [online](https://davidkingzyb.github.io/scast/SCAST.html) or just
 
 ## Update
 
-####　Ollama AI
+#### Ollama AI
 
 install [ollama](https://ollama.com/) first
 
