@@ -5,10 +5,9 @@ async function aiAnalysis(){
     var j=getOutlineJson()
     for(let file in gAst){
         let p=getOutlinePrompt(j[file],gAst[file].code)
-        await outlineAgent(p,j[file])
-        // await codeAgent(gAst[file])
+        await outlineAgent(p,j[file],file)
     }
-    loadAstJson(JSON.stringify(gAst))
+    // loadAstJson(JSON.stringify(gAst))
 }
 
 function getOutlineJson(){
@@ -88,7 +87,7 @@ ${result}
 return prompt
 }
 
-function outlineAgent(prompt,json){
+function outlineAgent(prompt,json,file){
     var fmt={
         "type": "object",
         "properties": {
@@ -129,6 +128,7 @@ function outlineAgent(prompt,json){
             gMermaid.FlowNode[fid]['_analysis']=result[fid]
         }
         renderMermaidFilter()
+        gAst[file].ai=result
         wtfmsg("analysis by ollama AI ok, hover on outline label or click icon show result.")
         document.getElementById('ai').innerHTML='🦙'
         document.getElementById('ai').disabled=false
@@ -166,38 +166,6 @@ function getModels(){
 function onModelChange(){
     gModel=document.getElementById('ai_models').value
     console.log('model change',gModel)
-}
-
-function codeAgent(asttop){//abandon
-    if (location.href.indexOf('davidkingzyb.tech') < 0) return
-    var query={
-        'stream':false,
-        'messages':[
-            {
-                'role':'system',
-                'content':'_codeAnalysis',
-            },
-            {
-                'role':'system',
-                'content':asttop.code,
-                '_type':'ref'
-            }
-        ]
-    }
-    return fetch(gOllamaHost+'/pi_chat',{method:"POST",headers: {
-        'Content-Type': 'application/json'
-    },body: JSON.stringify(query)}).then(response=>{return response.json()}).then(resp=>{
-        console.log(resp)
-        if(resp.code){
-            console.log(resp.data.message.content,asttop)
-            asttop.analysis=resp.data.message.content
-            return true
-        }
-        return false
-    }).catch(err=>{
-        console.warn('code Agent fail')
-        return false
-    })
 }
 
 function jumpOllama(asttop){
