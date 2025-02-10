@@ -1,5 +1,6 @@
 gOllamaHost="http://127.0.0.1:11434"
 gModel=""
+gNumCtx=16000
 
 async function aiAnalysis(){
     var j=getOutlineJson()
@@ -114,11 +115,11 @@ function outlineAgent(prompt,json,file){
         ],
         'format':fmt,
         'options':{
-            "num_ctx":32000
+            "num_ctx":gNumCtx
         }
     }
-    document.getElementById('ai').innerHTML='⌛'
-    document.getElementById('ai').disabled=true
+    document.getElementById('aibtn').innerHTML='⌛'
+    document.getElementById('aibtn').disabled=true
     return fetch(gOllamaHost+'/api/chat',{method:"POST",headers: {
         'Content-Type': 'application/json'
     },body: JSON.stringify(query)}).then(response=>{return response.json()}).then(resp=>{
@@ -130,14 +131,14 @@ function outlineAgent(prompt,json,file){
         renderMermaidFilter()
         gAst[file].ai=result
         wtfmsg("analysis by ollama AI ok, hover on outline label or click icon show result.")
-        document.getElementById('ai').innerHTML='🦙'
-        document.getElementById('ai').disabled=false
+        document.getElementById('aibtn').innerHTML='🦙'
+        document.getElementById('aibtn').disabled=false
         return false
     }).catch(err=>{
         wtfmsg('analysis by ollama AI fail.')
         console.warn('analysis by ollama AI fail.')
-        document.getElementById('ai').innerHTML='🦙'
-        document.getElementById('ai').disabled=false
+        document.getElementById('aibtn').innerHTML='🦙'
+        document.getElementById('aibtn').disabled=false
         return false
     })
 }
@@ -153,7 +154,7 @@ function getModels(){
             result += `<option value="${model.name}">${model.name}</option>`
         }
         document.getElementById('ai_models').innerHTML = result
-        document.getElementById('ai').style.display='inline'
+        document.getElementById('aibtn').style.display='inline'
         gModel=models[0].name
         return false
     }).catch(err=>{
@@ -166,6 +167,10 @@ function getModels(){
 function onModelChange(){
     gModel=document.getElementById('ai_models').value
     console.log('model change',gModel)
+}
+function onNumCtxChange(){
+    gNumCtx=parseInt(document.getElementById('ai_numctx').value)
+    console.log('numctx change',gNumCtx)
 }
 
 function jumpOllama(asttop){
