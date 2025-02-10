@@ -16,6 +16,7 @@
 
     <script src="./lib/json-viewer.bundle.js" async></script>
 
+    <script src="./lib/mermaid.min.js" async></script>
     <script src="./lib/d3.min.js" async></script>
     <script src="./js/D3M.js" async></script>
     <script src="./js/SCASTTS.js"></script>
@@ -87,6 +88,12 @@
         <details style="margin-top: 50px;" open>
             <summary title="Ollama AI config" >AI</summary>
             <select id="ai_models" onchange="onModelChange()"></select>
+            num ctx: <select id="ai_numctx" style="margin-top: 10px;" onchange="onNumCtxChange()">
+                <option value="4000">4k</option>
+                <option value="8000">8k</option>
+                <option value="16000" selected>16k</option>
+                <option value="32000">32k</option>
+            </select>
         </details>
         <details>
             <summary title="D3 SCAST filter">SCAST</summary>
@@ -107,7 +114,7 @@
         <button id="load" class="pointer" onclick="load()" title="2. generate AST">🔱</button>
         <button onclick="genMermaid()" title="3. generate mermaid click twice for detail">🧜‍♀️</button>
         <button onclick="genD3()" title="3. generate D3">🌳</button>
-        <button id="ai" class="pointer" style="display: none;" onclick="aiAnalysis()" title="4.AI Analysis" disabled>🦙</button>
+        <button id="aibtn" class="pointer" style="display: none;" onclick="aiAnalysis()" title="4.AI Analysis" disabled>🦙</button>
     </div>
     <details class="json_con">
         <summary onclick="showJson()">json
@@ -128,8 +135,8 @@
             <button onclick="scaleMermaid()" title="scale mermaid">🔛</button>
         </summary>
         <div id="mermaidPane">
-            <pre class="mermaid" id="mermaidUML"></pre>
-            <pre class="mermaid" id="mermaidFlow"></pre>
+            <!-- <pre class="mermaid" id="mermaidUML"></pre> -->
+            <!-- <pre class="mermaid" id="mermaidFlow"></pre> -->
         </div>
         <div id="FDP"></div>
     </details>
@@ -161,10 +168,4 @@
     initCodeScaler()
     getModels()
 </script>
-<script src="./lib/mermaid.min.js">
-</script>
-<script>
-mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
-</script>
-
 </html>

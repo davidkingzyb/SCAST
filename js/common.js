@@ -233,10 +233,17 @@ function renderMermaid(){
     var $mermaidPane=document.getElementById('mermaidPane')
     $textUML.value=gMermaid.UML;
     $textFlow.value=gMermaid.Flow+'\n'+gMermaid.FlowLink;
-    $mermaidPane.innerHTML=`<pre class="mermaid" id="mermaidUML">${$textUML.value}</pre><pre class="mermaid" id="mermaidFlow">${$textFlow.value}</pre>`
-    mermaid.run({
-        querySelector: '.mermaid',
-    })
+    $mermaidPane.innerHTML=$textUML.value=='classDiagram\n'?"":`<pre class="mermaid" id="mermaidUML">${$textUML.value}</pre>`
+    $mermaidPane.innerHTML+=`<pre class="mermaid" id="mermaidFlow">${$textFlow.value}</pre>`
+    try{
+        mermaid.run({
+            querySelector: '.mermaid',
+        })
+    }catch(e){
+        wtfmsg('mermaid render fail,try to fix mermaid code and click 🔄️ render again.')
+        console.warn('render mermaid fail')
+    }
+    
     $FDP.innerHTML=''
     $FDP.append(D3M.disjointForce({nodes:Object.values(gMermaid.FDPNode),links:gMermaid.FDPLinks},onFDPClick))
 }

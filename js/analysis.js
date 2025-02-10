@@ -49,6 +49,7 @@ var gMermaid;
 
 
 function genMermaid(){
+    mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
     var r={
         UML:'classDiagram\n',
         Flow:'flowchart LR\n',
@@ -148,8 +149,8 @@ function genMermaid(){
     console.log('gMermaid',gMermaid)
     renderMermaid()
     renderMermaidFilter()
-    scrollToView('mermaidUML',-window.innerHeight/2-20)
-    document.getElementById('ai').disabled=false
+    scrollToView('mermaidPane',-window.innerHeight/2-20)
+    document.getElementById('aibtn').disabled=false
 }
 
 var gD3 = {tree: {},conf:{}}
