@@ -359,8 +359,8 @@ function wtfmsg(m,time=3000){
 	var elem=document.createElement('div')
 	elem.className="wtfmsg"
 	elem.innerHTML=m
-    var bottom=(document.querySelectorAll('.wtfmsg').length+1)*50+10
-    elem.style.bottom=`${bottom}px`
+    // var bottom=(document.querySelectorAll('.wtfmsg').length+1)*50+10
+    // elem.style.bottom=`${bottom}px`
 	document.body.appendChild(elem)
     if(time<0){
         elem.onclick=()=>{

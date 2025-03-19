@@ -56,6 +56,7 @@ function genMermaid(){
         FlowLink:'',
         FlowNode:{},
         FlowOne:{},
+        FlowVarNew:{},
         FlowFilter:gMermaid&&gMermaid.FlowFilter||{},  
         UMLClass:{},
         showCondition:true,//document.getElementById('mmdop_condition').checked,
@@ -116,11 +117,23 @@ function genMermaid(){
             if(r.FlowFilter[node._flow_id]===false)continue
             // 连接方法内部细节调用线 click twice
             if(node.type=='NewExpression'||node.type=='CallExpression'){
-                if(r.idone&&(r.FlowOne[node.value]||r.FlowOne[node._value])){
+                let flow_ones=r.FlowOne[node.value||node._value]
+                if(r.idone&&flow_ones){
                     r.Flow=r.Flow.replaceAll(node._flow_str,'')
                     delete r.FDPNode[node._flow_id]
-                    r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${r.FlowOne[node.value||node._value]}\n`
-                    r.FDPLinks.push({source:node._flow_from,target:r.FlowOne[node.value||node._value],value:2,dash:"5,5",dist:100,strength:0.1})
+                    if(node.type=='CallExpression'){//for same name function call, not support same name call in one block because of same _flow_id
+                        if(!node._flow_callee)node._flow_callee=flow_ones[0]
+                        // console.log('samename',node._flow_callee,flow_ones) 
+                        for(let i=0;i<flow_ones.length;i++){
+                            let isvarnew=r.FlowVarNew[node._flow_callee]&&flow_ones[i].indexOf(r.FlowVarNew[node._flow_callee])>=0;
+                            let isfunc=node._flow_callee==flow_ones[i]
+                            let isstatic=!isfunc&&flow_ones[i].indexOf(node._flow_callee)>0;
+                            if(isvarnew||isfunc||isstatic){
+                                r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${flow_ones[i]}\n`
+                                r.FDPLinks.push({source:node._flow_from,target:flow_ones[i],value:2,dash:"5,5",dist:100,strength:0.1})
+                            }
+                        }
+                    }
                 }else{
                     r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${node._flow_id}\n`
                     r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})

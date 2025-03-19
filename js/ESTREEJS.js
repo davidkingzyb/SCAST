@@ -428,6 +428,9 @@ var ESTREEJS=(function(){
                         n.id={type:"Identifier",name:node._name,loc:{start:{},end:{}}}
                         traverseFunction(n,{},file)
                     }
+                    if(n.type=="NewExpression"){
+                        r.FlowVarNew[node._name]=getValue(n)
+                    }
                 })
                 return true
         }
@@ -437,7 +440,11 @@ var ESTREEJS=(function(){
             node._flow_id=node._value
             if(r.FlowFilter[node._value]===false)return;
             r.FlowNode[node._flow_id]=node;
-            r.FlowOne[node._flow_id]=node._value
+            if(r.FlowOne[node._flow_id]){
+                r.FlowOne[node._flow_id].unshift(node._value)
+            }else{
+                r.FlowOne[node._flow_id]=[node._value]
+            }
             r.Flow+=`    ${node._value}[${node._value}]\nclick ${node._value} "javascript:void(onFlowClick('${node._value}','${file}'))"\n`
             r.FDPNode[node._flow_id]={id:node._value,w:node._value.length*gD3fontSize/1.6+gD3fontSize*2,text:`[${node._value}]`}
             r.UMLClass[node._value]={}
@@ -500,6 +507,8 @@ var ESTREEJS=(function(){
                 n._flow_from=cls._flow_id
                 n._flow_prop=member._flow_prop
                 r.FlowNode[n._flow_id]=n
+                console.log('p var ',member._value,getValue(n))
+                r.FlowVarNew[member._value]=getValue(n)
                 if(r.FlowFilter[n._flow_id]===false)return true
                 r.UMLClass[cls._value][n._flow_id]=n;
                 n._flow_str=`        ${n._flow_id}[${n._value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
@@ -524,7 +533,11 @@ var ESTREEJS=(function(){
             // console.log('traverse function',member)
             member._value=getValue(member.id)
             var method=cls._flow_id?member._value+'_'+cls._flow_id:member._value
-            r.FlowOne[member._value]=method//todo 处理不同类同名方法
+            if(r.FlowOne[member._value]){
+                r.FlowOne[member._value].unshift(method)
+            }else{
+                r.FlowOne[member._value]=[method]
+            }
             member._flow_id=method
             member._flow_from=cls._flow_id
             member._file=file
@@ -599,6 +612,10 @@ var ESTREEJS=(function(){
                 n._value=getValue(n)
                 n._flow_id=n._value+'_'+node._flow_id
                 n._flow_from=node._flow_id
+                n._flow_callee=n.callee.name||n.callee.object?.name;
+                if(n._flow_callee&&r.FlowNode[n._flow_id]){
+                    n._flow_id=n._flow_callee+n._flow_id
+                }
                 r.FlowNode[n._flow_id]=n
                 if(r.FlowFilter[n._flow_id]===false)return true
                 n._flow_str=`        ${n._flow_id}([${n._value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
@@ -618,6 +635,13 @@ var ESTREEJS=(function(){
                 if(!r.FlowFilter[n._flow_id])return true//for first click not render detail
                 r.Flow+=n._flow_str
                 return true
+            }else if(n.type=="VariableDeclarator"){
+                traverseAst(n,(nn)=>{
+                    if(nn.type=="NewExpression"){
+                        console.log('block var',n,nn)
+                        r.FlowVarNew[getValue(n)]=getValue(nn)
+                    }
+                })
             }
         }
 
