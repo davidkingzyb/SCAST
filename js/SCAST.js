@@ -42,11 +42,13 @@ var SCAST=(function(){
     }
     function TokenStream(input) {
         var current = null;
+        var prev_id = null;
         var keywords = ["break","do","in","typeof","case","else","instanceof","var","catch","export","new","void","class","extends","return","while","const","finally","super","with","continue","for","switch","yield","debugger","function","this","default","if","throw","delete","import","try","constructor","super"]
         var cskeywords = ["abstract","as","base","bool","break","byte","case","catch","char","checked","class","const","continue","decimal","default","delegate","do","double","else","enum","event","explicit","extern","false","finally","fixed","float","for","foreach","goto","if","implicit","in","int","interface","internal","is","lock","long","namespace","new","null","object","operator","out","override","params","private","protected","public","readonly","ref","return","sbyte","sealed","short","sizeof","stackalloc","static","string","struct","switch","this","throw","true","try","typeof","uint","ulong","unchecked","unsafe","ushort","using","virtual","void","volatile","while","add","and","alias","ascending","args","async","await","by","descending","dynamic","equals","from","get","global","group","init","into","join","let","nameof","nint","not","notnull","nuint","on","or","orderby","partial","partial","record","remove","select","set","unmanaged","value","var","when","where","with","yield"]       
         return {
             next  : next,
             peek  : peek,
+            prev  : prev,
             eof   : eof,
             croak : input.croak
         };
@@ -205,8 +207,12 @@ var SCAST=(function(){
         }
         function next() {
             var tok = current;
+            if(current?.type=='id')prev_id=current;
             current = null;
             return tok || read_next();
+        }
+        function prev(){
+            return prev_id
         }
         function eof() {
             return peek() == null;
@@ -303,6 +309,7 @@ var SCAST=(function(){
             if(is_sp(","))return skip_split(",");
             if(is_punc('{'))return parse_block();
             let n=null;
+            let prevv=input.prev()
             if(is_id()){
                 n=input.next();
                 if(is_punc('(')){
@@ -310,7 +317,8 @@ var SCAST=(function(){
                         type:"CallExpression",
                         value:n.value,
                         poi:{line:n.poi.line,start:n.poi.start},
-                        body:[parse_arguments()]
+                        body:[parse_arguments()],
+                        callee:prevv
                     }
                 }
             }else if(is_kw("function")){//Anonymous Function
@@ -320,7 +328,8 @@ var SCAST=(function(){
                         type:"CallExpression",
                         value:n.value,
                         poi:{line:n.poi.line,start:n.poi.start},
-                        body:[parse_arguments()]
+                        body:[parse_arguments()],
+                        callee:prevv
                     }
                 }
             }else{
@@ -407,7 +416,9 @@ var SCAST=(function(){
             while (!is_punc(")")) {
                 let n=null;
                 if(is_id()){
-                    r.value+=input.peek().value+' '
+                    let prevv=input.prev().value
+                    let np=input.peek().value
+                    r.value+=np+' '
                     n=input.next()
                     if(is_punc('(')){
                         r.body.push({
@@ -415,6 +426,7 @@ var SCAST=(function(){
                             value:n.value,
                             poi:{line:n.poi.line,start:n.poi.start},
                             body:[parse_arguments()],
+                            callee:prevv
                         })
                     }
                     continue
@@ -475,15 +487,16 @@ var SCAST=(function(){
                 type:'Expression',
                 poi:{line:input.peek().poi.line,start:input.peek().poi.start}
             }
-            while(is_num()||is_str()||is_op()||is_sp()||is_punc('(')||is_punc(')')||is_id()){
-                let np=input.peek()
+            while(is_num()||is_str()||is_op()||is_sp()||is_punc('(')||is_punc(')')||is_id()){   
+                let prevv=input.prev().value
                 let n=input.next()
                 if(np.type=='id'&&is_punc('(')){
                     _body.push({
                         type:"CallExpression",
                         value:n.value,
                         poi:{line:n.poi.line,start:n.poi.start},
-                        body:[parse_arguments()]
+                        body:[parse_arguments()],
+                        callee:prevv
                     })
                 }else{
                     _body.push(n)
@@ -511,13 +524,15 @@ var SCAST=(function(){
             else return until_next_kw();    
         }
         function parse_id(){
+            var prevv=input.prev()
             var n = input.next();
             if(is_punc('(')){
                 var r={
                     type:"CallExpression",
                     value:n.value,
                     poi:{line:n.poi.line,start:n.poi.start},
-                    body:[parse_arguments()]
+                    body:[parse_arguments()],
+                    callee:prevv
                 }
                 if(is_punc('{')){
                     r.type="FunctionDefine"
@@ -680,7 +695,13 @@ function analysisMermaid(node,file,r){
     function traverseClass(node,file){
         node._file=file
         r.FlowNode[node.value]=node;
-        r.FlowOne[node.value]=node.value
+        if(r.FlowOne[node.value]){
+            if(r.FlowOne[node.value].indexOf(node.value)<0){
+                r.FlowOne[node.value].unshift(node.value)
+            }
+        }else{
+            r.FlowOne[node.value]=[node.value]
+        }
         r.UMLClass[node.value]={}
         var level_symbol={
             'public':'+',
@@ -752,6 +773,7 @@ function analysisMermaid(node,file,r){
                         r.UMLClass[cls.value][n._flow_id]=n;
                         n._flow_str=`        ${n._flow_id}[${n.value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                         r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6,text:`${n.value}`}
+                        r.FlowVarNew[node.value]=n.value
                     }else{
                         n._flow_str=`        ${n._flow_id}([${n.value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                         r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6+d3config.fontsize*2,text:`${n.value}()`}
@@ -764,7 +786,13 @@ function analysisMermaid(node,file,r){
 
     function traverseMethod(member,cls,file,symbol){
         var method=cls.value?member.value+'_'+cls.value:member.value
-        r.FlowOne[member.value]=method//todo 处理不同类同名方法
+        if(r.FlowOne[member.value]){
+            if(r.FlowOne[member.value].indexOf(method)<0){
+                r.FlowOne[member.value].unshift(method)
+            }
+        }else{
+            r.FlowOne[member.value]=[method]
+        }
         member._flow_id=method
         member._flow_from=cls.value
         member._file=file
@@ -788,7 +816,6 @@ function analysisMermaid(node,file,r){
                 n._file=file
                 n._flow_id=n.value+'_'+node._flow_id
                 n._flow_from=r.showIf?node._flow_id:method
-                r.FlowNode[n._flow_id]=n
                 if(n.type=="IfStatement"||n.type=="LoopStatement"){//can't show condition CallExpression
                     if(r.showIf){
                         r.Flow+=n.type=="IfStatement"?`        ${n._flow_id}{${n.value}}\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`:`        ${n._flow_id}((${n.value}))\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
@@ -797,11 +824,15 @@ function analysisMermaid(node,file,r){
                     if(n.condition&&n.condition.value)n._flow_condition='|'+n.condition.value.replaceAll('|','｜').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
                     _doBody(n,file)
                 }else if(r.FlowFilter[n._flow_id]&&(n.type=="NewExpression"||n.type=="CallExpression")){
+                    console.log('method dobody call&new',node,n)
                     if(n.type=="NewExpression"){
+                        r.FlowVarNew[node.value]=n.value
                         if(cls.value)r.UMLClass[cls.value][n._flow_id]=n;
                         n._flow_str=`        ${n._flow_id}[${n.value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                         r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6,text:n.value}
                     }else{
+                        n._flow_callee=n.callee.value;
+                        if(r.FlowNode[n._flow_id])n._flow_id=n._flow_callee+n._flow_id;
                         n._flow_str=`        ${n._flow_id}([${n.value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                         r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6+d3config.fontsize*2,text:n.value+'()'}
                     }
@@ -818,6 +849,7 @@ function analysisMermaid(node,file,r){
                     n._flow_id=node._flow_id;
                     _doBody(n,file)
                 }
+                r.FlowNode[n._flow_id]=n
             }
         }
     }
@@ -836,6 +868,7 @@ function analysisMermaid(node,file,r){
                 r.FlowNode[n._flow_id]=n
                 if(r.FlowFilter[n._flow_id]&&(n.type=="NewExpression"||n.type=="CallExpression")){
                     if(n.type=="NewExpression"){
+                        r.FlowVarNew[node.value]=n.value
                         n._flow_str=`        ${n._flow_id}[${n.value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                         r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6,text:n.value}
                     }else{

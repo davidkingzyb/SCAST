@@ -739,6 +739,13 @@ var SCASTPY=(function(){
                 if(!r.showMethod)break//
                 traverseClass(node,file)
                 return true
+            case "Variable":
+                // console.log('g var',node);
+                for(let n of node.body){
+                    if(n.type=="CallExpression"){
+                        r.FlowVarNew[node.value]=n.value;
+                    }
+                }
         }
         // console.log('main enter',node)
         //todo main enter
@@ -748,7 +755,13 @@ var SCASTPY=(function(){
             node._flow_id=node.value
             if(r.FlowFilter[node.value]===false)return;
             r.FlowNode[node._flow_id]=node;
-            r.FlowOne[node._flow_id]=node.value
+            if(r.FlowOne[node._flow_id]){
+                if(r.FlowOne[node._flow_id].indexOf(node.value)<0){
+                    r.FlowOne[node._flow_id].unshift(node.value)
+                }
+            }else{
+                r.FlowOne[node._flow_id]=[node.value]
+            }
             r.Flow+=`    ${node.value}[${node.value}]\nclick ${node.value} "javascript:void(onFlowClick('${node.value}','${file}'))"\n`
             r.FDPNode[node._flow_id]={id:node.value,w:node.value.length*gD3fontSize/1.6+gD3fontSize*2,text:`[${node.value}]`}
             r.UMLClass[node.value]={}
@@ -762,6 +775,11 @@ var SCASTPY=(function(){
                     case "PropertyDefine":
                         traverseProperty(member,node,file,r)
                         break
+                    case "FunctionDefine":
+                        member._flow_id=member.value
+                        traverseFunction(member,node,file,true)
+                        break
+                    
                 }
             }
             r.UML+='  }\n'
@@ -788,6 +806,7 @@ var SCASTPY=(function(){
                     n._flow_from=cls._flow_id
                     n._flow_prop=member._flow_prop
                     r.FlowNode[n._flow_id]=n
+                    r.FlowVarNew[member.value]=n.value
                     if(!r.FlowFilter[n._flow_id])return true
                     n._flow_str=`        ${n._flow_id}([${n.value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                     r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*gD3fontSize/1.6+gD3fontSize*2,text:n.value+'()'}
@@ -799,7 +818,13 @@ var SCASTPY=(function(){
 
         function traverseFunction(member,cls,file,symbol){//member:function cls:parent function symbol:boolean
             var method=cls.value?member.value+'_'+cls.value:member.value
-            r.FlowOne[member.value]=method//todo 处理不同类同名方法
+            if(r.FlowOne[member.value]){
+                if(r.FlowOne[member.value].indexOf(method)<0){
+                    r.FlowOne[member.value].unshift(method)
+                }
+            }else{
+                r.FlowOne[member.value]=[method]
+            }
             member._flow_id=method
             // console.log('traverse function',member)
             member._flow_from=cls.value
@@ -827,11 +852,11 @@ var SCASTPY=(function(){
                     n._file=file
                     n._flow_id=n.value+'_'+node._flow_id
                     n._flow_from=r.showIf?node._flow_id:method
-                    r.FlowNode[n._flow_id]=n
                     if(n.type=="FunctionDefine"||n.type=="MethodDefine"){
+                        r.FlowNode[n._flow_id]=n
                         traverseFunction(n,node,file)
                     }else if(n.type=="LoopStatement"){
-                        
+                        r.FlowNode[n._flow_id]=n
                         if(r.showIf){
                             r.Flow+=`         ${n._flow_id}((${n.value}))\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                             r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:'🔵'}
@@ -843,6 +868,7 @@ var SCASTPY=(function(){
                             }
                         }
                     }else if(n.type=="IfStatement"){
+                        r.FlowNode[n._flow_id]=n
                         if(r.showIf){
                             r.Flow+=`        ${n._flow_id}{${n.value}}\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                             r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:'🔷'}
@@ -854,12 +880,19 @@ var SCASTPY=(function(){
                             }
                         }
                     }else if(n.type=="CallExpression"){
+                        if(node.type=='Variable'){
+                            r.FlowVarNew[node.value]=n.value
+                        }
+                        // console.log('callee',node,n)
+                        n._flow_callee=node.type=='FunctionDefine'||node.type=="MethodDefine"?n.value:node.value;
+                        if(r.FlowNode[n._flow_id])n._flow_id=n._flow_callee+n._flow_id;
                         r.FlowNode[n._flow_id]=n
                         if(!r.FlowFilter[n._flow_id])return true//filter===false click once show call detail
                         n._flow_str=`        ${n._flow_id}([${n.value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                         r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*gD3fontSize/1.6+gD3fontSize*2,text:n.value+'()'}
                         r.Flow+=n._flow_str
                     }else if(n.type=='Variable'||n.type=="Expression"||n.type=="WithStatement"||n.type=="TryStatement"||n.type=="ExceptStatement"||n.type=="FinallyStatement"||n.type=="MemberExpression"){
+                        r.FlowNode[n._flow_id]=n
                         n._flow_id=node._flow_id;
                         if(n.body){
                             for(let nn of n.body){
