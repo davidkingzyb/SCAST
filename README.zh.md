@@ -9,6 +9,7 @@
 [🔱SCAST](https://davidkingzyb.github.io/scast/SCAST.html) 可以将输入的代码转换为UML图和流程图，可用作整理流程架构，输出文档图表。
 
 [📽️视频](https://www.bilibili.com/video/BV1QK2QYXEPW)
+[📽️教程](https://www.bilibili.com/video/BV1EZNBejEfR)
 
 多种语言支持
 - javascript (使用[acorn](https://github.com/acornjs/acorn))

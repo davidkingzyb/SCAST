@@ -298,11 +298,12 @@ button{
 	position: fixed;
 	bottom:70px;
     left:10px;
-    height: 25px;
+    /* height: 25px; */
 	z-index: 9999;
 	text-align: center;
 	background-color: #ffb02e;
     color:black;
     padding:10px;
-    overflow: hidden;
+    /* overflow: hidden; */
+    width: 70%;
 }

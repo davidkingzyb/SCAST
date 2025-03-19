@@ -9,6 +9,7 @@
 [🔱SCAST](https://davidkingzyb.github.io/scast/SCAST.html) is a programmatic tool that converts code into UML diagrams and flowcharts.
 
 [📽️watch video](https://youtu.be/KYbGcD38gqM)
+[📽️Tutorial](https://youtu.be/x3ZqxDtHSJc)
 
 support plan
 - javascript (use [acorn](https://github.com/acornjs/acorn))
