@@ -121,7 +121,7 @@ function genMermaid(){
                 if(r.idone&&flow_ones){
                     r.Flow=r.Flow.replaceAll(node._flow_str,'')
                     delete r.FDPNode[node._flow_id]
-                    if(node.type=='CallExpression'){//for same name function call, not support same name call in one block because of same _flow_id
+                    if(node.type=='CallExpression'){//for same name function call
                         if(!node._flow_callee)node._flow_callee=flow_ones[0]
                         // console.log('samename',node._flow_callee,flow_ones) 
                         for(let i=0;i<flow_ones.length;i++){
@@ -133,6 +133,9 @@ function genMermaid(){
                                 r.FDPLinks.push({source:node._flow_from,target:flow_ones[i],value:2,dash:"5,5",dist:100,strength:0.1})
                             }
                         }
+                    }else{
+                        r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${flow_ones[0]}\n`
+                        r.FDPLinks.push({source:node._flow_from,target:flow_ones[0],value:2,dash:"5,5",dist:100,strength:0.1})
                     }
                 }else{
                     r.FlowLink+=`${node._flow_from} -..-> ${node._flow_prop||''} ${node._flow_id}\n`
