@@ -518,7 +518,7 @@ var SCAST=(function(){
                 }
                 if(is_punc('('))_r.arguments=parse_arguments()
                 if(is_punc('{'))_r.body=[parse_block()]
-                console.log(_r)
+                // console.log(_r)
                 return _r
             }else if(is_punc('{'))return parse_block();
             else return until_next_kw();    
@@ -824,15 +824,20 @@ function analysisMermaid(node,file,r){
                     if(n.condition&&n.condition.value)n._flow_condition='|'+n.condition.value.replaceAll('|','｜').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
                     _doBody(n,file)
                 }else if(r.FlowFilter[n._flow_id]&&(n.type=="NewExpression"||n.type=="CallExpression")){
-                    console.log('method dobody call&new',node,n)
                     if(n.type=="NewExpression"){
                         r.FlowVarNew[node.value]=n.value
                         if(cls.value)r.UMLClass[cls.value][n._flow_id]=n;
                         n._flow_str=`        ${n._flow_id}[${n.value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                         r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6,text:n.value}
                     }else{
-                        n._flow_callee=n.callee.value;
-                        if(r.FlowNode[n._flow_id])n._flow_id=n._flow_callee+n._flow_id;
+                        if(n.callee.value==node.value){
+                            if(r.showMethod){n._flow_callee=n.value+'_'+cls.value}
+                            else{n._flow_callee=n.value}
+                        }else{
+                            n._flow_callee=n.callee.value;
+                        }
+                        // console.log('callee',n._flow_callee,cls,n,node)
+                        if(r.FlowNode[n._flow_id])n._flow_id=n._flow_callee+'_'+n._flow_id;
                         n._flow_str=`        ${n._flow_id}([${n.value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                         r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6+d3config.fontsize*2,text:n.value+'()'}
                     }
