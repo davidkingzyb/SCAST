@@ -125,7 +125,7 @@ function genMermaid(){
                         if(!node._flow_callee)node._flow_callee=flow_ones[0]
                         // console.log('samename',node._flow_callee,flow_ones) 
                         for(let i=0;i<flow_ones.length;i++){
-                            let isvarnew=r.FlowVarNew[node._flow_callee]&&flow_ones[i].split('_').indexOf(r.FlowVarNew[node._flow_callee])>=0;
+                            let isvarnew=flow_ones[i].split('_').indexOf(r.FlowVarNew[node._flow_callee])>=0;
                             let isfunc=node._flow_callee==flow_ones[i]
                             let isstatic=!isfunc&&flow_ones[i].indexOf(node._flow_callee)>0;
                             if(isvarnew||isfunc||isstatic){
