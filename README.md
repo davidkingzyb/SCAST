@@ -52,4 +52,3 @@ Compliant with ESTree specification AST parser
 
 ![scast_d3](https://github.com/user-attachments/assets/11c4e11f-05e6-48b0-a3ee-c1e5f6a0816d)
 
-
