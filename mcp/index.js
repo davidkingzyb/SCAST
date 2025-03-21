@@ -3,6 +3,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema, ToolSchema, } from "@modelcontextprotocol/sdk/types.js";
 import fs from "fs/promises";
+import {existsSync} from 'fs'
 import path from "path";
 import os from 'os';
 import { z } from "zod";
@@ -82,11 +83,14 @@ async function validatePath(requestedPath) {
     }
 }
 
+const SUPPORT_TYPE=['.js','.py','.cs','.ts']
+
 async function scastAnalysis(dir){
     var files=[]
     const entries = await fs.readdir(dir, { withFileTypes: true });
     for(let entry of entries){
-        if(!entry.isDirectory()&&entry.name.slice(-3)=='.js')files.push(entry.name);
+        let t=String(path.extname(entry.name)).toLocaleLowerCase();
+        if(!entry.isDirectory()&&SUPPORT_TYPE.indexOf(t)>=0)files.push(entry.name);
     }
     var ast={}
     const results = await Promise.all(files.map(async (file) => {
@@ -108,7 +112,8 @@ async function scastAnalysis(dir){
     }
     const mcpdir=path.parse(process.argv[1]).dir
     const lastdir=path.parse(dir).name
-    const datajson=path.join(mcpdir,`./data/${lastdir}.json`)
+    const datajson=path.join(mcpdir.replace('mcp','tmp'),`${lastdir}.json`)
+    if(!existsSync(mcpdir.replace('mcp','tmp')))fs.mkdir(mcpdir.replace('mcp','tmp'))
     await fs.writeFile(datajson, JSON.stringify(ast), 'utf8');
     const runserver=await checkPort('localhost',5305)
     if(runserver){
@@ -122,7 +127,7 @@ async function scastAnalysis(dir){
             return "start scast server error"
         }
     }
-    return `[http://localhost:5305?mcp=${lastdir}.json](http://localhost:5305?mcp=${lastdir}.json)`
+    return `[http://localhost:5305?file=/tmp/${lastdir}.json](http://localhost:5305?file=/tmp/${lastdir}.json)`
 
 }
 
@@ -145,8 +150,6 @@ function checkPort(host, port) {
       });
     });
 }
-
-
 
 const ScastAnalysisArgsSchema = z.object({
     dir: z.string(),

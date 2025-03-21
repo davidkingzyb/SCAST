@@ -2,4 +2,4 @@ js/SCAST.js
 js/SCASTPY.js
 _test
 node_modules
-mcp/data/*
+tmp
