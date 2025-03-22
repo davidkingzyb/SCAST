@@ -4,6 +4,8 @@
 
 2024/9/27 by DKZ
 
+[English](./README.md)/中文
+
 ![](https://davidkingzyb.github.io/blogmd/blogImg/scastbanner.png)
 
 [🔱SCAST](https://davidkingzyb.github.io/scast/SCAST.html) 可以将输入的代码转换为UML图和流程图，可用作整理流程架构，输出文档图表。
@@ -24,6 +26,26 @@
 ![scast_uml](https://github.com/user-attachments/assets/0185738e-0815-4c92-8770-e9ff2b0da1d5)
 
 ## 更新
+
+### MCP
+
+1. `git clone https://github.com/davidkingzyb/SCAST.git` 下载源码.
+2. `npm install`
+3. 在你的客户端设置
+```
+{
+  "mcpServers": {
+    "scast":{
+      "command":"node",
+      "args":[
+        "/YOUR_INSTALL_DIR/SCAST/mcp/index.js",
+        "/YOUR_WORKSPACE/",
+        "C:\\Users\\DKZ\\OTHER_ALLOWED_DIR\\",
+      ]
+    }
+  }
+}
+```
 
 #### Ollama AI
 

@@ -6,6 +6,8 @@
 
 ![](https://davidkingzyb.github.io/blogmd/blogImg/scastbanner.png)
 
+English/[中文](./README.zh.md)
+
 [🔱SCAST](https://davidkingzyb.github.io/scast/SCAST.html) is a programmatic tool that converts code into UML diagrams and flowcharts.
 
 [📽️watch video](https://youtu.be/KYbGcD38gqM)
@@ -25,6 +27,26 @@ You can try it [online](https://davidkingzyb.github.io/scast/SCAST.html) or just
 ![scast_uml](https://github.com/user-attachments/assets/0185738e-0815-4c92-8770-e9ff2b0da1d5)
 
 ## Update
+
+### MCP
+
+1. `git clone https://github.com/davidkingzyb/SCAST.git` download the source code.
+2. `npm install`
+3. config at your client
+```
+{
+  "mcpServers": {
+    "scast":{
+      "command":"node",
+      "args":[
+        "/YOUR_INSTALL_DIR/SCAST/mcp/index.js",
+        "/YOUR_WORKSPACE/",
+        "C:\\Users\\DKZ\\OTHER_ALLOWED_DIR\\",
+      ]
+    }
+  }
+}
+```
 
 #### Ollama AI
 

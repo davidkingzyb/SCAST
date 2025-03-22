@@ -9,7 +9,8 @@ import os from 'os';
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import net from "net";
-import {execFile,spawn,exec,fork} from 'child_process'
+import {spawn,exec} from 'child_process'
+
 // import { minimatch } from 'minimatch';
 // Command line argument parsing
 const args = process.argv.slice(2);
@@ -127,7 +128,13 @@ async function scastAnalysis(dir){
             return "start scast server error"
         }
     }
-    return `[http://localhost:5305?file=/tmp/${lastdir}.json](http://localhost:5305?file=/tmp/${lastdir}.json)`
+    const ourl=`http://localhost:5305?file=/tmp/${lastdir}.json`
+    try{
+        exec(ourl)
+    }catch(err){
+
+    }   
+    return `open [${ourl}](${ourl}) in browser to preview the analysis results. Click on the bottom-right corner to further analyze using ollama AI if needed.`
 
 }
 
