@@ -1,4 +1,4 @@
-
+// a AST parser by DKZ 
 var SCASTPY=(function(){
     var types={
         num:false,

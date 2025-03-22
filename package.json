@@ -1,0 +1,34 @@
+{
+    "name": "@davidkingzyb/scast",
+    "version": "0.1.0",
+    "description": "Static Code Analysis and Visualization. Convert Code to UML and Flow Diagram and explain by AI.",
+    "license": "MIT",
+    "author": "DKZ davidkingzyb@163.com",
+    "homepage": "https://github.com/davidkingzyb/SCAST",
+    "bugs": "https://github.com/davidkingzyb/SCAST/issues",
+    "type": "module",
+    "bin": {
+        "mcp-server-filesystem": "mcp.js"
+    },
+    "files": [
+        "mcp"
+    ],
+    "scripts": {
+        "build": "shx chmod -R 755 mcp",
+        "prepare": "npm run build",
+        "dev": "node mcp/index.js ./test",
+        "server": "node mcp/server.js",
+        "minify": "uglifyjs js/SCAST.js -o lib/SCAST.min.js && uglifyjs js/SCASTPY.js -o lib/SCASTPY.min.js"
+    },
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "0.5.0",
+        "glob": "^10.3.10",
+        "minimatch": "^10.0.1",
+        "multiparty": "^4.2.3",
+        "uglify-js": "^3.19.3",
+        "zod-to-json-schema": "^3.23.5"
+    },
+    "devDependencies": {
+        "shx": "^0.3.4"
+    }
+}

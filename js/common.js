@@ -27,11 +27,26 @@ function loadAstJson(aststr){
                 <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
+        if(!ast.body){//for mcp
+            let t=ast.split('.')
+            let c=gAst[ast].code
+            if(t[1]=='py'){
+                gAst[ast]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
+            }else if(t[1]=='js'){
+                gAst[ast]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
+            }else{
+                gAst[ast]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
+            }
+            gAst[ast]['code']=c.replace(/\r\n/g,'\n')
+            gAst[ast]['filetype']=t[1]
+            gAst[ast]['filename']=t[0]
+        }
     }
     $code.innerHTML=html;
     hljs.highlightAll();
     hljs.initLineNumbersOnLoad();
     showJson()
+    setTimeout(()=>{genMermaid()},1000);//for mermaid script load
 }
 
 function fixedCon(idname,status){
