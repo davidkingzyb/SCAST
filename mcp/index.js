@@ -130,7 +130,9 @@ async function scastAnalysis(dir){
     }
     const ourl=`http://localhost:5305?file=/tmp/${lastdir}.json`
     try{
-        exec(ourl)
+        if (process.platform === 'win32') {
+            exec('start '+ourl)
+        }
     }catch(err){
 
     }   

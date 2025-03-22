@@ -4,6 +4,7 @@ import http from 'http'
 import process from "process";
 import url from 'url';
 import multiparty from'multiparty';
+import {exec} from 'child_process'
 
 const port = 5305;
 const directoryPath = process.argv[2]||process.cwd();
@@ -59,4 +60,5 @@ http.createServer((req, res) => {
 }).listen(port, () => {
   console.log(`SCAST Server is running on http://localhost:${port}`);
   console.log('directoryPath',directoryPath);
+  exec(`start http://localhost:${port}`)
 });
