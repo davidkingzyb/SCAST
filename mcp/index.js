@@ -51,12 +51,10 @@ async function validatePath(requestedPath) {
         ? path.resolve(expandedPath)
         : path.resolve(process.cwd(), expandedPath);
     const normalizedRequested = normalizePath(absolute);
-    // Check if path is within allowed directories
     const isAllowed = allowedDirectories.some(dir => normalizedRequested.startsWith(dir));
     if (!isAllowed) {
         throw new Error(`Access denied - path outside allowed directories: ${absolute} not in ${allowedDirectories.join(', ')}`);
     }
-    // Handle symlinks by checking their real path
     try {
         const realPath = await fs.realpath(absolute);
         const normalizedReal = normalizePath(realPath);
@@ -67,7 +65,6 @@ async function validatePath(requestedPath) {
         return realPath;
     }
     catch (error) {
-        // For new files that don't exist yet, verify parent directory
         const parentDir = path.dirname(absolute);
         try {
             const realParentPath = await fs.realpath(parentDir);
@@ -143,14 +140,12 @@ async function scastAnalysis(dir){
 function checkPort(host, port) {
     return new Promise((resolve, reject) => {
       const socket = net.createConnection({ host, port }, () => {
-        // 端口正在使用中
         resolve(false);
         socket.destroy();
       });
   
       socket.on('error', (err) => {
         if (err.code === 'ECONNREFUSED') {
-          // 端口未被占用
           resolve(true);
         } else {
           reject(err);

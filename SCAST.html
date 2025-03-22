@@ -71,16 +71,7 @@
         <div id="mermaid_conf_panel">
             <textarea name="" id="textUML" placeholder="Mermaid classDiagram UML code"></textarea><br>
             <textarea name="" id="textFlow" placeholder="Mermaid flowchart code"></textarea>
-            <div id="mermaidOption" class="opcls">
-            <!-- <input type="checkbox" id="mmdop_relation" class="mmdops" checked /><label for="mmdop_relation">UML Relationship</label> -->
-            <input type="checkbox" id="mmdop_click" class="mmdops" checked /><label for="mmdop_click">Can Click</label>
-            <input type="checkbox" id="mmdop_method" class="mmdops" checked /><label for="mmdop_method">OOP</label>
-            <input type="checkbox" id="mmdop_call" class="mmdops" checked /><label for="mmdop_call">Call Detail</label>
-            <input type="checkbox" id="mmdop_idone" class="mmdops" checked /><label for="mmdop_idone">One ID</label>
-            <input type="checkbox" id="mmdop_if" class="mmdops" /><label for="mmdop_if">If and Loop</label>
-            <!-- <input type="checkbox" id="mmdop_condition" class="mmdops" /><label for="mmdop_condition">Condition</label> -->
-            <input type="checkbox" id="mmdop_namespace" class="mmdops" /><label for="mmdop_namespace">Namespace</label>
-            </div>
+            
         </div>
     </details>
     <details id="d3_conf_con">
@@ -138,6 +129,17 @@
             <button onclick="saveMermaid()" title="save mermaid">💾</button>
             <button onclick="scaleMermaid()" title="scale mermaid">🔛</button>
         </summary>
+        <div id="mermaidOption" class="opcls">
+            <!-- <input type="checkbox" id="mmdop_relation" class="mmdops" checked /><label for="mmdop_relation">UML Relationship</label> -->
+            <input type="checkbox" id="mmdop_click" class="mmdops" checked /><label for="mmdop_click" title="Click mermaid diagram jump to defined.">Can Click</label>
+            <input type="checkbox" id="mmdop_method" class="mmdops" checked /><label for="mmdop_method" title="Use OOP paradigm analysis.">OOP</label>
+            <input type="checkbox" id="mmdop_call" class="mmdops" checked /><label for="mmdop_call" title="Show function call detail.">Call Detail</label>
+            <input type="checkbox" id="mmdop_idone" class="mmdops" checked /><label for="mmdop_idone" title="Function call and function define node use same node.">One ID</label>
+            <input type="checkbox" id="mmdop_samename" class="mmdops" checked /><label for="mmdop_samename" title="deal with same name function.">Same Name</label>
+            <input type="checkbox" id="mmdop_if" class="mmdops" /><label for="mmdop_if" title="Show if and loop in flow chart.">If and Loop</label>
+            <!-- <input type="checkbox" id="mmdop_condition" class="mmdops" /><label for="mmdop_condition">Condition</label> -->
+            <input type="checkbox" id="mmdop_namespace" class="mmdops" /><label for="mmdop_namespace" title="Layout by Namespace.">Namespace</label>
+        </div>
         <div id="mermaidPane">
             <!-- <pre class="mermaid" id="mermaidUML"></pre> -->
             <!-- <pre class="mermaid" id="mermaidFlow"></pre> -->
