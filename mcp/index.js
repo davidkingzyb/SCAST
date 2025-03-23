@@ -196,14 +196,20 @@ function getKeyword(ast){
                     }
                 }))
             }else{
+                var lines=ast[file].code.split('\n')
+
                 traverseScast(ast[file],(node)=>{
                     if(KEYWORDTYPE[node.type]){
+                        var lastnode;
+                        traverseScast(node,(n)=>{
+                            lastnode=n
+                        })
                         keyword[node.value]={
                             type:node.type,
                             analysis:node._analysis,
                             file:file,
                             t:ast[file].filetype,
-                            // code:ast[file].code.slice(node.range[0],node.range[1])
+                            code:lines.slice(node.poi.line-1,lastnode.poi.line+1).join('\n')
                         }
                     }
                 })
@@ -227,7 +233,8 @@ function traverseESTree(node,callback){
     })
 }
 function traverseScast(node,callback){
-    callback&&callback(node)
+    var isreturn=callback(node)
+    if(isreturn===true)return
     if(node.body&&node.body.length>0){
         for(let n of node.body){
             traverseScast(n,callback)
