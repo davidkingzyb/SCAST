@@ -8,11 +8,8 @@
     "bugs": "https://github.com/davidkingzyb/SCAST/issues",
     "type": "module",
     "bin": {
-        "mcp-server-filesystem": "mcp.js"
+        "scast_mcp": "mcp/index.js"
     },
-    "files": [
-        "mcp"
-    ],
     "scripts": {
         "build": "shx chmod -R 755 mcp",
         "prepare": "npm run build",

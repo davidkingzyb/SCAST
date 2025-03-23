@@ -67,6 +67,7 @@ function genMermaid(){
         idone:document.getElementById('mmdop_idone').checked,
         showCall:document.getElementById('mmdop_call').checked,
         showNamespace:document.getElementById('mmdop_namespace').checked,
+        sameName:document.getElementById('mmdop_samename').checked,
         FDPNode:{},
         FDPLinks:[],
     }
@@ -121,7 +122,7 @@ function genMermaid(){
                 if(r.idone&&flow_ones){
                     r.Flow=r.Flow.replaceAll(node._flow_str,'')
                     delete r.FDPNode[node._flow_id]
-                    if(node.type=='CallExpression'){//for same name function call
+                    if(node.type=='CallExpression'&&r.sameName){//for same name function call
                         if(!node._flow_callee)node._flow_callee=flow_ones[0]
                         // console.log('samename',node._flow_callee,flow_ones) 
                         for(let i=0;i<flow_ones.length;i++){
