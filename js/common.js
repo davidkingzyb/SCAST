@@ -22,12 +22,13 @@ function loadAstJson(aststr){
     gAst=JSON.parse(aststr||localStorage.getItem('SCAST_gAst'))
     var $code=document.getElementById('code')
     var html=''
+    var isautosave=false;
     for(let ast in gAst){
         html+=`<details id="detail_${ast.replace('.','_')}">
                 <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
-        if(!ast.body){//for mcp
+        if(!gAst[ast].body){//for mcp
             let t=ast.split('.')
             let c=gAst[ast].code
             if(t[1]=='py'){
@@ -40,13 +41,17 @@ function loadAstJson(aststr){
             gAst[ast]['code']=c.replace(/\r\n/g,'\n')
             gAst[ast]['filetype']=t[1]
             gAst[ast]['filename']=t[0]
+            isautosave=true;
         }
     }
     $code.innerHTML=html;
     hljs.highlightAll();
     hljs.initLineNumbersOnLoad();
     showJson()
-    setTimeout(()=>{genMermaid()},1000);//for mermaid script load
+    setTimeout(()=>{
+        genMermaid()
+        if(isautosave)_saveServer(JSON.stringify(gAst),'tmp.ast')
+    },1000);//for mermaid script load
 }
 
 function fixedCon(idname,status){
@@ -91,7 +96,12 @@ function _saveFile(content, fileName) {
     link.href = url;
     link.download = fileName;
     link.click();
-    // if (location.href.indexOf('davidkingzyb.tech') < 0) return
+    _saveServer(content,fileName)
+    
+}
+
+function _saveServer(content,fileName){
+    console.log('save to server',fileName)
     var q = RegExp('[?&]file=([^&]*)').exec(location.href); 
     var file=q && decodeURIComponent(q[1].replace(/\+/g, ' '))
     var fd = new FormData()

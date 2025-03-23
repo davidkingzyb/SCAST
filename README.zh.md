@@ -51,11 +51,16 @@
 #### 工具
 
 ##### scast_analysis:
+SCAST 是一个帮助用户分析总结代码并将可视化的工具.
+只需要提供源代码所在的文件夹路径, SCAST 会对文件夹下的源代码做静态分析,生成 AST 树, 帮助用户理解代码结构,解释代码的功能. 
+生成一系列的可视化图表, 如 UML 类图, AST tree 图 以及 Mermaid flowchart 图等.
+最后返回一个keyword列表,包含所有类和方法名称和其功能解释,并附一个连接, 让用户在浏览器中查看图表详情.
 
-SCAST is a tool designed to assist users in analyzing and summarizing code through visualization. 
-By simply providing the folder path where the code is located, 
-SCAST can perform static analysis on the code, helping users understand the code structure, explain its functionality.
-generate various visual charts such as UML diagrams, AST tree diagrams and Mermaid flowcharts.
+##### scast_retriever
+SCAST 是一个帮助用户分析总结代码并将可视化的工具.
+需要提供源代码所在的文件夹路径, SCAST 会对文件夹下的源代码做静态分析,生成 AST 树, 帮助用户理解代码结构, 解释代码的功能. 
+使用 SCAST 分析完代码目录之后, 可以通过提供关键字在 AST 树中进行检索,用 RAG 的方法更好的回答用户的提问.
+这个关键字可以是类名,方法名,或者是字段名称. SCAST 会找到其定义处的源代码并返回. 
 
 #### Ollama AI
 

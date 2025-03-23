@@ -50,12 +50,17 @@ For Developers it can be deployed on servers using `npm run server`. Or use it a
 ```
 #### Tools
 ##### scast_analysis:
-
 SCAST is a tool designed to assist users in analyzing and summarizing code through visualization. 
 By simply providing the folder path where the code is located, 
-SCAST can perform static analysis on the code, helping users understand the code structure, explain its functionality.
-generate various visual charts such as UML diagrams, AST tree diagrams and Mermaid flowcharts.
+SCAST can perform static analysis on the code,  generating an AST tree to helping users understand the code structure and explain its functionality.
+Generate various visual charts such as UML diagrams, AST tree diagrams and Mermaid flowcharts.
+Finally return a keyword list containing all class and method names along with their functionality explanations, and include a link to allow users to view the chart details in their browser.
 
+##### scast_retriever
+SCAST is a tool that helps users analyze and summarize code and provides visualizations.
+You need to provide the file path of the source code folder. SCAST will perform static analysis on the source codes in the folder, generating an AST tree to help users understand the code structure and explain its functionality.
+After analyzing the code directory with SCAST, you can use keywords in the AST tree for searching, better answering user questions using a RAG method.
+This keyword can be a class name, method name, or field name. SCAST will find the source code at its definition and return it.
 
 #### Ollama AI
 
