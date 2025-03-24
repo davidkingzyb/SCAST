@@ -10,8 +10,9 @@ English/[中文](./README.zh.md)
 
 [🔱SCAST](https://davidkingzyb.github.io/scast/SCAST.html) is a programmatic tool that converts code into UML diagrams and flowcharts.
 
-[📽️watch video](https://youtu.be/KYbGcD38gqM)
-[📽️Tutorial](https://youtu.be/x3ZqxDtHSJc)
+[📽️watch video](https://youtu.be/KYbGcD38gqM)  
+[📽️Tutorial](https://youtu.be/sYqRW7zem8s)  
+[📽️MCP](https://youtu.be/ay4zFeYasPU)  
 
 support plan
 - javascript (use [acorn](https://github.com/acornjs/acorn))
@@ -30,6 +31,8 @@ For Developers it can be deployed on servers using `npm run server`. Or use it a
 ## Update
 
 ### MCP
+
+![mcp](https://github.com/user-attachments/assets/f35cf086-0105-47ce-a3d2-6ec1e09748d7)
 
 1. `git clone https://github.com/davidkingzyb/SCAST.git` download the source code.
 2. `npm install`
