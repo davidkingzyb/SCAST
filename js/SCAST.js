@@ -830,11 +830,11 @@ function analysisMermaid(node,file,r){
                         n._flow_str=`        ${n._flow_id}[${n.value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                         r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6,text:n.value}
                     }else{
-                        if(n.callee.value==node.value){
+                        if(n.callee?.value==node.value){
                             if(r.showMethod){n._flow_callee=n.value+'_'+cls.value}
                             else{n._flow_callee=n.value}
                         }else{
-                            n._flow_callee=n.callee.value;
+                            n._flow_callee=n.callee?.value;
                         }
                         // console.log('callee',n._flow_callee,cls,n,node)
                         if(r.FlowNode[n._flow_id])n._flow_id=n._flow_callee+'_'+n._flow_id;
