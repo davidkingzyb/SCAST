@@ -19,6 +19,32 @@ a{
     -webkit-box-shadow:inset 0 0 6px rgba(0,0,0,.3);
     background-color:#555;
 }
+button{
+    background-color: white;
+    outline:none;
+    cursor: pointer;
+    border: 1px solid black;
+}
+button:hover {
+    background-color: black;
+}
+button:disabled{
+    background-color: #333;
+}
+
+input[type="checkbox"] {
+    appearance: none;
+    border: 1px solid black;
+    background-color: white;
+}
+input[type="checkbox"]:checked{
+    /* appearance: none; */
+    background-color: #ffb02e;
+}
+select option:checked{
+    background-color: #ffb02e;
+}
+
 body{
     margin: 0;
     background-color: white;
@@ -235,7 +261,7 @@ select {
     cursor: pointer;
 }
 .jump {
-    font-size: 34px;
+    font-size: 18px;
 }
 json-viewer {
     /* Background, font and indentation */
@@ -272,13 +298,13 @@ json-viewer {
     position: fixed;
     bottom: 0;
     right: 0;
-    background-color: rgba(0,0,0,0.9);
+    /* background-color: rgba(0,0,0,0.9); */
     padding: 10px;
     z-index: 999;
 }
 #load_con button{
     font-size: 26px;
-    border: 0;
+    /* border: 0; */
     cursor: pointer;
     padding: 0 6px
 }
@@ -287,13 +313,15 @@ json-viewer {
 }
 .input-file-button{
     font-size: 26px;
-    background-color: #F0f0f0;
-    padding: 0px 6px;
+    /* background-color: #F0f0f0; */
+    padding: 0px 5px;
     cursor: pointer;
+    border: 1px solid black;
 }
-button{
-    cursor: pointer;
+.input-file-button:hover{
+    background-color: black;
 }
+
 .wtfmsg{
 	position: fixed;
 	bottom:70px;
