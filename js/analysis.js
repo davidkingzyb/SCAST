@@ -5,6 +5,24 @@ function load() {
     var $code=document.getElementById('code')
     var $codetext=document.getElementById('codetext')
     var html=''
+    for(let ast in gAst){
+        html+=`<details id="detail_${ast.replace('.','_')}">
+                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
+                <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
+                </details>`
+        let t=ast.split('.')
+        let c=gAst[ast].code
+        if(t[1]=='py'){
+            gAst[ast]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
+        }else if(t[1]=='js'){
+            gAst[ast]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
+        }else{
+            gAst[ast]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
+        }
+        gAst[ast]['code']=c.replace(/\r\n/g,'\n')
+        gAst[ast]['filetype']=t[1]
+        gAst[ast]['filename']=t[0]
+    }
     if($codetext&&$codetext.value){
         html=`<details id="detail_code">
             <summary>code</summary>
@@ -75,25 +93,37 @@ function genMermaid(){
         r.Flow+=`  subgraph ${file}\n   direction TB\n`;
         let namespace=null;
         if(gAst[file].filetype=='js'){
-            ESTREEJS.setCode(gAst[file].code)
-            ESTREEJS.traverseAst(gAst[file],(node)=>{
-                node.poi=ESTREEJS.loc2poi(node)
-            })
-            ESTREEJS.traverseAst(gAst[file],(node)=>{
-                return ESTREEJS.analysisMermaid(node,file,r)
-            })
+            try{
+                ESTREEJS.setCode(gAst[file].code)
+                ESTREEJS.traverseAst(gAst[file],(node)=>{
+                    node.poi=ESTREEJS.loc2poi(node)
+                })
+                ESTREEJS.traverseAst(gAst[file],(node)=>{
+                    return ESTREEJS.analysisMermaid(node,file,r)
+                })
+            }catch(err){
+                console.warn('genMermaid js error file',file,err)
+            }
         }else if(gAst[file].filetype=='py'){
-            ESTREEPY.setCode(gAst[file].code)
-            ESTREEPY.traverseAst(gAst[file],(node)=>{
-                node.poi=ESTREEPY.loc2poi(node)
-            })
-            ESTREEPY.traverseAst(gAst[file],(node)=>{
-                return ESTREEPY.analysisMermaid(node,file,r)
-            })
+            try{
+                ESTREEPY.setCode(gAst[file].code)
+                ESTREEPY.traverseAst(gAst[file],(node)=>{
+                    node.poi=ESTREEPY.loc2poi(node)
+                })
+                ESTREEPY.traverseAst(gAst[file],(node)=>{
+                    return ESTREEPY.analysisMermaid(node,file,r)
+                })
+            }catch(err){
+                console.warn('genMermaid py error file',file,err)
+            } 
         }else{
-            SCAST.traverseAst(gAst[file],(node)=>{
-                return SCAST.analysisMermaid(node,file,r)
-            })
+            try{
+                SCAST.traverseAst(gAst[file],(node)=>{
+                    return SCAST.analysisMermaid(node,file,r)
+                })
+            }catch(err){
+                console.warn('genMermaid py error file',file,err)
+            }
         }
         
         if(namespace)r.Flow+=`  end\n`
