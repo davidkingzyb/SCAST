@@ -317,6 +317,7 @@ json-viewer {
     padding: 0px 5px;
     cursor: pointer;
     border: 1px solid black;
+    background-color: white;
 }
 .input-file-button:hover{
     background-color: black;

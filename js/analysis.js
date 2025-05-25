@@ -93,25 +93,37 @@ function genMermaid(){
         r.Flow+=`  subgraph ${file}\n   direction TB\n`;
         let namespace=null;
         if(gAst[file].filetype=='js'){
-            ESTREEJS.setCode(gAst[file].code)
-            ESTREEJS.traverseAst(gAst[file],(node)=>{
-                node.poi=ESTREEJS.loc2poi(node)
-            })
-            ESTREEJS.traverseAst(gAst[file],(node)=>{
-                return ESTREEJS.analysisMermaid(node,file,r)
-            })
+            try{
+                ESTREEJS.setCode(gAst[file].code)
+                ESTREEJS.traverseAst(gAst[file],(node)=>{
+                    node.poi=ESTREEJS.loc2poi(node)
+                })
+                ESTREEJS.traverseAst(gAst[file],(node)=>{
+                    return ESTREEJS.analysisMermaid(node,file,r)
+                })
+            }catch(err){
+                console.warn('genMermaid js error file',file,err)
+            }
         }else if(gAst[file].filetype=='py'){
-            ESTREEPY.setCode(gAst[file].code)
-            ESTREEPY.traverseAst(gAst[file],(node)=>{
-                node.poi=ESTREEPY.loc2poi(node)
-            })
-            ESTREEPY.traverseAst(gAst[file],(node)=>{
-                return ESTREEPY.analysisMermaid(node,file,r)
-            })
+            try{
+                ESTREEPY.setCode(gAst[file].code)
+                ESTREEPY.traverseAst(gAst[file],(node)=>{
+                    node.poi=ESTREEPY.loc2poi(node)
+                })
+                ESTREEPY.traverseAst(gAst[file],(node)=>{
+                    return ESTREEPY.analysisMermaid(node,file,r)
+                })
+            }catch(err){
+                console.warn('genMermaid py error file',file,err)
+            } 
         }else{
-            SCAST.traverseAst(gAst[file],(node)=>{
-                return SCAST.analysisMermaid(node,file,r)
-            })
+            try{
+                SCAST.traverseAst(gAst[file],(node)=>{
+                    return SCAST.analysisMermaid(node,file,r)
+                })
+            }catch(err){
+                console.warn('genMermaid py error file',file,err)
+            }
         }
         
         if(namespace)r.Flow+=`  end\n`
