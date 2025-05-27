@@ -104,6 +104,7 @@ function _saveServer(content,fileName){
     console.log('save to server',fileName)
     var q = RegExp('[?&]file=([^&]*)').exec(location.href); 
     var file=q && decodeURIComponent(q[1].replace(/\+/g, ' '))
+    if(file&&fileName.indexOf('.tld')>=0)file+='.tld'
     var fd = new FormData()
     if(file){
         fd.append('file', file)
