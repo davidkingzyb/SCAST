@@ -11,7 +11,8 @@ function saveTldraw(){
             "html":`<div style="margin-top:1rem">${document.getElementById('mermaidUML').innerHTML}</div>`,
             "w":800,
             "h":600,
-            "copybtn":true
+            "copybtn":true,
+            "canEdit":true
         }
     })
     create.push({
@@ -23,7 +24,8 @@ function saveTldraw(){
             "html":`<div style="margin-top:1rem">${document.getElementById('mermaidFlow').innerHTML}</div>`,
             "w":800,
             "h":600,
-            "copybtn":true
+            "copybtn":true,
+            "canEdit":true
         }
         
     })
@@ -38,7 +40,8 @@ function saveTldraw(){
                 "html":`<div style="margin:15px 5px;"><pre style="background:#111;color:white;">${$codes[i].outerHTML}<pre></div>`,
                 "w":800,
                 "h":1500,
-                "copybtn":true
+                "copybtn":true,
+                "canEdit":true
             }
             
         })
