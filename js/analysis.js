@@ -1,5 +1,7 @@
 var gAst={}
 
+
+
 function load() {
     var $file = document.getElementById('codefile')
     var $code=document.getElementById('code')
@@ -26,7 +28,7 @@ function load() {
     if($codetext&&$codetext.value){
         html=`<details id="detail_code">
             <summary>code</summary>
-            <pre><code class="language-cs" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
+            <pre><code class="" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
         </details>`;
         gAst.code=SCAST.getAst($codetext.value,'code')
         gAst.code['code']=$codetext.value

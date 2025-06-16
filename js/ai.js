@@ -100,6 +100,7 @@ Here is user's code you need analyse:
 async function aiAnalysis(){
     var j=getOutlineJson()
     for(let file in gAst){
+        if(j[file]===undefined)continue;
         let p=getOutlinePrompt(j[file],gAst[file].code)
         await outlineAgent(p,j[file],file)
     }
@@ -166,7 +167,8 @@ function outlineAgent(prompt,json,file){
         'format':fmt,
         'options':{
             "num_ctx":gNumCtx
-        }
+        },
+        "think":false
     }
     document.getElementById('aibtn').innerHTML='⌛'
     document.getElementById('aibtn').disabled=true
