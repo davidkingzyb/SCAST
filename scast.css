@@ -19,18 +19,32 @@ a{
     -webkit-box-shadow:inset 0 0 6px rgba(0,0,0,.3);
     background-color:#555;
 }
-button{
-    background-color: white;
-    outline:none;
-    cursor: pointer;
-    border: 1px solid black;
+.input-file-button,button {
+ border: 3px solid black;
+ box-shadow: 0.1em 0.1em;
+ cursor: pointer;
 }
-button:hover {
-    background-color: black;
+
+.input-file-button:hover,button:hover {
+ transform: translate(-0.05em, -0.05em);
+ box-shadow: 0.15em 0.15em;
+ background-color: #ffb02e
+}
+
+.input-file-button:active,button:active {
+ transform: translate(0.05em, 0.05em);
+ box-shadow: 0.05em 0.05em;
 }
 button:disabled{
     background-color: #333;
 }
+.input-file-button{
+    font-size: 26px;
+    /* background-color: #F0f0f0; */
+    padding: 0px 5px;
+    background-color: white;
+}
+
 
 input[type="checkbox"] {
     appearance: none;
@@ -310,17 +324,6 @@ json-viewer {
 }
 #load_con input{
     display: none;
-}
-.input-file-button{
-    font-size: 26px;
-    /* background-color: #F0f0f0; */
-    padding: 0px 5px;
-    cursor: pointer;
-    border: 1px solid black;
-    background-color: white;
-}
-.input-file-button:hover{
-    background-color: black;
 }
 
 .wtfmsg{
