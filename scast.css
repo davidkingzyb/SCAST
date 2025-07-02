@@ -61,7 +61,7 @@ select option:checked{
 
 body{
     margin: 0;
-    background-color: white;
+    background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAAXNSR0IArs4c6QAAAD5JREFUKFNjvPTo638GIgAjSKGeHDcjIbWkK/z16xfYCWxsbGDTQXwQG0bDTUSXQNeIVyFOE4mymvq+JmQiAENNW7Ou6cHxAAAAAElFTkSuQmCC) repeat;
 }
 #title{
     position: fixed;left:10px;bottom: 10px;z-index: 999;
