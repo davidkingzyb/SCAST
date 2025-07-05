@@ -60,5 +60,5 @@ http.createServer((req, res) => {
 }).listen(port, () => {
   console.log(`SCAST Server is running on http://localhost:${port}`);
   console.log('directoryPath',directoryPath);
-  exec(`start http://localhost:${port}`)
+  // exec(`start http://localhost:${port}`) // auto open in browser but mcp first open will open twice
 });

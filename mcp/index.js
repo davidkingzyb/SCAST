@@ -163,12 +163,25 @@ async function scastAnalysis(dir){
     var autosave_ast=JSON.parse(await fs.readFile(dirjson,'utf-8'))
     var keyword=getKeyword(autosave_ast)
     var keywordstr=""
-    for(let k in keyword){
+    var sortkeys=Object.keys(keyword).sort((a,b)=>{
+        
+        if(keyword[a].file>keyword[b].file)return 1;
+        if(keyword[a].file<keyword[b].file)return -1;
+        return 0;
+    })
+    var filetitle=""
+    for(let k of sortkeys){
+        if(filetitle!=keyword[k].file){
+            filetitle=keyword[k].file;
+            keywordstr+=`\n### ${filetitle}  \n`
+        }
         keywordstr+=`- ${k} (${keyword[k].type}) ${keyword[k].analysis||''} \n`
     }
     return `${keywordstr}
 --------
-open [${ourl}](${ourl}) in browser to preview the analysis results. Click on the bottom-right corner to further analyze using ollama AI if needed.`
+Open [${ourl}](${ourl}) in browser to preview the analysis results. Click on the bottom-right corner to further analyze if needed.
+Click 🧜‍♀️ to get more details. click 🦙 to use ollama analyze code, click 💾 to save result, Then use scast_analysis again to obtain the AI report.
+`
 }
 
 function updateAst(ast,oldast){

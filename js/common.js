@@ -84,7 +84,9 @@ function scrollToView(id,dst){
 }
 
 function saveScast(){
-    var filename = window.prompt('💾save SCAST name', '');
+    var q = RegExp('[?&]file=([^&]*)').exec(location.href); 
+    var filename=q && decodeURIComponent(q[1].replace(/\+/g, ''))
+    if(!filename)filename = window.prompt('💾save SCAST name', '');
     if(filename===null)return
     _saveFile(JSON.stringify(gAst),filename+'.ast')
 }
