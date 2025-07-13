@@ -28,7 +28,7 @@ a{
 .input-file-button:hover,button:hover {
  transform: translate(-0.05em, -0.05em);
  box-shadow: 0.15em 0.15em;
- background-color: #ffb02e
+ background-color: #ffb02e;
 }
 
 .input-file-button:active,button:active {
@@ -44,8 +44,16 @@ button:disabled{
     padding: 0px 5px;
     background-color: white;
 }
-
-
+textarea,select{
+    border: 3px solid black;
+    padding: 3px;
+    font-size: 18px;
+}
+input[type="text"]{
+    border: 3px solid black;
+    padding: 3px;
+    width: 170px;
+}
 input[type="checkbox"] {
     appearance: none;
     border: 1px solid black;
@@ -268,9 +276,6 @@ summary {
 input {
     font-size: 18px;
 }
-select {
-    font-size: 18px;
-}
 .pointer {
     cursor: pointer;
 }
@@ -303,10 +308,10 @@ json-viewer {
     --property-color: #0a688d;
 
     /* Collapsed node preview */
-    --preview-color: #dfba13;
+    --preview-color: #73787e;
 
     /* Search highlight color */
-    --highlight-color:  #8f0707;
+    --highlight-color:  #ff702e;
 }
 #load_con{
     position: fixed;
@@ -336,4 +341,8 @@ json-viewer {
     color:black;
     padding:10px;
     max-width: 70%;
+}
+
+#searchMermaid{
+    margin-left: 10px;
 }

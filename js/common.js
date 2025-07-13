@@ -10,6 +10,64 @@ function search(){
     searchIterator.next()
 }
 
+function searchMermaid(){
+    var s=document.getElementById('searchMermaid').value;
+    var $uml=document.getElementById('mermaidUML')
+    var $flow=document.getElementById('mermaidFlow')
+    var $fdp=document.getElementById('FDP')
+    var $d3=document.getElementById('D3Diagram')
+    _traverseDOM($uml,function(node){
+        if(node.nodeType==Node.TEXT_NODE&&node.textContent.indexOf(s)>=0){
+            node.parentNode.style.color='#ff702e'
+            setTimeout(()=>{
+                node.parentNode.style.color='#ffb02e'
+            },10000)
+            return true
+        }
+    })
+    _traverseDOM($flow,function(node){
+        if(node.nodeType==Node.TEXT_NODE&&node.textContent.indexOf(s)>=0){
+            node.parentNode.style.color='#ff702e'
+            setTimeout(()=>{
+                node.parentNode.style.color='#ffb02e'
+            },10000)
+            return true
+        }
+    })
+    _traverseDOM($fdp,function(node){
+        if(node.nodeType==Node.TEXT_NODE&&node.textContent.indexOf(s)>=0){
+            console.log(node)
+            node.parentNode.style.fill='#ff702e'
+            setTimeout(()=>{
+                node.parentNode.style.fill='#ffb02e'
+            },10000)
+            return true
+        }
+    })
+    _traverseDOM($d3,function(node){
+        if(node.nodeType==Node.TEXT_NODE&&node.textContent.indexOf(s)>=0){
+            console.log(node)
+            node.parentNode.style.fill='#ff702e'
+            setTimeout(()=>{
+                node.parentNode.style.fill='#ffb02e'
+            },10000)
+            return true
+        }
+    })
+
+}
+
+function _traverseDOM(element,callback) {
+    if(element&&element.childNodes){
+        for (let child of element.childNodes) {
+            let flag=callback(child)
+            if (child.nodeType === Node.ELEMENT_NODE&&!flag) {
+                _traverseDOM(child,callback);
+            }
+        }
+    }
+}
+
 function showJson(){
     console.log('gAst',gAst)
     var $json=document.getElementById('json')
@@ -88,7 +146,8 @@ function saveScast(){
     var filename=q && decodeURIComponent(q[1].replace(/\+/g, ''))
     if(!filename)filename = window.prompt('💾save SCAST name', '');
     if(filename===null)return
-    _saveFile(JSON.stringify(gAst),filename+'.ast')
+    // _saveFile(JSON.stringify(gAst),filename+'.ast')
+    _saveServer(JSON.stringify(gAst),filename+'.ast')
 }
 
 function _saveFile(content, fileName) {
@@ -98,8 +157,6 @@ function _saveFile(content, fileName) {
     link.href = url;
     link.download = fileName;
     link.click();
-    _saveServer(content,fileName)
-    
 }
 
 function _saveServer(content,fileName){
@@ -199,11 +256,11 @@ function onFlowClick(n,file,time=5000){
     var $line=document.querySelectorAll(`#detail_${fileid} .hljs-ln-line`)
     for(let $l of $line){
         if($l.getAttribute('data-line-number')==node.poi.line){
-            $l.style.backgroundColor = "#ffb02e";
+            $l.style.backgroundColor = "#ff702e";
             $l.scrollIntoView()
             document.getElementById('code_con').scrollBy(0,-100)
             setTimeout(()=>{
-                $l.style.backgroundColor = "#8b5600";
+                $l.style.backgroundColor = "#ffb02e";
             },3000)
             break;
         }
