@@ -1,6 +1,5 @@
 var varfunc=function(a){
     if(a==0)return
-    var c=callc(a)
 }
 
 
@@ -100,8 +99,6 @@ function testES5(t){
         throw new Error('test throw')
     }catch(err){
         console.warn('err',err)
-    }finally{
-        console.log('finally')
     }
 
     return 'ok'

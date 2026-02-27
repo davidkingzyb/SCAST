@@ -16,20 +16,6 @@ public class Animal
             cc()
         }
     }
-
-    public class SubClass{
-        public string subprop="aaa"
-        public void SubMethod(){
-            try{
-                throw new ArgumentException("throw");
-            }catch(Exception e){
-                atry()
-                throw e
-            }finally{
-                btry()
-            }
-        }
-    }
 }
 
 public class Dog : Animal
