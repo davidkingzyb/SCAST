@@ -90,6 +90,7 @@ var ESTREEJS=(function(){
     
     function getAst(code){
         var EStree=acorn.parse(code, option)
+        console.log('EStree',EStree)
         return EStree
     }
     function traverseAst(node,callback){

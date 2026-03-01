@@ -6,6 +6,7 @@ function load() {
     var $file = document.getElementById('codefile')
     var $code=document.getElementById('code')
     var $codetext=document.getElementById('codetext')
+    var $useTreeSitter=document.getElementById('useTreeSitter')
     var html=''
     for(let ast in gAst){
         html+=`<details id="detail_${ast.replace('.','_')}">
@@ -14,35 +15,41 @@ function load() {
                 </details>`
         let t=ast.split('.')
         let c=gAst[ast].code
-        if(t[1]=='py'){
+        console.log('useTreeSitter',$useTreeSitter.checked)
+        if($useTreeSitter.checked){
+            gAst[ast]=TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
+        }else if(t[1]=='py'){
             gAst[ast]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }else if(t[1]=='js'){
             gAst[ast]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }else{
+            console.log('use SCAST')
             gAst[ast]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }
         gAst[ast]['code']=c.replace(/\r\n/g,'\n')
         gAst[ast]['filetype']=t[1]
         gAst[ast]['filename']=t[0]
     }
-    if($codetext&&$codetext.value){
-        html=`<details id="detail_code">
-            <summary>code</summary>
-            <pre><code class="" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
-        </details>`;
-        gAst.code=SCAST.getAst($codetext.value,'code')
-        gAst.code['code']=$codetext.value
-        gAst.code['filetype']=''
-        $code.innerHTML=html;
-        hljs.highlightAll();
-        hljs.initLineNumbersOnLoad();
-    }
+    // if($codetext&&$codetext.value){
+    //     html=`<details id="detail_code">
+    //         <summary>code</summary>
+    //         <pre><code class="" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
+    //     </details>`;
+    //     gAst.code=SCAST.getAst($codetext.value,'code')
+    //     gAst.code['code']=$codetext.value
+    //     gAst.code['filetype']=''
+    //     $code.innerHTML=html;
+    //     hljs.highlightAll();
+    //     hljs.initLineNumbersOnLoad();
+    // }
     for(let i=0;i<$file.files.length;i++){
         let r = new FileReader()
-        r.onload = function (e) {
+        r.onload =async function (e) {
             let t=r._filename.split('.')
             var c=e.target.result
-            if(t[1]=='py'){
+            if($useTreeSitter.checked){
+                gAst[r._filename]=await TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
+            }else if(t[1]=='py'){
                 gAst[r._filename]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else if(t[1]=='js'){
                 gAst[r._filename]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
@@ -69,6 +76,7 @@ var gMermaid;
 
 
 function genMermaid(){
+    var $useTreeSitter=document.getElementById('useTreeSitter')
     mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
     var r={
         UML:'classDiagram\n',
@@ -94,7 +102,15 @@ function genMermaid(){
     for(let file in gAst){//generate FlowNode FlowOne UMLClass FDPNode Flow
         r.Flow+=`  subgraph ${file}\n   direction TB\n`;
         let namespace=null;
-        if(gAst[file].filetype=='js'){
+        if($useTreeSitter.checked){
+                TreeSitter.setCode(gAst[file].code)
+                TreeSitter.traverseAst(gAst[file],(node)=>{
+                    node.poi=loc2poi(node)
+                })
+                TreeSitter.traverseAst(gAst[file],(node)=>{
+                    return TreeSitter.analysisMermaid(node,file,r)
+                })
+        }else if(gAst[file].filetype=='js'){
             try{
                 ESTREEJS.setCode(gAst[file].code)
                 ESTREEJS.traverseAst(gAst[file],(node)=>{
@@ -211,6 +227,7 @@ var level_symbol={
     "static":'$',
 }
 function genD3(){
+    var $useTreeSitter=document.getElementById('useTreeSitter')
     var r={name:'file',children:[]}
     gD3.conf={
         scastops:getSCASTD3Option(),
@@ -222,7 +239,13 @@ function genD3(){
 
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
-        if(file.indexOf('.js')>=0){
+        if($useTreeSitter.checked){
+            TreeSitter.setCode(gAst[file].code)
+            TreeSitter.setD3Config(gD3.conf)
+            TreeSitter.traverseAst(d3node,(node)=>{
+                return TreeSitter.analysisD3(node,file)
+            })
+        }else if(file.indexOf('.js')>=0){
             ESTREEJS.setCode(gAst[file].code)
             ESTREEJS.setD3Config(gD3.conf)
             ESTREEJS.traverseAst(d3node,(node)=>{

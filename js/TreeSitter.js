@@ -1,0 +1,238 @@
+import { Parser,Language }  from '../lib/TreeSitter/web-tree-sitter.js';
+await Parser.init().then(() => {
+    console.log("Parser init")
+});
+
+window.TreeSitter=(function(){
+    var Code='';
+    var types={
+
+    }
+    const LANGUAGE_WASM={
+        'js':'../lib/TreeSitter/tree-sitter-javascript.wasm',
+        'ts':'../lib/TreeSitter/tree-sitter-typescript.wasm',
+        'py':'../lib/TreeSitter/tree-sitter-python.wasm',
+        'sh':'../lib/TreeSitter/tree-sitter-bash.wasm',
+        'cs':'../lib/TreeSitter/tree-sitter-c_sharp.wasm',
+        'cpp':'../lib/TreeSitter/tree-sitter-cpp.wasm',
+        'c':'../lib/TreeSitter/tree-sitter-c.wasm',
+        'hlsl':'../lib/TreeSitter/tree-sitter-c.wasm',
+        'shader':'../lib/TreeSitter/tree-sitter-c.wasm',
+    }
+
+    var language_parser={
+        'js':null,
+        'ts':null,
+        'py':null,
+        'sh':null,
+        'cs':null,
+        'cpp':null,
+        'c':null,
+        'hlsl':null,
+        'shader':null,
+    }
+
+    var d3config={estreeops:types,fontsize:14}
+    function setD3Config(conf){
+        d3config=conf
+    }
+    function setCode(code){
+        Code = code;
+    }
+
+    async function getAst(code,filename,filetype){
+        var parser=language_parser[filetype]
+        if(parser===null){
+            parser=new Parser();
+            const language=await Language.load(LANGUAGE_WASM[filetype])
+            console.log('[TreeSitter] load ',LANGUAGE_WASM[filetype])
+            parser.setLanguage(language);
+            language_parser[filetype]=parser
+        }
+        Code=code;
+        const tree=parser.parse(code)
+        var result=child2Body(tree.rootNode)
+        function child2Body(node){
+            var n=getNodeValue(node)
+            if(node.childCount>0){
+                n['body']=[]
+            }
+            for (const child of node.children) {
+                let c=child2Body(child);
+                n['body'].push(c)
+            }
+            return n 
+        }
+        console.log("TreeSitter getAst",filename,filetype,result,tree.rootNode)
+        return result;
+    }
+
+    function traverseAst(node,callback){
+        callback&&callback(node)
+        if(node.body&&node.body.length>0){
+            for(let n of node.body){
+                traverseAst(n,callback)
+            }
+        }
+    }
+
+
+
+    function getNodeValue(node){
+        var n={}
+        n.type=node.type
+        n.text=node.text;
+        n.poi={
+            start:node.startPosition.column,
+            line:node.startPosition.row
+        }
+
+        if(n.type==="interface_declaration"){//cs ts
+            n.value=getChildByType(node)?.text
+            if(!n.value)n.value=getChildByType(node,'type_identifier').text//ts
+        }
+        if(n.type==="class_declaration"||n.type==="abstract_class_declaration"){//cs ts
+            n.value=getChildByType(node)?.text
+            if(!n.value)n.value=getChildByType(node,'type_identifier').text//ts
+            n.level=getChildByType(node,'modifier',true)?.text
+            n.extends=getChildrenTextByType(getChildByType(node,'base_list',true))
+            if(n.extends.length==0){//ts
+                let ch=getChildByType(node,'class_heritage')
+                let ec=getChildByType(ch,'extends_clause')
+                n.extends=getChildrenTextByType(ec)
+                if(!ec){
+                    ec=getChildByType(ch,'implements_clause')
+                    n.extends=getChildrenTextByType(ec,'type_identifier')
+                }
+            }
+        }
+        if(n.type==="field_declaration"){//cs member
+            let vd=getChildByType(node,'variable_declaration')
+            n.predefined_type=getChildByType(vd,"predefined_type")?.text
+            if(!n.predefined_type)n.predefined_type=getChildByType(vd,"generic_name")?.text
+            n.value=getChildByType(vd,"variable_declarator")?.text
+            n.level=getChildByType(node,'modifier',true)?.text
+        }
+        if(n.type=="public_field_definition"||n.type=="property_signature"){//ts
+            n.predefined_type=getChildByType(getChildByType(node,"type_annotation"),"predefined_type")?.text
+            n.value=getChildByType(node,"property_identifier")?.text
+            n.level=getChildByType(node,'accessibility_modifier',true)?.text
+            if(!n.level)n.level='public'
+        }
+        if(n.type==="constructor_declaration"){//cs
+            n.value=getChildByType(node)?.text
+            n.level=getChildByType(node,'modifier',true)?.text
+            let parameter_list=getChildByType(node,'parameter_list')
+            n.param=parameter_list?.text
+            n.parameters=getChildrenTextByType(parameter_list,'parameter')
+        }
+        if(n.type==="method_declaration"){//cs
+            n.value=getChildByType(node)?.text
+            let return_type=getChildByType(node,'identifier',true)?.text
+            n.return_type=n.value==return_type?"void":return_type;
+            n.level=getChildByType(node,'modifier',true)?.text
+            let parameter_list=getChildByType(node,'parameter_list')
+            n.param=parameter_list?.text
+            n.parameters=getChildrenTextByType(parameter_list,'parameter')
+        }
+        if(n.type==="method_signature"||n.type==="method_definition"||n.type==="abstract_method_signature"){
+            n.value=getChildByType(node,"property_identifier")?.text//ts
+            n.return_type=getChildByType(getChildByType(node,"type_annotation"),"predefined_type")?.text
+            n.level=getChildByType(node,'accessibility_modifier',true)?.text
+            let parameter_list=getChildByType(node,'formal_parameters')
+            n.param=parameter_list?.text
+            n.parameters=getChildrenTextByType(parameter_list,'required_parameter')
+        }
+
+        if(n.type==="object_creation_expression"){//cs new
+            n.value=getChildByType(node)?.text
+            let argument_list=getChildByType(node,'argument_list')
+            n.arg=argument_list?.text
+            n.arguments=getChildrenTextByType(argument_list,'argument')
+        }       
+        if(n.type==="invocation_expression"){//cs call
+            n.value=getChildByType(node)?.text
+            if(!n.value){
+                n.value=getChildByType(getChildByType(node,"member_access_expression")).text
+            }
+            let argument_list=getChildByType(node,'argument_list')
+            n.arg=argument_list?.text
+            n.arguments=getChildrenTextByType(argument_list,'argument')
+        }
+
+        if(n.type==="for_statement"||n.type==="while_statement"||n.type==="do_statement"||n.type==="if_statement"||n.type==="foreach_statement"){
+            n.condition=getChildByType(node,"binary_expression")?.text;
+            if(!n.condition)n.condition=getChildByType(node,"comparison_operator")?.text;
+            if(!n.condition)n.condition=getChildByType(node)?.text//cs foreach py for
+        }
+
+        if(n.type==="class_definition"){//py
+            n.value=getChildByType(node)?.text
+            n.extends=getChildrenTextByType(getChildByType(node,'argument_list',true))
+        }
+
+        if(n.type==="function_definition"){//py
+            n.value=getChildByType(node)?.text
+            let parameter_list=getChildByType(node,'parameters')
+            n.param=parameter_list?.text
+            n.parameters=getChildrenTextByType(parameter_list)
+        }
+        if(n.type==="call"){//py
+            n.value=getChildByType(node)?.text
+            let argument_list=getChildByType(node,'argument_list')
+            n.arg=argument_list?.text
+            n.arguments=getChildrenTextByType(argument_list,'argument')
+        }
+        if(n.type==="list_comprehension"){
+            n.value=node.text
+        }
+        return n;
+
+        function getChildByType(node,type='identifier',isfirst=false){
+            if(node===null)return null
+            var result=null
+            for(let child of node.children){
+                if(child.type==type){
+                    result=child
+                    if(isfirst)return result
+                }
+            }
+            return result
+        }
+
+        function getChildrenTextByType(node,type='identifier'){
+            if(node==null)return []
+            var result=[]
+            for(let child of node.children){
+                if(child.type==type){
+                    result.push(child.text)
+                }
+            }
+            return result
+        }
+    }
+
+    function analysisMermaid(){
+
+    }
+
+    function analysisD3(){
+
+    }
+
+    function loc2poi(){
+
+    }
+
+
+    return {
+        getAst:getAst,
+        traverseAst:traverseAst,
+        analysisMermaid:analysisMermaid,
+        analysisD3:analysisD3,
+        setD3Config:setD3Config,
+        types:types,
+        loc2poi:loc2poi,
+        setCode:setCode
+    }
+})()

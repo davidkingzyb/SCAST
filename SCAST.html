@@ -22,6 +22,7 @@
     <!-- <script src="./js/SCASTTS.js"></script> -->
     <!-- <script src="./js/ESTREEPY.js"></script> -->
     <script src="./js/ESTREEJS.js"></script>
+    <script src="./js/TreeSitter.js" type="module"></script>
     <script src="./lib/SCAST.min.js"></script>
     <script src="./lib/SCASTPY.min.js"></script>
     
@@ -49,17 +50,19 @@
     <div id="code_panel">
         <div id="code_scroll">
             <div id="code">
-                <textarea name="" id="codetext" placeholder="HOW TO USE
+<pre style="padding: 10px;font-size: 22px;">
+HOW TO USE  
 
-1. paste code here  
-   or select from file by click 📄 at right corner
+1. select file by click 📄 at right corner
 2. click ️🔱 generate AST
 3. click 🧜‍♀️ analysis and show mermaid diagram
    click 🧜‍♀️ again for more details
    or click 🌳 show D3 diagram
-4. click 🦙 use ollama AI analysis code
+4. click 🦙 use ollama AI analysis code  
 
-                                       © 2024 DKZ"></textarea>
+                        © 2026 DKZ
+</pre>
+                <textarea name="" id="codetext" style="display: none;;" placeholder=""></textarea>
             </div>  
         </div>
               
@@ -88,7 +91,11 @@
                 <option value="zh">zh</option>
                 <option value="en">en</option>
             </select>
+            
         </details>
+        <div class="opcls">
+            <input type="checkbox" id="useTreeSitter" class="d3ops" checked /><label for="useTreeSitter" title="use TreeSitter">TreeSitter</label>
+        </div>
         <details>
             <summary title="D3 SCAST filter">SCAST</summary>
             <div id="D3Option" class="opcls"></div>
