@@ -1,82 +1,83 @@
 // 接口定义
 // namespace AA{
+namespace OOP {
 
-interface IAnimal {
-  private name: string;
-  age: number;
-  public makeSound(s:string): void;
-  getInfo(): string;
-}
-
-// 抽象类（可选，增强结构）
-abstract class Animal implements IAnimal {
-  name: string;
-  private age: number;
-
-  constructor(name: string, age: number) {
-    this.name = name;
-    this.age = age;
+  interface IAnimal {
+    private name: string;
+    age: number;
+    public makeSound(s: string): void;
+    getInfo(): string;
   }
 
-  abstract makeSound(): void;
+  // 抽象类（可选，增强结构）
+  abstract class Animal implements IAnimal {
+    name: string;
+    private age: number;
 
-  getInfo(): string {
-    return `${this.name} 是 ${this.age} 岁`;
+    constructor(name: string, age: number) {
+      this.name = name;
+      this.age = age;
+    }
+
+    abstract makeSound(): void;
+
+    getInfo(): string {
+      return `${this.name} 是 ${this.age} 岁`;
+    }
+
+    // 静态方法
+    static getSpecies(): string {
+      return "动物";
+    }
   }
 
-  // 静态方法
-  static getSpecies(): string {
-    return "动物";
-  }
-}
+  // Dog 子类
+  class Dog extends Animal {
+    breed: string;
 
-// Dog 子类
-class Dog extends Animal {
-  breed: string;
+    constructor(name: string, age: number, breed: string) {
+      super(name, age);
+      this.breed = breed;
+    }
 
-  constructor(name: string, age: number, breed: string) {
-    super(name, age);
-    this.breed = breed;
-  }
+    public makeSound(): void {
+      console.log(`${this.name} 说: 汪汪!`);
+    }
 
-  public makeSound(): void {
-    console.log(`${this.name} 说: 汪汪!`);
-  }
+    private fetch(): void {
+      console.log(`${this.name} 正在捡球`);
+    }
 
-  private fetch(): void {
-    console.log(`${this.name} 正在捡球`);
-  }
-
-  getInfo(): string {
-    return `${super.getInfo()}, 品种: ${this.breed}`;
-  }
-// }
-
-// Cat 子类
-class Cat extends Animal {
-  color: string;
-
-  constructor(name: string, age: number, color: string) {
-    super(name, age);
-    this.color = color;
+    getInfo(): string {
+      return `${super.getInfo()}, 品种: ${this.breed}`;
+    }
   }
 
-  makeSound(): void {
-    console.log(`${this.name} 说: 喵喵!`);
-  }
+  // Cat 子类
+  class Cat extends Animal {
+    color: string;
 
-  climb(): void {
-    console.log(`${this.name} 正在爬树`);
-  }
+    constructor(name: string, age: number, color: string) {
+      super(name, age);
+      this.color = color;
+    }
 
-  getInfo(): string {
-    return `${super.getInfo()}, 颜色: ${this.color}`;
+    makeSound(): void {
+      console.log(`${this.name} 说: 喵喵!`);
+    }
+
+    climb(): void {
+      console.log(`${this.name} 正在爬树`);
+    }
+
+    getInfo(): string {
+      return `${super.getInfo()}, 颜色: ${this.color}`;
+    }
   }
-}
 }
 
 // 主程序
-function main(a:number,b:string): void {
+function main(a: number, b: string): void {
   const animals: Animal[] = [
     new Dog("旺财", 3, "金毛"),
     new Cat("咪咪", 2, "白色"),
@@ -122,6 +123,6 @@ function main(a:number,b:string): void {
 }
 
 // 运行程序
-main(1,2);
+main(1, 2);
 
-var cat=new Cat(1,2)
+var cat = new Cat(1, 2)

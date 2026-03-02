@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+namespace OPP{
+
 // 1. 接口 (interface)
 interface ISpeak
 {
@@ -53,6 +55,7 @@ class Cat : Animal
     {
         Console.WriteLine("喵喵喵！");
     }
+}
 }
 
 class Program

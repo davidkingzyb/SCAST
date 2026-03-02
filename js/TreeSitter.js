@@ -87,23 +87,30 @@ window.TreeSitter=(function(){
             line:node.startPosition.row
         }
 
-        if(node.type==="interface_declaration"){//cs ts
+        if(node.type==="namespace_declaration"||node.type==="internal_module"){//cs ts
+            n.value=getChildByType(node)?.text
+            n.type="Namespace"
+        }
+        else if(node.type==="interface_declaration"){//cs ts
             n.value=getChildByType(node)?.text
             if(!n.value)n.value=getChildByType(node,'type_identifier').text//ts
             n.type="InterfaceDefine"
         }
-        else if(node.type==="class_declaration"||node.type==="abstract_class_declaration"){//cs ts
+        else if(node.type==="class_declaration"||node.type==="abstract_class_declaration"){//cs ts js
             n.value=getChildByType(node)?.text
             if(!n.value)n.value=getChildByType(node,'type_identifier').text//ts
             n.level=getChildByType(node,'modifier',true)?.text
             n.extends=getChildrenTextByType(getChildByType(node,'base_list',true))
-            if(n.extends.length==0){//ts
+            if(n.extends.length==0){//ts js
                 let ch=getChildByType(node,'class_heritage')
                 let ec=getChildByType(ch,'extends_clause')
                 n.extends=getChildrenTextByType(ec)
-                if(!ec){
+                if(!ec){//ts
                     ec=getChildByType(ch,'implements_clause')
                     n.extends=getChildrenTextByType(ec,'type_identifier')
+                }
+                if(!ec){//js
+                    n.extends=getChildrenTextByType(ch)
                 }
             }
             n.type="ClassDefine"
@@ -121,7 +128,7 @@ window.TreeSitter=(function(){
             n.level=getChildByType(node,'modifier',true)?.text
             n.type="PropertyDefine"
         }
-        else if(node.type==="public_field_definition"||node.type==="property_signature"){//ts
+        else if(node.type==="public_field_definition"||node.type==="property_signature"||node.type==="field_definition"){//ts js
             n.predefined_type=getChildByType(getChildByType(node,"type_annotation"),"predefined_type")?.text
             n.value=getChildByType(node,"property_identifier")?.text
             n.level=getChildByType(node,'accessibility_modifier',true)?.text
@@ -146,7 +153,7 @@ window.TreeSitter=(function(){
             n.parameters=getChildrenTextByType(parameter_list,'parameter')
             n.type="MethodDefine"
         }
-        else if(node.type==="method_signature"||node.type==="method_definition"||node.type==="abstract_method_signature"||node.type==="function_declaration"){//ts
+        else if(node.type==="method_signature"||node.type==="method_definition"||node.type==="abstract_method_signature"){//ts
             n.value=getChildByType(node)?.text//ts
             if(!n.value)n.value=getChildByType(node,"property_identifier")?.text//ts
             n.return_type=getChildByType(getChildByType(node,"type_annotation"),"predefined_type")?.text
@@ -154,7 +161,21 @@ window.TreeSitter=(function(){
             let parameter_list=getChildByType(node,'formal_parameters')
             n.param=parameter_list?.text
             n.parameters=getChildrenTextByType(parameter_list,'required_parameter')
+            if(n.parameters.length==0){//js
+                n.parameters=getChildrenTextByType(parameter_list)
+            }
             n.type="MethodDefine"
+        }
+        else if(node.type==="function_declaration"){//js ts
+            n.value=getChildByType(node)?.text
+            n.return_type=getChildByType(getChildByType(node,"type_annotation"),"predefined_type")?.text//ts
+            let parameter_list=getChildByType(node,'formal_parameters')
+            n.param=parameter_list?.text
+            n.parameters=getChildrenTextByType(parameter_list,'required_parameter')
+            if(n.parameters.length==0){//js
+                n.parameters=getChildrenTextByType(parameter_list)
+            }
+            n.type="FunctionDefine"
         }
         else if(node.type==="object_creation_expression"){//cs new
             n.value=getChildByType(node)?.text
@@ -211,9 +232,28 @@ window.TreeSitter=(function(){
             n.value=node.text
             n.type="LoopStatement"
         }
-        else if(node.type==="variable_declarator"||node.type==="assignment"){//ts py
+        else if(node.type==="variable_declarator"||node.type==="assignment"){//ts py js
             n.value=getChildByType(node)?.text
+            let funcNode=getChildByType(node,"function_expression")
+            if(!funcNode)funcNode=getChildByType(node,"arrow_function")
+            if(funcNode){
+                funcNode.value=n.value
+            }
             n.type="Variable"
+        }
+        else if(node.type==="pair"){//js obj
+            let funcNode=getChildByType(node,"function_expression")
+            if(!funcNode)funcNode=getChildByType(node,"arrow_function")
+            if(funcNode){
+                funcNode.value=getChildByType(node,"property_identifier")?.text
+            }
+        }
+        else if(node.type==="function_expression"||node.type==="arrow_function"){//js
+            if(node.value){
+                n.value=node.value;
+                n.arg=getChildByType(node,"formal_parameters")?.text
+                n.type="FunctionDefine"
+            }
         }
         else if(node.type==="new_expression"){//ts
             n.value=getChildByType(node)?.text
