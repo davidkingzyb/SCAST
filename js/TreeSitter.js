@@ -80,18 +80,19 @@ window.TreeSitter=(function(){
 
     function getNodeValue(node){
         var n={}
-        n.type=node.type
+        n._type=node.type
         n.text=node.text;
         n.poi={
             start:node.startPosition.column,
             line:node.startPosition.row
         }
 
-        if(n.type==="interface_declaration"){//cs ts
+        if(node.type==="interface_declaration"){//cs ts
             n.value=getChildByType(node)?.text
             if(!n.value)n.value=getChildByType(node,'type_identifier').text//ts
+            n.type="InterfaceDefine"
         }
-        if(n.type==="class_declaration"||n.type==="abstract_class_declaration"){//cs ts
+        else if(node.type==="class_declaration"||node.type==="abstract_class_declaration"){//cs ts
             n.value=getChildByType(node)?.text
             if(!n.value)n.value=getChildByType(node,'type_identifier').text//ts
             n.level=getChildByType(node,'modifier',true)?.text
@@ -105,28 +106,37 @@ window.TreeSitter=(function(){
                     n.extends=getChildrenTextByType(ec,'type_identifier')
                 }
             }
+            n.type="ClassDefine"
         }
-        if(n.type==="field_declaration"){//cs member
+        else if(node.type==="class_definition"){//py
+            n.value=getChildByType(node)?.text
+            n.extends=getChildrenTextByType(getChildByType(node,'argument_list',true))
+            n.type="ClassDefine"
+        }
+        else if(node.type==="field_declaration"){//cs member
             let vd=getChildByType(node,'variable_declaration')
             n.predefined_type=getChildByType(vd,"predefined_type")?.text
             if(!n.predefined_type)n.predefined_type=getChildByType(vd,"generic_name")?.text
             n.value=getChildByType(vd,"variable_declarator")?.text
             n.level=getChildByType(node,'modifier',true)?.text
+            n.type="PropertyDefine"
         }
-        if(n.type=="public_field_definition"||n.type=="property_signature"){//ts
+        else if(node.type==="public_field_definition"||node.type==="property_signature"){//ts
             n.predefined_type=getChildByType(getChildByType(node,"type_annotation"),"predefined_type")?.text
             n.value=getChildByType(node,"property_identifier")?.text
             n.level=getChildByType(node,'accessibility_modifier',true)?.text
             if(!n.level)n.level='public'
+            n.type="PropertyDefine"
         }
-        if(n.type==="constructor_declaration"){//cs
+        else if(node.type==="constructor_declaration"){//cs
             n.value=getChildByType(node)?.text
             n.level=getChildByType(node,'modifier',true)?.text
             let parameter_list=getChildByType(node,'parameter_list')
             n.param=parameter_list?.text
             n.parameters=getChildrenTextByType(parameter_list,'parameter')
+            n.type="MethodDefine"
         }
-        if(n.type==="method_declaration"){//cs
+        else if(node.type==="method_declaration"){//cs
             n.value=getChildByType(node)?.text
             let return_type=getChildByType(node,'identifier',true)?.text
             n.return_type=n.value==return_type?"void":return_type;
@@ -134,23 +144,25 @@ window.TreeSitter=(function(){
             let parameter_list=getChildByType(node,'parameter_list')
             n.param=parameter_list?.text
             n.parameters=getChildrenTextByType(parameter_list,'parameter')
+            n.type="MethodDefine"
         }
-        if(n.type==="method_signature"||n.type==="method_definition"||n.type==="abstract_method_signature"){
-            n.value=getChildByType(node,"property_identifier")?.text//ts
+        else if(node.type==="method_signature"||node.type==="method_definition"||node.type==="abstract_method_signature"||node.type==="function_declaration"){//ts
+            n.value=getChildByType(node)?.text//ts
+            if(!n.value)n.value=getChildByType(node,"property_identifier")?.text//ts
             n.return_type=getChildByType(getChildByType(node,"type_annotation"),"predefined_type")?.text
             n.level=getChildByType(node,'accessibility_modifier',true)?.text
             let parameter_list=getChildByType(node,'formal_parameters')
             n.param=parameter_list?.text
             n.parameters=getChildrenTextByType(parameter_list,'required_parameter')
+            n.type="MethodDefine"
         }
-
-        if(n.type==="object_creation_expression"){//cs new
+        else if(node.type==="object_creation_expression"){//cs new
             n.value=getChildByType(node)?.text
             let argument_list=getChildByType(node,'argument_list')
             n.arg=argument_list?.text
             n.arguments=getChildrenTextByType(argument_list,'argument')
         }       
-        if(n.type==="invocation_expression"){//cs call
+        else if(node.type==="invocation_expression"){//cs call
             n.value=getChildByType(node)?.text
             if(!n.value){
                 n.value=getChildByType(getChildByType(node,"member_access_expression")).text
@@ -158,33 +170,56 @@ window.TreeSitter=(function(){
             let argument_list=getChildByType(node,'argument_list')
             n.arg=argument_list?.text
             n.arguments=getChildrenTextByType(argument_list,'argument')
+            n.type="CallExpression"
         }
-
-        if(n.type==="for_statement"||n.type==="while_statement"||n.type==="do_statement"||n.type==="if_statement"||n.type==="foreach_statement"){
+        else if(node.type==="for_statement"||node.type==="while_statement"||node.type==="do_statement"||node.type==="foreach_statement"){
             n.condition=getChildByType(node,"binary_expression")?.text;
             if(!n.condition)n.condition=getChildByType(node,"comparison_operator")?.text;
             if(!n.condition)n.condition=getChildByType(node)?.text//cs foreach py for
+            n.type="LoopStatement"
         }
-
-        if(n.type==="class_definition"){//py
-            n.value=getChildByType(node)?.text
-            n.extends=getChildrenTextByType(getChildByType(node,'argument_list',true))
+        else if(node.type==="for_in_statement"){//ts
+            n.condition=getChildByType(node)?.text;
+            n.type="LoopStatement"
         }
-
-        if(n.type==="function_definition"){//py
+        else if(node.type==="if_statement"||node.type==="else_clause"){
+            n.condition=getChildByType(node,"binary_expression")?.text;
+            if(!n.condition)n.condition=getChildByType(node,"comparison_operator")?.text;
+            if(!n.condition)n.condition=getChildByType(node,"parenthesized_expression")?.text;//ts
+            n.type="IfStatement"
+        }
+        else if(node.type==="function_definition"){//py
             n.value=getChildByType(node)?.text
             let parameter_list=getChildByType(node,'parameters')
             n.param=parameter_list?.text
             n.parameters=getChildrenTextByType(parameter_list)
+            n.type="FunctionDefine"
         }
-        if(n.type==="call"){//py
+        else if(node.type==="call"){//py
             n.value=getChildByType(node)?.text
-            let argument_list=getChildByType(node,'argument_list')
-            n.arg=argument_list?.text
-            n.arguments=getChildrenTextByType(argument_list,'argument')
+            if(!n.value)n.value=getChildByType(getChildByType(node,"attribute"))?.text
+            n.arg=getChildByType(node,'argument_list')?.text
+            n.type="CallExpression"
         }
-        if(n.type==="list_comprehension"){
+        else if(node.type==="call_expression"){//ts
+            n.value=getChildByType(node)?.text
+            if(!n.value)n.value=getChildByType(getChildByType(node,"member_expression"),"property_identifier")?.text
+            n.arg=getChildByType(node,'arguments')?.text
+            n.type="CallExpression"
+        }
+        else if(node.type==="list_comprehension"){//py for
             n.value=node.text
+            n.type="LoopStatement"
+        }
+        else if(node.type==="variable_declarator"||node.type==="assignment"){//ts py
+            n.value=getChildByType(node)?.text
+            n.type="Variable"
+        }
+        else if(node.type==="new_expression"){//ts
+            n.value=getChildByType(node)?.text
+            let argument_list=getChildByType(node,'arguments')
+            n.arg=argument_list?.text
+            n.type="NewExpression"
         }
         return n;
 
@@ -205,6 +240,9 @@ window.TreeSitter=(function(){
             var result=[]
             for(let child of node.children){
                 if(child.type==type){
+                    result.push(child.text)
+                }
+                if(type==='*'){
                     result.push(child.text)
                 }
             }

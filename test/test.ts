@@ -76,7 +76,7 @@ class Cat extends Animal {
 }
 
 // 主程序
-function main(): void {
+function main(a:number,b:string): void {
   const animals: Animal[] = [
     new Dog("旺财", 3, "金毛"),
     new Cat("咪咪", 2, "白色"),
@@ -117,9 +117,11 @@ function main(): void {
     }
   });
 
-  console.log("\n=== 静态方法 ===");
+  console.log.aaa("\n=== 静态方法 ===");
   console.log(`物种: ${Animal.getSpecies()}`);
 }
 
 // 运行程序
-main();
+main(1,2);
+
+var cat=new Cat(1,2)
