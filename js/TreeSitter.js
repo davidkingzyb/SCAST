@@ -6,7 +6,17 @@ await Parser.init().then(() => {
 window.TreeSitter=(function(){
     var Code='';
     var types={
-
+        "Namespace":true,
+        "Class":true,
+        "Interface":true,
+        "Method":true,
+        "Property":true,
+        "Variable":true,
+        "New":true,
+        "Call":true,
+        "Function":true,
+        "Loop":true,
+        "If":true
     }
     const LANGUAGE_WASM={
         'js':'../lib/TreeSitter/tree-sitter-javascript.wasm',
@@ -51,32 +61,88 @@ window.TreeSitter=(function(){
         }
         Code=code;
         const tree=parser.parse(code)
-        var result=child2Body(tree.rootNode)
-        function child2Body(node){
+        var result=genValue(tree.rootNode)
+        function genValue(node){
             var n=getNodeValue(node)
             if(node.childCount>0){
-                n['body']=[]
+                n['children']=[]
             }
             for (const child of node.children) {
-                let c=child2Body(child);
-                n['body'].push(c)
+                let c=genValue(child);
+                n['children'].push(c)
             }
             return n 
         }
-        console.log("TreeSitter getAst",filename,filetype,result,tree.rootNode)
+        result=getTopTree(filterTree(result))
+        console.log("TreeSitter getAst",filename,filetype,result)
         return result;
     }
 
     function traverseAst(node,callback){
         callback&&callback(node)
-        if(node.body&&node.body.length>0){
-            for(let n of node.body){
+        if(node.children&&node.children.length>0){
+            for(let n of node.children){
                 traverseAst(n,callback)
             }
         }
     }
 
+    function getTopTree(tree){
+        var result={type:"top"}
+        if (Array.isArray(tree)) {
+            result['children']=tree
+        }else{
+            result['children']=[tree]
+        }
+        return result;
+    }
 
+    function filterTree(node) {
+        if (!node) return null;
+        
+        if (types[node.type]) {
+            const new_node = {
+                children: []
+            };
+            for(let k in node){
+                if(k!='children')new_node[k]=node[k]
+            }
+            if (node.children && node.children.length > 0) {
+                for (const child of node.children) {
+                    const result = filterTree(child);
+                    if (result) {
+                        if (Array.isArray(result)) {
+                            new_node.children.push(...result);
+                        } else {
+                            new_node.children.push(result);
+                        }
+                    }
+                }
+            }
+            return new_node;
+        } else {
+            const nodes = [];
+            if (node.children && node.children.length > 0) {
+                for (const child of node.children) {
+                    const result = filterTree(child);
+                    if (result) {
+                        if (Array.isArray(result)) {
+                            nodes.push(...result);
+                        } else {
+                            nodes.push(result);
+                        }
+                    }
+                }
+            }
+            if (nodes.length === 0) {
+                return null;
+            } else if (nodes.length === 1) {
+                return nodes[0];
+            } else {
+                return nodes;
+            }
+        }
+    }
 
     function getNodeValue(node){
         var n={}
@@ -86,6 +152,7 @@ window.TreeSitter=(function(){
             start:node.startPosition.column,
             line:node.startPosition.row
         }
+        // n.node=node;//dev
 
         if(node.type==="namespace_declaration"||node.type==="internal_module"){//cs ts
             n.value=getChildByType(node)?.text
@@ -94,7 +161,7 @@ window.TreeSitter=(function(){
         else if(node.type==="interface_declaration"){//cs ts
             n.value=getChildByType(node)?.text
             if(!n.value)n.value=getChildByType(node,'type_identifier').text//ts
-            n.type="InterfaceDefine"
+            n.type="Interface"
         }
         else if(node.type==="class_declaration"||node.type==="abstract_class_declaration"){//cs ts js
             n.value=getChildByType(node)?.text
@@ -113,27 +180,27 @@ window.TreeSitter=(function(){
                     n.extends=getChildrenTextByType(ch)
                 }
             }
-            n.type="ClassDefine"
+            n.type="Class"
         }
         else if(node.type==="class_definition"){//py
             n.value=getChildByType(node)?.text
             n.extends=getChildrenTextByType(getChildByType(node,'argument_list',true))
-            n.type="ClassDefine"
+            n.type="Class"
         }
         else if(node.type==="field_declaration"){//cs member
             let vd=getChildByType(node,'variable_declaration')
             n.predefined_type=getChildByType(vd,"predefined_type")?.text
             if(!n.predefined_type)n.predefined_type=getChildByType(vd,"generic_name")?.text
-            n.value=getChildByType(vd,"variable_declarator")?.text
+            n.value=getChildByType(getChildByType(vd,"variable_declarator"))?.text
             n.level=getChildByType(node,'modifier',true)?.text
-            n.type="PropertyDefine"
+            n.type="Property"
         }
         else if(node.type==="public_field_definition"||node.type==="property_signature"||node.type==="field_definition"){//ts js
             n.predefined_type=getChildByType(getChildByType(node,"type_annotation"),"predefined_type")?.text
             n.value=getChildByType(node,"property_identifier")?.text
             n.level=getChildByType(node,'accessibility_modifier',true)?.text
             if(!n.level)n.level='public'
-            n.type="PropertyDefine"
+            n.type="Property"
         }
         else if(node.type==="constructor_declaration"){//cs
             n.value=getChildByType(node)?.text
@@ -141,7 +208,7 @@ window.TreeSitter=(function(){
             let parameter_list=getChildByType(node,'parameter_list')
             n.param=parameter_list?.text
             n.parameters=getChildrenTextByType(parameter_list,'parameter')
-            n.type="MethodDefine"
+            n.type="Method"
         }
         else if(node.type==="method_declaration"){//cs
             n.value=getChildByType(node)?.text
@@ -151,7 +218,7 @@ window.TreeSitter=(function(){
             let parameter_list=getChildByType(node,'parameter_list')
             n.param=parameter_list?.text
             n.parameters=getChildrenTextByType(parameter_list,'parameter')
-            n.type="MethodDefine"
+            n.type="Method"
         }
         else if(node.type==="method_signature"||node.type==="method_definition"||node.type==="abstract_method_signature"){//ts
             n.value=getChildByType(node)?.text//ts
@@ -164,7 +231,7 @@ window.TreeSitter=(function(){
             if(n.parameters.length==0){//js
                 n.parameters=getChildrenTextByType(parameter_list)
             }
-            n.type="MethodDefine"
+            n.type="Method"
         }
         else if(node.type==="function_declaration"){//js ts
             n.value=getChildByType(node)?.text
@@ -175,7 +242,7 @@ window.TreeSitter=(function(){
             if(n.parameters.length==0){//js
                 n.parameters=getChildrenTextByType(parameter_list)
             }
-            n.type="FunctionDefine"
+            n.type="Function"
         }
         else if(node.type==="object_creation_expression"){//cs new
             n.value=getChildByType(node)?.text
@@ -191,46 +258,46 @@ window.TreeSitter=(function(){
             let argument_list=getChildByType(node,'argument_list')
             n.arg=argument_list?.text
             n.arguments=getChildrenTextByType(argument_list,'argument')
-            n.type="CallExpression"
+            n.type="Call"
         }
         else if(node.type==="for_statement"||node.type==="while_statement"||node.type==="do_statement"||node.type==="foreach_statement"){
             n.condition=getChildByType(node,"binary_expression")?.text;
             if(!n.condition)n.condition=getChildByType(node,"comparison_operator")?.text;
             if(!n.condition)n.condition=getChildByType(node)?.text//cs foreach py for
-            n.type="LoopStatement"
+            n.type="Loop"
         }
         else if(node.type==="for_in_statement"){//ts
             n.condition=getChildByType(node)?.text;
-            n.type="LoopStatement"
+            n.type="Loop"
         }
         else if(node.type==="if_statement"||node.type==="else_clause"){
             n.condition=getChildByType(node,"binary_expression")?.text;
             if(!n.condition)n.condition=getChildByType(node,"comparison_operator")?.text;
             if(!n.condition)n.condition=getChildByType(node,"parenthesized_expression")?.text;//ts
-            n.type="IfStatement"
+            n.type="If"
         }
         else if(node.type==="function_definition"){//py
             n.value=getChildByType(node)?.text
             let parameter_list=getChildByType(node,'parameters')
             n.param=parameter_list?.text
             n.parameters=getChildrenTextByType(parameter_list)
-            n.type="FunctionDefine"
+            n.type="Function"
         }
         else if(node.type==="call"){//py
             n.value=getChildByType(node)?.text
             if(!n.value)n.value=getChildByType(getChildByType(node,"attribute"))?.text
             n.arg=getChildByType(node,'argument_list')?.text
-            n.type="CallExpression"
+            n.type="Call"
         }
         else if(node.type==="call_expression"){//ts
             n.value=getChildByType(node)?.text
             if(!n.value)n.value=getChildByType(getChildByType(node,"member_expression"),"property_identifier")?.text
             n.arg=getChildByType(node,'arguments')?.text
-            n.type="CallExpression"
+            n.type="Call"
         }
         else if(node.type==="list_comprehension"){//py for
             n.value=node.text
-            n.type="LoopStatement"
+            n.type="Loop"
         }
         else if(node.type==="variable_declarator"||node.type==="assignment"){//ts py js
             n.value=getChildByType(node)?.text
@@ -252,14 +319,14 @@ window.TreeSitter=(function(){
             if(node.value){
                 n.value=node.value;
                 n.arg=getChildByType(node,"formal_parameters")?.text
-                n.type="FunctionDefine"
+                n.type="Function"
             }
         }
         else if(node.type==="new_expression"){//ts
             n.value=getChildByType(node)?.text
             let argument_list=getChildByType(node,'arguments')
             n.arg=argument_list?.text
-            n.type="NewExpression"
+            n.type="New"
         }
         return n;
 
@@ -294,13 +361,49 @@ window.TreeSitter=(function(){
 
     }
 
-    function analysisD3(){
-
+    const LEVEL={
+        "public":'+',
+        "private":'-',
+        "protected":"#",
+        "static":'$',
+        "abstract":'*'
     }
 
-    function loc2poi(){
-
+    function analysisD3(node){
+        switch(node.type){
+            case "top":
+                node.name=node.filename
+                break;
+            case "Interface":
+                node.name=`{ ${node.value} }`
+                break;
+            case 'Class':
+                node.name=`[ ${node.value} ]`
+                break;
+            case 'Method':
+                let level=LEVEL[node.level]||''
+                node.name=`${level}${node.value}${node.param||''}`
+                break;
+            case 'Function':
+                node.name=`${node.value}${node.param||''}`
+                break;
+            case 'New':
+                node.name=`new ${node.value}`
+                break;
+            case 'Call':
+                node.name=node.value+'()'
+                break;
+            case 'If':
+                node.name=`if ${node.condition}`
+                break;
+            case "Loop":
+                node.name=`for ${node.condition}`
+                break;
+            default:
+                node.name=node.value
+        }
     }
+
 
 
     return {
@@ -310,7 +413,6 @@ window.TreeSitter=(function(){
         analysisD3:analysisD3,
         setD3Config:setD3Config,
         types:types,
-        loc2poi:loc2poi,
         setCode:setCode
     }
 })()

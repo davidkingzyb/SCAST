@@ -105,9 +105,6 @@ function genMermaid(){
         if($useTreeSitter.checked){
                 TreeSitter.setCode(gAst[file].code)
                 TreeSitter.traverseAst(gAst[file],(node)=>{
-                    node.poi=loc2poi(node)
-                })
-                TreeSitter.traverseAst(gAst[file],(node)=>{
                     return TreeSitter.analysisMermaid(node,file,r)
                 })
         }else if(gAst[file].filetype=='js'){
@@ -243,7 +240,7 @@ function genD3(){
             TreeSitter.setCode(gAst[file].code)
             TreeSitter.setD3Config(gD3.conf)
             TreeSitter.traverseAst(d3node,(node)=>{
-                return TreeSitter.analysisD3(node,file)
+                return TreeSitter.analysisD3(node)
             })
         }else if(file.indexOf('.js')>=0){
             ESTREEJS.setCode(gAst[file].code)
