@@ -481,7 +481,7 @@ var ESTREEJS=(function(){
         function traverseProperty(member,cls,file,r){
             member._value=getValue(member)
             member._flow_id=member._value
-            member._flow_prop=`|${member._value.replaceAll('|','\|').replaceAll('[','').replaceAll(']','')}|`
+            member._flow_prop=`|${mermaidRepl(member._value)}|`
             // if(r.FlowFilter[member._flow_id]===false)return;
             // r.FlowNode[member._flow_id]=member;
             r.UML+=`    ${member._value}\n`
@@ -573,8 +573,8 @@ var ESTREEJS=(function(){
                     r.Flow+=`         ${n._flow_id}((${n._value}))\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                     r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:'🔵'}
                 }  
-                if(n.test&&getRangeCode(n.test))n._flow_condition='|'+getRangeCode(n.test).replaceAll('|','｜').replace('{','⌈').replace('}','⌋').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
-                if(n.right&&getRangeCode(n.right))n._flow_condition='|'+getRangeCode(n.right).replaceAll('|','｜').replace('{','⌈').replace('}','⌋').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
+                if(n.test&&getRangeCode(n.test))n._flow_condition='|'+mermaidRepl(getRangeCode(n.test))+'|'
+                if(n.right&&getRangeCode(n.right))n._flow_condition='|'+mermaidRepl(getRangeCode(n.right))+'|'
                 if(r.showIf&&n.body){
                     traverseAst(n.body,(nn)=>{
                         return doBlock(nn,n,file,r)
@@ -591,7 +591,7 @@ var ESTREEJS=(function(){
                     r.Flow+=`        ${n._flow_id}{${n._value}}\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                     r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:'🔷'}
                 }  
-                if(n.test&&getRangeCode(n.test))n._flow_condition='|'+getRangeCode(n.test).replaceAll('|','｜').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
+                if(n.test&&getRangeCode(n.test))n._flow_condition='|'+mermaidRepl(getRangeCode(n.test))+'|'
                 if(r.showIf&&n.consequent){
                     traverseAst(n.consequent,(nn)=>{
                         return doBlock(nn,n,file,r)
@@ -645,6 +645,11 @@ var ESTREEJS=(function(){
                 })
             }
         }
+
+        function mermaidRepl(s){
+            return s.replaceAll('|','‼').replaceAll('[','⌈').replaceAll(']','⌋').replaceAll('(','⟪').replaceAll(')','⟫').replaceAll('{','⟪').replaceAll('}','⟫')
+        }
+
 
 
     }

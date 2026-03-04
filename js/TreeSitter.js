@@ -150,9 +150,9 @@ window.TreeSitter=(function(){
         n.text=node.text;
         n.poi={
             start:node.startPosition.column,
-            line:node.startPosition.row
+            line:node.startPosition.row+1
         }
-        // n.node=node;//dev
+        n.node=node;//dev
 
         if(node.type==="namespace_declaration"||node.type==="internal_module"){//cs ts
             n.value=getChildByType(node)?.text
@@ -223,6 +223,9 @@ window.TreeSitter=(function(){
         else if(node.type==="method_signature"||node.type==="method_definition"||node.type==="abstract_method_signature"){//ts
             n.value=getChildByType(node)?.text//ts
             if(!n.value)n.value=getChildByType(node,"property_identifier")?.text//ts
+            if(n.value=="constructor"){
+                n.value="_constructor"
+            }
             n.return_type=getChildByType(getChildByType(node,"type_annotation"),"predefined_type")?.text
             n.level=getChildByType(node,'accessibility_modifier',true)?.text
             let parameter_list=getChildByType(node,'formal_parameters')
@@ -246,14 +249,16 @@ window.TreeSitter=(function(){
         }
         else if(node.type==="object_creation_expression"){//cs new
             n.value=getChildByType(node)?.text
+            if(!n.value)n.value=getChildByType(node,"generic_name")?.text;
             let argument_list=getChildByType(node,'argument_list')
             n.arg=argument_list?.text
             n.arguments=getChildrenTextByType(argument_list,'argument')
+            n.type="New"
         }       
         else if(node.type==="invocation_expression"){//cs call
             n.value=getChildByType(node)?.text
             if(!n.value){
-                n.value=getChildByType(getChildByType(node,"member_access_expression")).text
+                n.value=getChildByType(getChildByType(node,"member_access_expression"))?.text
             }
             let argument_list=getChildByType(node,'argument_list')
             n.arg=argument_list?.text
@@ -261,16 +266,19 @@ window.TreeSitter=(function(){
             n.type="Call"
         }
         else if(node.type==="for_statement"||node.type==="while_statement"||node.type==="do_statement"||node.type==="foreach_statement"){
+            n.value="loop"
             n.condition=getChildByType(node,"binary_expression")?.text;
             if(!n.condition)n.condition=getChildByType(node,"comparison_operator")?.text;
             if(!n.condition)n.condition=getChildByType(node)?.text//cs foreach py for
             n.type="Loop"
         }
         else if(node.type==="for_in_statement"){//ts
+            n.value="loop"
             n.condition=getChildByType(node)?.text;
             n.type="Loop"
         }
         else if(node.type==="if_statement"||node.type==="else_clause"){
+            n.value="if"
             n.condition=getChildByType(node,"binary_expression")?.text;
             if(!n.condition)n.condition=getChildByType(node,"comparison_operator")?.text;
             if(!n.condition)n.condition=getChildByType(node,"parenthesized_expression")?.text;//ts
@@ -296,7 +304,8 @@ window.TreeSitter=(function(){
             n.type="Call"
         }
         else if(node.type==="list_comprehension"){//py for
-            n.value=node.text
+            n.value="loop"
+            n.condition=node.text
             n.type="Loop"
         }
         else if(node.type==="variable_declarator"||node.type==="assignment"){//ts py js
@@ -357,9 +366,7 @@ window.TreeSitter=(function(){
         }
     }
 
-    function analysisMermaid(){
-
-    }
+    
 
     const LEVEL={
         "public":'+',
@@ -367,6 +374,228 @@ window.TreeSitter=(function(){
         "protected":"#",
         "static":'$',
         "abstract":'*'
+    }
+
+    function analysisMermaid(node,file,r){
+        switch(node.type){
+            case 'Namespace':
+                if(!r.showNamespace)break;
+                if(r.namespace){
+                    r.Flow+=`  end\n  subgraph ${node.value}.namespace\n`
+                }else{
+                    r.Flow+=`  subgraph ${node.value}.namespace\n`
+                    r.namespace=node.value;
+                }
+                break;
+            case 'Interface':
+                if(r.FlowFilter[node.value]===false)break;
+                r.Flow+=`    ${node.value}{{${node.value}}}\nclick ${node.value} "javascript:void(onFlowClick('${node.value}','${file}'))"\n`
+                r.FDPNode[node.value]={id:node.value,w:node.value.length*d3config.fontsize/1.6+d3config.fontsize*2,text:`{${node.value}}`}
+                traverseClass(node,file)
+                break;
+            case 'Class':
+                if(r.FlowFilter[node.value]===false)break;
+                r.Flow+=`    ${node.value}[${node.value}]\nclick ${node.value} "javascript:void(onFlowClick('${node.value}','${file}'))"\n`
+                r.FDPNode[node.value]={id:node.value,w:node.value.length*d3config.fontsize/1.6+d3config.fontsize*2,text:`[${node.value}]`}
+                traverseClass(node,file)
+                break;
+            case "Function":
+                if(r.showMethod)break
+                console.log('function define',node)
+                traverseMethod(node,{},file)
+                break
+            // case "Method":
+            //     if(r.showMethod)break
+            //     // console.log("method",node)
+            //     traverseMethod(node,{},file)
+            //     break
+
+        }
+
+
+        function traverseClass(node,file){
+            node._file=file
+            r.FlowNode[node.value]=node;
+            if(r.FlowOne[node.value]){
+                if(r.FlowOne[node.value].indexOf(node.value)<0){
+                    r.FlowOne[node.value].unshift(node.value)
+                }
+            }else{
+                r.FlowOne[node.value]=[node.value]
+            }
+            r.UMLClass[node.value]={}
+            r.UML+=`  class ${node.value}{\n`;
+            // if(node.type=="Interface"){
+            //     r.UML+=`     <<interface>> ${node.value}\n`;//mermaid bug
+            // }
+            for(let member of node.children){
+                let symbol=member.level&&LEVEL[member.level]?LEVEL[member.level]:' ';
+                switch(member.type){
+                    case "Property":
+                        traverseProperty(member,node,file,symbol)
+                        break;
+                    case "Method":
+                        traverseMethod(member,node,file,symbol)
+                        break;
+                    case "Function"://py
+                        traverseMethod(member,node,file,symbol)
+                        break;
+                }
+            }
+            r.UML+='  }\n'
+            if(node.extends){
+                for(let f of node.extends){
+                    if(r.FlowNode[f]&&r.FlowNode[f].type=="Interface"){
+                        r.FDPNode[f]={id:f,w:f.length*d3config.fontsize/1.6+d3config.fontsize*2,text:`{${f}}`}
+                        r.UML+=`  ${f} <|.. ${node.value}\n`
+                        r.FlowLink+=`${f} ==> ${node.value}\n` 
+                        r.FDPLinks.push({source:node.value,target:f,value:6,dist:200,dash:'2,2'})
+                    }else{
+                        if(r.FDPNode[f]===undefined)r.FDPNode[f]={id:f,w:f.length*d3config.fontsize/1.6+d3config.fontsize*2,text:`[${f}]`}
+                        r.UML+=`  ${f} <|-- ${node.value}\n`
+                        r.FlowLink+=`${f} ==o ${node.value}\n` 
+                        r.FDPLinks.push({source:f,target:node.value,value:6,dist:200,dash:"2,2"})
+                    }
+                }
+            }
+        }
+
+        function traverseProperty(member,cls,file,symbol){
+            member._flow_id=member.value+'_'+cls.value
+            member._flow_from=cls.value
+            member._flow_prop=`|${symbol}${mermaidRepl(member.value)}|`
+            member._file=file
+            if(r.FlowFilter[member._flow_id]===false)return;
+            r.FlowNode[member._flow_id]=member;
+            r.UML+=`    ${symbol}${member.value}\n`
+            if(r.showCall)_doBody(member,file)
+            function _doBody(node,file){
+                if(!node.children)return
+                // console.log('prop',node)
+                
+                for(let n of node.children ){
+                    if(n.type==="Variable"){//cs property->var->new/call
+                        _doBody(n,file)
+                    }
+                    n._file=file
+                    n._flow_id=n.value+'_'+node._flow_id
+                    n._flow_from=node._flow_from
+                    n._flow_prop=node._flow_prop
+                    r.FlowNode[n._flow_id]=n
+                    if(r.FlowFilter[n._flow_id]){
+                
+                        if(n.type=="New"){
+                            r.UMLClass[cls.value][n._flow_id]=n;
+                            n._flow_str=`        ${n._flow_id}[${n.value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                            r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6,text:`${n.value}`}
+                            r.FlowVarNew[node.value]=n.value
+                            r.Flow+=n._flow_str;    
+                        }else if(n.type=="Call"){
+                            n._flow_str=`        ${n._flow_id}([${n.value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                            r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6+d3config.fontsize*2,text:`${n.value}()`}
+                            r.Flow+=n._flow_str;    
+                        }
+                    }
+                }
+            }
+        }
+
+        function traverseMethod(member,cls,file,symbol){
+            var method=cls.value?member.value+'_'+cls.value:member.value
+            if(r.FlowOne[member.value]){
+                if(r.FlowOne[member.value].indexOf(method)<0){
+                    r.FlowOne[member.value].unshift(method)
+                }
+            }else{
+                r.FlowOne[member.value]=[method]
+            }
+            member._flow_id=method
+            member._flow_from=cls.value
+            member._file=file
+            if(r.FlowFilter[member._flow_id]===false)return;
+            r.FlowNode[member._flow_id]=member;
+            r.FDPNode[member._flow_id]={id:member._flow_id,w:member.value.length*d3config.fontsize/1.6+d3config.fontsize*3,text:`${symbol||':'}${member.value}()`}
+            if(symbol)r.UML+=`    ${symbol}${member.value}()\n`
+            if(member.value==cls.value||member.value==="_constructor"){//constructor
+                r.Flow+=`    ${member._flow_id}(${cls.value})\nclick ${member._flow_id} "javascript:void(onFlowClick('${member._flow_id}','${file}'))"\n`
+            }else{
+                r.Flow+=`    ${member._flow_id}([${member.value}])\nclick ${member._flow_id} "javascript:void(onFlowClick('${member._flow_id}','${file}'))"\n`
+            }
+            if(cls.value){
+                r.FlowLink+=`${cls.value} --o ${member._flow_id}\n`
+                r.FDPLinks.push({source:cls.value,target:member._flow_id,value:2})
+            }
+            if(r.showCall)_doBody(member,file)    
+            function _doBody(node,file){
+                if(!node.children)return
+                for(let n of node.children ){
+                    n._file=file
+                    n._flow_id=n.value+'_'+node._flow_id
+                    n._flow_from=r.showIf?node._flow_id:method
+                    if(n.type=="If"||n.type=="Loop"){//can't show condition CallExpression
+                        if(r.showIf){
+                            r.Flow+=n.type=="If"?`        ${n._flow_id}{${n.value}}\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`:`        ${n._flow_id}((${n.value}))\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                            r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:n.type=="If"?'🔷':'🔵'}
+                        }  
+                        if(n.condition)n._flow_condition='|'+mermaidRepl(n.condition)+'|'
+                        _doBody(n,file)
+                    }else if(r.FlowFilter[n._flow_id]&&(n.type=="New"||n.type=="Call")){
+                        if(n.type=="New"){
+                            r.FlowVarNew[node.value]=n.value
+                            if(cls.value)r.UMLClass[cls.value][n._flow_id]=n;
+                            n._flow_str=`        ${n._flow_id}[${n.value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                            r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6,text:n.value}
+                        }else{
+                            if(n.callee?.value==node.value){
+                                if(r.showMethod){n._flow_callee=n.value+'_'+cls.value}
+                                else{n._flow_callee=n.value}
+                            }else{
+                                n._flow_callee=n.callee?.value;
+                            }
+                            // console.log('callee',n._flow_callee,cls,n,node)
+                            if(r.FlowNode[n._flow_id])n._flow_id=n._flow_callee+'_'+n._flow_id;
+                            n._flow_str=`        ${n._flow_id}([${n.value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                            r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6+d3config.fontsize*2,text:n.value+'()'}
+                        }
+                        r.Flow+=n._flow_str;    
+                    }
+                    if(n.type=='Variable'){
+                        n._flow_id=node._flow_id;//not a flow node same as condition
+                        if(!r.showMethod)traverseVariable(n,file)
+                        else{_doBody(n,file)}
+                    }
+                    r.FlowNode[n._flow_id]=n
+                }
+            }
+        }
+
+        function traverseVariable(variable,file){
+            if(r.showMethod)return
+            // console.log('traverse var',variable)
+            _doBody(variable,file)
+            function _doBody(node,file){
+                if(!node.children)return
+                for(let n of node.children){
+                    n._file=file
+                    n._flow_id=n.value+'_'+node._flow_id
+                    n._flow_from=node._flow_id
+                    if(r.FlowNode[n._flow_id])continue
+                    r.FlowNode[n._flow_id]=n
+                    if(r.FlowFilter[n._flow_id]&&(n.type=="New"||n.type=="Call")){
+                        if(n.type=="New"){
+                            r.FlowVarNew[node.value]=n.value
+                            n._flow_str=`        ${n._flow_id}[${n.value}]\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                            r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6,text:n.value}
+                        }else{
+                            n._flow_str=`        ${n._flow_id}([${n.value}])\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
+                            r.FDPNode[n._flow_id]={id:n._flow_id,w:n.value.length*d3config.fontsize/1.6+d3config.fontsize*2,text:n.value+'()'}
+                        }
+                        r.Flow+=n._flow_str;    
+                    }
+                }
+            }
+        }
+
     }
 
     function analysisD3(node){
@@ -404,7 +633,9 @@ window.TreeSitter=(function(){
         }
     }
 
-
+    function mermaidRepl(s){
+        return s.replaceAll('|','‼').replaceAll('[','⌈').replaceAll(']','⌋').replaceAll('(','⟪').replaceAll(')','⟫').replaceAll('{','⟪').replaceAll('}','⟫')
+    }
 
     return {
         getAst:getAst,

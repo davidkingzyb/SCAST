@@ -669,11 +669,11 @@ function analysisMermaid(node,file,r){
         case 'NamespaceDefine':
             if(!r.showMethod)break
             if(!r.showNamespace)break;
-            if(namespace){
+            if(r.namespace){
                 r.Flow+=`  end\n  subgraph ${node.value}.namespace\n`
             }else{
                 r.Flow+=`  subgraph ${node.value}.namespace\n`
-                namespace=node.value;
+                r.namespace=node.value;
             }
             break;
         case "FunctionDefine":
@@ -749,7 +749,7 @@ function analysisMermaid(node,file,r){
     function traverseProperty(member,cls,file,symbol){
         member._flow_id=member.value+'_'+cls.value
         member._flow_from=cls.value
-        member._flow_prop=`|${symbol}${member.value.replaceAll('|','\|').replaceAll('[','').replaceAll(']','')}|`
+        member._flow_prop=`|${symbol}${mermaidRepl(member.value)}|`
         member._file=file
         if(r.FlowFilter[member._flow_id]===false)return;
         r.FlowNode[member._flow_id]=member;
@@ -821,7 +821,7 @@ function analysisMermaid(node,file,r){
                         r.Flow+=n.type=="IfStatement"?`        ${n._flow_id}{${n.value}}\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`:`        ${n._flow_id}((${n.value}))\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                         r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:n.type=="IfStatement"?'🔷':'🔵'}
                     }  
-                    if(n.condition&&n.condition.value)n._flow_condition='|'+n.condition.value.replaceAll('|','｜').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
+                    if(n.condition&&n.condition.value)n._flow_condition='|'+mermaidRepl(n.condition.value)+'|'
                     _doBody(n,file)
                 }else if(r.FlowFilter[n._flow_id]&&(n.type=="NewExpression"||n.type=="CallExpression")){
                     if(n.type=="NewExpression"){
@@ -944,6 +944,10 @@ var d3config={scastops:types,fontsize:14}
 function setD3Config(conf){
     d3config=conf
 }
+
+        function mermaidRepl(s){
+            return s.replaceAll('|','‼').replaceAll('[','⌈').replaceAll(']','⌋').replaceAll('(','⟪').replaceAll(')','⟫').replaceAll('{','⟪').replaceAll('}','⟫')
+        }
     return {
         getAst:getAst,
         traverseAst:traverseAst,

@@ -277,6 +277,11 @@ var gIconmap={
     "FunctionExpression":'Ⓜ️',
     "ClassDefine":'🆑',
     "ClassDeclaration":'🆑',
+    "Class":'🆑',
+    "Method":'Ⓜ️',
+    "Function":'🟦',
+    "Call":'📞',
+    "New":'🆕',
 }
 function renderMermaidFilter(){
     var html=''

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using OPP;
 
 namespace OPP{
 
@@ -37,6 +38,7 @@ class Animal : ISpeak
 // 5. 子类 (Subclass)
 class Dog : Animal
 {
+    static Cat scat=new Cat();
     // 子类构造方法，使用 base 调用父类构造
     public Dog(string name, int age) : base(name, age) { }
 
@@ -49,11 +51,16 @@ class Dog : Animal
 
 class Cat : Animal
 {
+    static Cat ncat=new Cat("s",1)
+    private string p=GenString("aaa");
     public Cat(string name, int age) : base(name, age) { }
 
     public override void Speak()
     {
         Console.WriteLine("喵喵喵！");
+    }
+    private string GenString(string a){
+        return a;
     }
 }
 }
@@ -86,6 +93,14 @@ class Program
         for (int i = 0; i < 3; i++)
         {
             Console.WriteLine($"for 循环计数：{i + 1}");
+            while(true){
+                dog.Speak("white");
+            }
+
+            do{
+                Update();
+
+            }while(i>0);
         }
 
         // 8. foreach 循环
@@ -98,6 +113,10 @@ class Program
             if (animal.Age > 2)
             {
                 Console.WriteLine("  -> 这是一只成年动物");
+                var a=new Dog()
+                if(a.Age>1){
+                    a.Speak();
+                }
             }
             else
             {
@@ -108,13 +127,7 @@ class Program
             animal.Speak();
         }
 
-        while(true){
-
-        }
-
-        do{
-
-        }while(i>0)
+        
 
         Console.WriteLine("\n--- 测试结束 ---");
         Console.ReadKey();

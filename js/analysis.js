@@ -74,7 +74,6 @@ function load() {
 
 var gMermaid;
 
-
 function genMermaid(){
     var $useTreeSitter=document.getElementById('useTreeSitter')
     mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
@@ -98,10 +97,10 @@ function genMermaid(){
         sameName:document.getElementById('mmdop_samename').checked,
         FDPNode:{},
         FDPLinks:[],
+        namespace:''
     }
     for(let file in gAst){//generate FlowNode FlowOne UMLClass FDPNode Flow
         r.Flow+=`  subgraph ${file}\n   direction TB\n`;
-        let namespace=null;
         if($useTreeSitter.checked){
                 TreeSitter.setCode(gAst[file].code)
                 TreeSitter.traverseAst(gAst[file],(node)=>{
@@ -141,7 +140,7 @@ function genMermaid(){
             }
         }
         
-        if(namespace)r.Flow+=`  end\n`
+        if(r.namespace)r.Flow+=`  end\n`
         r.Flow+=`  end\n`
     }
     if(r.showRelation&&gMermaid){//第一次不渲染依赖 generate UML
@@ -150,7 +149,7 @@ function genMermaid(){
                 if(gMermaid&&gMermaid.FlowFilter[x]==false)continue
                 if(ucls===x||ucls===x.split('_')[0])continue
                 var v=r.UMLClass[ucls][x]
-                if(v.type=='NewExpression'){
+                if(v.type=='NewExpression'||v.type=='New'){
                     r.UML+=`${ucls}..>${v.value||v._value}\n`
                 }
             }
@@ -162,12 +161,12 @@ function genMermaid(){
             let node=r.FlowNode[nk]
             if(r.FlowFilter[node._flow_id]===false)continue
             // 连接方法内部细节调用线 click twice
-            if(node.type=='NewExpression'||node.type=='CallExpression'){
+            if(node.type=='NewExpression'||node.type=='CallExpression'||node.type=="Call"||node.type=="New"){
                 let flow_ones=r.FlowOne[node.value||node._value]
                 if(r.idone&&flow_ones){
                     r.Flow=r.Flow.replaceAll(node._flow_str,'')
                     delete r.FDPNode[node._flow_id]
-                    if(node.type=='CallExpression'&&r.sameName){//for same name function call
+                    if((node.type=='CallExpression'||node.type=="Call")&&r.sameName){//for same name function call
                         if(!node._flow_callee)node._flow_callee=flow_ones[0]
                         // console.log('samename',node._flow_callee,flow_ones) 
                         for(let i=0;i<flow_ones.length;i++){
@@ -188,7 +187,7 @@ function genMermaid(){
                     r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
                 }
             }else if(r.showIf
-                    &&(node.type=="IfStatement"||node.type=="LoopStatement"||
+                    &&(node.type=="IfStatement"||node.type=="LoopStatement"||node.type=="If"||node.type=="Loop"||
                     node.type=="ForStatement"||node.type=="WhileStatement"||node.type=="DoWhileStatement"||node.type=="ForInStatement"||node.type=="ForOfStatement")
                 ){
                 //todo bug click mermaid first then check if and loop target undefined

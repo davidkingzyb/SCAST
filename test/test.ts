@@ -34,6 +34,7 @@ namespace OOP {
   // Dog 子类
   class Dog extends Animal {
     breed: string;
+    static sdog:Dog=new Dog();
 
     constructor(name: string, age: number, breed: string) {
       super(name, age);
@@ -124,5 +125,3 @@ function main(a: number, b: string): void {
 
 // 运行程序
 main(1, 2);
-
-var cat = new Cat(1, 2)

@@ -796,7 +796,7 @@ var SCASTPY=(function(){
 
         function traverseProperty(member,cls,file,r){
             member._flow_id=member.value
-            member._flow_prop=`|${member.value.replaceAll('|','\|').replaceAll('[','').replaceAll(']','')}|`
+            member._flow_prop=`|${mermaidRepl(member.value)}|`
             r.UML+=`    ${member.value}\n`
             if(!r.showCall)return true
             for(let n of member.body){
@@ -861,7 +861,7 @@ var SCASTPY=(function(){
                             r.Flow+=`         ${n._flow_id}((${n.value}))\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                             r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:'🔵'}
                         }  
-                        if(n.condition&&n.condition.value)n._flow_condition='|'+n.condition.value.replaceAll('|','｜').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
+                        if(n.condition&&n.condition.value)n._flow_condition='|'+mermaidRepl(n.condition.value)+'|'
                         if(n.body){
                             for(let nn of n.body){
                                 doBlock(nn,n,method)
@@ -873,7 +873,7 @@ var SCASTPY=(function(){
                             r.Flow+=`        ${n._flow_id}{${n.value}}\nclick ${n._flow_id} "javascript:void(onFlowClick('${n._flow_id}','${file}'))"\n`
                             r.FDPNode[n._flow_id]={id:n._flow_id,w:0,text:'🔷'}
                         }  
-                        if(n.condition&&n.condition.value)n._flow_condition='|'+n.condition.value.replaceAll('|','｜').replaceAll('[','⌈').replaceAll(']','⌋')+'|'
+                        if(n.condition&&n.condition.value)n._flow_condition='|'+mermaidRepl(n.condition.value)+'|'
                         if(n.body){
                             for(let nn of n.body){
                                 doBlock(nn,n,method)
@@ -945,6 +945,10 @@ var SCASTPY=(function(){
         return node.poi
     }
     function setCode(){}
+
+    function mermaidRepl(s){
+        return s.replaceAll('|','‼').replaceAll('[','⌈').replaceAll(']','⌋').replaceAll('(','⟪').replaceAll(')','⟫').replaceAll('{','⟪').replaceAll('}','⟫')
+    }
 
     return {
         getAst: getAst,
