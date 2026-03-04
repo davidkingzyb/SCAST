@@ -97,6 +97,10 @@ HOW TO USE
             <input type="checkbox" id="useTreeSitter" class="d3ops" checked /><label for="useTreeSitter" title="use TreeSitter">TreeSitter</label>
         </div>
         <details>
+            <summary title="D3 TreeSitter filter">TreeSitter</summary>
+            <div id="D3TreeSitter" class="opcls"></div>
+        </details>
+        <details>
             <summary title="D3 SCAST filter">SCAST</summary>
             <div id="D3Option" class="opcls"></div>
         </details>
@@ -177,9 +181,12 @@ HOW TO USE
 
 </body>
 <script>
-    initFile()
-    renderD3Option()
-    initCodeScaler()
-    getModels()
+    window.onload=function(){
+        initFile()
+        renderD3Option()
+        initCodeScaler()
+        getModels()
+    }
+    
 </script>
 </html>

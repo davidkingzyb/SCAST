@@ -358,7 +358,16 @@ function renderD3Option(){
         html+=`<input type="checkbox" id="d3op_${op}" class="d3ops" ${SCAST.types[op]?"checked":''} /><label for="d3op_${op}">${op}</label> `
     }
     document.getElementById("D3Option").innerHTML=html
+
+    var html=`<input type="checkbox" id="d3tsop_all" class="d3ops" checked/><label for="d3tsop_all">all</label>`
+    for(let op in TreeSitter.types){
+        html+=`<input type="checkbox" id="d3tsop_${op}" class="d3ops" ${TreeSitter.types[op]?"checked":''} /><label for="d3tsop_${op}">${op}</label> `
+    }
+    document.getElementById("D3TreeSitter").innerHTML=html
+
 }
+
+
 function getSCASTD3Option(){
     var result=JSON.parse(JSON.stringify(SCAST.types))
     for(let op in result){
@@ -373,6 +382,14 @@ function getESTreeD3Option(){
         result[op]=document.getElementById('d3esop_'+op).checked
     }
     result['all']=document.getElementById('d3esop_all').checked
+    return result
+}
+function getTreeSitterD3Option(){
+    var result=JSON.parse(JSON.stringify(TreeSitter.types))
+    for(let op in result){
+        result[op]=document.getElementById('d3tsop_'+op).checked
+    }
+    result['all']=document.getElementById('d3tsop_all').checked
     return result
 }
 function scaleD3(){

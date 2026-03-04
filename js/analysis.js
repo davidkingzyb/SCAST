@@ -228,6 +228,7 @@ function genD3(){
     gD3.conf={
         scastops:getSCASTD3Option(),
         estreeops:getESTreeD3Option(),
+        treesitterops:getTreeSitterD3Option(),
         fontsize:gD3fontSize,
     }
     
@@ -238,6 +239,7 @@ function genD3(){
         if($useTreeSitter.checked){
             TreeSitter.setCode(gAst[file].code)
             TreeSitter.setD3Config(gD3.conf)
+            d3node=TreeSitter.getTopTree(TreeSitter.filterTree(d3node));
             TreeSitter.traverseAst(d3node,(node)=>{
                 return TreeSitter.analysisD3(node)
             })

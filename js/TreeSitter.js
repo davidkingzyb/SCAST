@@ -1,7 +1,4 @@
-import { Parser,Language }  from '../lib/TreeSitter/web-tree-sitter.js';
-await Parser.init().then(() => {
-    console.log("Parser init")
-});
+
 
 window.TreeSitter=(function(){
     var Code='';
@@ -42,9 +39,10 @@ window.TreeSitter=(function(){
         'shader':null,
     }
 
-    var d3config={estreeops:types,fontsize:14}
+    var d3config={treesitterops:types,fontsize:14}
     function setD3Config(conf){
         d3config=conf
+        console.log('Tree Sitter d3config',d3config)
     }
     function setCode(code){
         Code = code;
@@ -100,7 +98,7 @@ window.TreeSitter=(function(){
     function filterTree(node) {
         if (!node) return null;
         
-        if (types[node.type]) {
+        if (types[node.type]&&d3config.treesitterops[node.type]) {
             const new_node = {
                 children: []
             };
@@ -265,18 +263,16 @@ window.TreeSitter=(function(){
             n.arguments=getChildrenTextByType(argument_list,'argument')
             n.type="Call"
         }
-        else if(node.type==="for_statement"||node.type==="while_statement"||node.type==="do_statement"||node.type==="foreach_statement"){
+        else if(node.type==="for_statement"||node.type==="while_statement"||node.type==="do_statement"||node.type==="foreach_statement"
+            ||node.type==="for_in_statement"||node.type==="list_comprehension"){
             n.value="loop"
             n.condition=getChildByType(node,"binary_expression")?.text;
             if(!n.condition)n.condition=getChildByType(node,"comparison_operator")?.text;
-            if(!n.condition)n.condition=getChildByType(node)?.text//cs foreach py for
+            if(!n.condition)n.condition=getChildByType(node)?.text//cs foreach py for in
+            if(!n.condition)n.condition=node.text//py for
             n.type="Loop"
         }
-        else if(node.type==="for_in_statement"){//ts
-            n.value="loop"
-            n.condition=getChildByType(node)?.text;
-            n.type="Loop"
-        }
+
         else if(node.type==="if_statement"||node.type==="else_clause"){
             n.value="if"
             n.condition=getChildByType(node,"binary_expression")?.text;
@@ -302,11 +298,6 @@ window.TreeSitter=(function(){
             if(!n.value)n.value=getChildByType(getChildByType(node,"member_expression"),"property_identifier")?.text
             n.arg=getChildByType(node,'arguments')?.text
             n.type="Call"
-        }
-        else if(node.type==="list_comprehension"){//py for
-            n.value="loop"
-            n.condition=node.text
-            n.type="Loop"
         }
         else if(node.type==="variable_declarator"||node.type==="assignment"){//ts py js
             n.value=getChildByType(node)?.text
@@ -644,6 +635,14 @@ window.TreeSitter=(function(){
         analysisD3:analysisD3,
         setD3Config:setD3Config,
         types:types,
-        setCode:setCode
+        setCode:setCode,
+        getTopTree:getTopTree,
+        filterTree:filterTree,
     }
 })()
+
+import { Parser,Language }  from '../lib/TreeSitter/web-tree-sitter.js';
+await Parser.init().then(() => {
+    console.log("Parser init")
+    
+});
