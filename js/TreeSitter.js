@@ -25,6 +25,7 @@ window.TreeSitter=(function(){
         'c':'../lib/TreeSitter/tree-sitter-c.wasm',
         'hlsl':'../lib/TreeSitter/tree-sitter-c.wasm',
         'shader':'../lib/TreeSitter/tree-sitter-c.wasm',
+        'compute':'../lib/TreeSitter/tree-sitter-c.wasm',
     }
 
     var language_parser={
@@ -37,6 +38,7 @@ window.TreeSitter=(function(){
         'c':null,
         'hlsl':null,
         'shader':null,
+        'compute':null,
     }
 
     var d3config={treesitterops:types,fontsize:14}
@@ -71,7 +73,7 @@ window.TreeSitter=(function(){
             }
             return n 
         }
-        result=getTopTree(filterTree(result))
+        result=getTopTree(filterTree(result))//dev
         console.log("TreeSitter getAst",filename,filetype,result)
         return result;
     }
@@ -150,7 +152,7 @@ window.TreeSitter=(function(){
             start:node.startPosition.column,
             line:node.startPosition.row+1
         }
-        n.node=node;//dev
+        // n.node=node;//dev
 
         if(node.type==="namespace_declaration"||node.type==="internal_module"){//cs ts
             n.value=getChildByType(node)?.text
@@ -245,6 +247,19 @@ window.TreeSitter=(function(){
             }
             n.type="Function"
         }
+        else if(node.type==="function_definition"){//py
+            n.value=getChildByType(node)?.text
+            let parameter_list=getChildByType(node,'parameters')
+            let c_func=getChildByType(node,"function_declarator")
+            if(c_func){//c
+                n.value=getChildByType(c_func,'identifier',true)?.text
+                parameter_list=getChildByType(c_func,"parameter_list")
+            }
+            n.param=parameter_list?.text
+            n.parameters=getChildrenTextByType(parameter_list)
+            n.type="Function"
+        }
+
         else if(node.type==="object_creation_expression"){//cs new
             n.value=getChildByType(node)?.text
             if(!n.value)n.value=getChildByType(node,"generic_name")?.text;
@@ -279,13 +294,6 @@ window.TreeSitter=(function(){
             if(!n.condition)n.condition=getChildByType(node,"comparison_operator")?.text;
             if(!n.condition)n.condition=getChildByType(node,"parenthesized_expression")?.text;//ts
             n.type="If"
-        }
-        else if(node.type==="function_definition"){//py
-            n.value=getChildByType(node)?.text
-            let parameter_list=getChildByType(node,'parameters')
-            n.param=parameter_list?.text
-            n.parameters=getChildrenTextByType(parameter_list)
-            n.type="Function"
         }
         else if(node.type==="call"){//py
             n.value=getChildByType(node)?.text

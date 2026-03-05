@@ -257,7 +257,7 @@ function onFlowClick(n,file,time=5000){
     for(let $l of $line){
         if($l.getAttribute('data-line-number')==node.poi.line){
             $l.style.backgroundColor = "#ff702e";
-            $l.scrollIntoView()
+            $l.scrollIntoView({behavior:'smooth',block:'center',inline:'center'})
             document.getElementById('code_con').scrollBy(0,-100)
             setTimeout(()=>{
                 $l.style.backgroundColor = "#ffb02e";
@@ -415,6 +415,20 @@ function initCodeScaler(){
     var $codecon=document.getElementById('code_con')
     var $codepanel=document.getElementById('code_panel')
     var $codescroll=document.getElementById('code_scroll')
+
+    var $mover=document.getElementById('codemover');
+    var isCodeMove=false
+
+    $mover.addEventListener('mousedown',()=>{
+        isCodeMove=true
+        document.body.style.userSelect='none'
+    })
+    document.addEventListener('mouseup',()=>{
+        // console.log('up')
+        isCodeMove=false
+        document.body.style.userSelect=''
+    })
+
     $codecon.addEventListener('toggle',(e)=>{
         if($codecon.open){
             $codepanel.style.display = 'block';
@@ -441,6 +455,12 @@ function initCodeScaler(){
             $codescroll.style.width=(cx-15)+'px'
             $codescroll.style.height=(cy-15)+'px'
         }
+        if(isCodeMove){
+            var cx = e.clientX;
+            var cy = e.clientY;
+            $codepanel.style.left=(cx-15)+'px'
+            $codepanel.style.top=(cy-15)+'px'
+        }
     })
 
     $scaler.addEventListener('touchend',()=>{
@@ -459,7 +479,6 @@ function initCodeScaler(){
         }
         
     })
-    
 }
 
 function wtfmsg(m,time=3000){

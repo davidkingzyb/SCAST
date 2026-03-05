@@ -125,7 +125,16 @@ summary{
     bottom: 0;
     background-color: #ffb02e;
     clip-path: polygon(100% 0%, 100% 100%, 0% 100%);
-    cursor: pointer;
+    cursor: se-resize;
+}
+#codemover{
+    height: 25px;
+    width: 25px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background-color: #ffb02e;
+    cursor: move;
 }
 #code_con{
     position: fixed;                          
