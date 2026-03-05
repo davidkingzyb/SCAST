@@ -232,7 +232,10 @@ function genD3(){
         fontsize:gD3fontSize,
     }
     
-    console.log('D3 config',gD3.conf)
+    var D3Select=document.getElementById('D3Select').value;
+    gD3.select=D3Select;
+    gD3.tree=r;
+    console.log('gD3',gD3)
 
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
@@ -241,6 +244,10 @@ function genD3(){
             TreeSitter.setD3Config(gD3.conf)
             d3node=TreeSitter.getTopTree(TreeSitter.filterTree(d3node));
             TreeSitter.traverseAst(d3node,(node)=>{
+                if(D3Select!=="IndentedTree"){
+                    node.name=node.value
+                    return
+                }
                 return TreeSitter.analysisD3(node)
             })
         }else if(file.indexOf('.js')>=0){
@@ -263,11 +270,8 @@ function genD3(){
         }
         r.children.push(d3node)
     }
-    gD3.tree=r;
     
-    var D3Select=document.getElementById('D3Select').value;
-    gD3.select=D3Select;
-    console.log('gD3',gD3)
+    
 
     renderD3(D3Select,gD3.tree)
     scrollToView('D3Select',-window.innerHeight/2-20)

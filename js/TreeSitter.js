@@ -1,5 +1,5 @@
 
-
+const LIBPATH='../lib'
 window.TreeSitter=(function(){
     var Code='';
     var types={
@@ -16,16 +16,16 @@ window.TreeSitter=(function(){
         "If":true
     }
     const LANGUAGE_WASM={
-        'js':'../lib/TreeSitter/tree-sitter-javascript.wasm',
-        'ts':'../lib/TreeSitter/tree-sitter-typescript.wasm',
-        'py':'../lib/TreeSitter/tree-sitter-python.wasm',
-        'sh':'../lib/TreeSitter/tree-sitter-bash.wasm',
-        'cs':'../lib/TreeSitter/tree-sitter-c_sharp.wasm',
-        'cpp':'../lib/TreeSitter/tree-sitter-cpp.wasm',
-        'c':'../lib/TreeSitter/tree-sitter-c.wasm',
-        'hlsl':'../lib/TreeSitter/tree-sitter-c.wasm',
-        'shader':'../lib/TreeSitter/tree-sitter-c.wasm',
-        'compute':'../lib/TreeSitter/tree-sitter-c.wasm',
+        'js':LIBPATH+'/TreeSitter/tree-sitter-javascript.wasm',
+        'ts':LIBPATH+'/TreeSitter/tree-sitter-typescript.wasm',
+        'py':LIBPATH+'/TreeSitter/tree-sitter-python.wasm',
+        'sh':LIBPATH+'/TreeSitter/tree-sitter-bash.wasm',
+        'cs':LIBPATH+'/TreeSitter/tree-sitter-c_sharp.wasm',
+        'cpp':LIBPATH+'/TreeSitter/tree-sitter-cpp.wasm',
+        'c':LIBPATH+'/TreeSitter/tree-sitter-c.wasm',
+        'hlsl':LIBPATH+'/TreeSitter/tree-sitter-c.wasm',
+        'shader':LIBPATH+'/TreeSitter/tree-sitter-c.wasm',
+        'compute':LIBPATH+'/TreeSitter/tree-sitter-c.wasm',
     }
 
     var language_parser={
@@ -154,8 +154,9 @@ window.TreeSitter=(function(){
         }
         // n.node=node;//dev
 
-        if(node.type==="namespace_declaration"||node.type==="internal_module"){//cs ts
+        if(node.type==="namespace_declaration"||node.type==="internal_module"||node.type==="namespace_definition"){//cs ts cpp
             n.value=getChildByType(node)?.text
+            if(!n.value)n.value=getChildByType(node,"namespace_identifier")?.text //cpp
             n.type="Namespace"
         }
         else if(node.type==="interface_declaration"){//cs ts
@@ -187,11 +188,17 @@ window.TreeSitter=(function(){
             n.extends=getChildrenTextByType(getChildByType(node,'argument_list',true))
             n.type="Class"
         }
-        else if(node.type==="field_declaration"){//cs member
+        else if(node.type==="class_specifier"){//cpp
+            n.value=getChildByType(node,"type_identifier")?.text
+            n.extends=getChildrenTextByType(getChildByType(node,'base_class_clause',true),"type_identifier")
+            n.type="Class"
+        }
+        else if(node.type==="field_declaration"){//cs member cpp
             let vd=getChildByType(node,'variable_declaration')
             n.predefined_type=getChildByType(vd,"predefined_type")?.text
             if(!n.predefined_type)n.predefined_type=getChildByType(vd,"generic_name")?.text
             n.value=getChildByType(getChildByType(vd,"variable_declarator"))?.text
+            if(!n.value)n.value=getChildByType(node,"field_identifier")?.text//cpp
             n.level=getChildByType(node,'modifier',true)?.text
             n.type="Property"
         }
@@ -247,13 +254,17 @@ window.TreeSitter=(function(){
             }
             n.type="Function"
         }
-        else if(node.type==="function_definition"){//py
+        else if(node.type==="function_definition"){//py c cpp
             n.value=getChildByType(node)?.text
             let parameter_list=getChildByType(node,'parameters')
             let c_func=getChildByType(node,"function_declarator")
             if(c_func){//c
                 n.value=getChildByType(c_func,'identifier',true)?.text
+                if(!n.value)n.value=getChildByType(c_func,'field_identifier',true)?.text//cpp
+                if(!n.value)n.value=getChildByType(c_func,'destructor_name',true)?.text//cpp interface
+                if(n.value)n.value=n.value.replaceAll('~','')//cpp for mermaid flow
                 parameter_list=getChildByType(c_func,"parameter_list")
+                n.return_type=getChildByType(node,"primitive_type")?.text
             }
             n.param=parameter_list?.text
             n.parameters=getChildrenTextByType(parameter_list)
@@ -268,6 +279,13 @@ window.TreeSitter=(function(){
             n.arguments=getChildrenTextByType(argument_list,'argument')
             n.type="New"
         }       
+        else if(node.type==="new_expression"){//ts cpp
+            n.value=getChildByType(node)?.text
+            if(!n.value)n.value=getChildByType(node,"type_identifier")?.text;
+            n.arg=getChildByType(node,'arguments')?.text
+            if(!n.arg)n.arg=getChildByType(node,"argument_list")?.text
+            n.type="New"
+        }
         else if(node.type==="invocation_expression"){//cs call
             n.value=getChildByType(node)?.text
             if(!n.value){
@@ -293,6 +311,7 @@ window.TreeSitter=(function(){
             n.condition=getChildByType(node,"binary_expression")?.text;
             if(!n.condition)n.condition=getChildByType(node,"comparison_operator")?.text;
             if(!n.condition)n.condition=getChildByType(node,"parenthesized_expression")?.text;//ts
+            if(!n.condition)n.condition=getChildByType(node,"condition_clause")?.text;//cpp
             n.type="If"
         }
         else if(node.type==="call"){//py
@@ -301,10 +320,13 @@ window.TreeSitter=(function(){
             n.arg=getChildByType(node,'argument_list')?.text
             n.type="Call"
         }
-        else if(node.type==="call_expression"){//ts
+        else if(node.type==="call_expression"){//ts c cpp
             n.value=getChildByType(node)?.text
             if(!n.value)n.value=getChildByType(getChildByType(node,"member_expression"),"property_identifier")?.text
+            if(!n.value)n.value=getChildByType(getChildByType(node,"field_expression"),"field_identifier")?.text//cpp
+            if(!n.value)n.value=getChildByType(node,"qualified_identifier")?.text//cpp
             n.arg=getChildByType(node,'arguments')?.text
+            if(!n.arg)n.arg=getChildByType(node,'argument_list')?.text//c
             n.type="Call"
         }
         else if(node.type==="variable_declarator"||node.type==="assignment"){//ts py js
@@ -330,12 +352,7 @@ window.TreeSitter=(function(){
                 n.type="Function"
             }
         }
-        else if(node.type==="new_expression"){//ts
-            n.value=getChildByType(node)?.text
-            let argument_list=getChildByType(node,'arguments')
-            n.arg=argument_list?.text
-            n.type="New"
-        }
+        
         return n;
 
         function getChildByType(node,type='identifier',isfirst=false){
@@ -403,11 +420,6 @@ window.TreeSitter=(function(){
                 console.log('function define',node)
                 traverseMethod(node,{},file)
                 break
-            // case "Method":
-            //     if(r.showMethod)break
-            //     // console.log("method",node)
-            //     traverseMethod(node,{},file)
-            //     break
 
         }
 
@@ -436,7 +448,7 @@ window.TreeSitter=(function(){
                     case "Method":
                         traverseMethod(member,node,file,symbol)
                         break;
-                    case "Function"://py
+                    case "Function"://py cpp
                         traverseMethod(member,node,file,symbol)
                         break;
                 }
@@ -616,10 +628,10 @@ window.TreeSitter=(function(){
                 node.name=`${node.value}${node.param||''}`
                 break;
             case 'New':
-                node.name=`new ${node.value}`
+                node.name=`new ${node.value}${node.arg}`
                 break;
             case 'Call':
-                node.name=node.value+'()'
+                node.name=`${node.value}${node.arg}`
                 break;
             case 'If':
                 node.name=`if ${node.condition}`
@@ -633,6 +645,7 @@ window.TreeSitter=(function(){
     }
 
     function mermaidRepl(s){
+        if(!s)return 'null'
         return s.replaceAll('|','‼').replaceAll('[','⌈').replaceAll(']','⌋').replaceAll('(','⟪').replaceAll(')','⟫').replaceAll('{','⟪').replaceAll('}','⟫')
     }
 
