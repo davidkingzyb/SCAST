@@ -6,6 +6,7 @@ function load() {
     var $file = document.getElementById('codefile')
     var $code=document.getElementById('code')
     var $codetext=document.getElementById('codetext')
+    var $useTreeSitter=document.getElementById('useTreeSitter')
     var html=''
     for(let ast in gAst){
         html+=`<details id="detail_${ast.replace('.','_')}">
@@ -14,35 +15,41 @@ function load() {
                 </details>`
         let t=ast.split('.')
         let c=gAst[ast].code
-        if(t[1]=='py'){
+        console.log('useTreeSitter',$useTreeSitter.checked)
+        if($useTreeSitter.checked){
+            gAst[ast]=TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
+        }else if(t[1]=='py'){
             gAst[ast]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }else if(t[1]=='js'){
             gAst[ast]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }else{
+            console.log('use SCAST')
             gAst[ast]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }
         gAst[ast]['code']=c.replace(/\r\n/g,'\n')
         gAst[ast]['filetype']=t[1]
         gAst[ast]['filename']=t[0]
     }
-    if($codetext&&$codetext.value){
-        html=`<details id="detail_code">
-            <summary>code</summary>
-            <pre><code class="" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
-        </details>`;
-        gAst.code=SCAST.getAst($codetext.value,'code')
-        gAst.code['code']=$codetext.value
-        gAst.code['filetype']=''
-        $code.innerHTML=html;
-        hljs.highlightAll();
-        hljs.initLineNumbersOnLoad();
-    }
+    // if($codetext&&$codetext.value){
+    //     html=`<details id="detail_code">
+    //         <summary>code</summary>
+    //         <pre><code class="" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
+    //     </details>`;
+    //     gAst.code=SCAST.getAst($codetext.value,'code')
+    //     gAst.code['code']=$codetext.value
+    //     gAst.code['filetype']=''
+    //     $code.innerHTML=html;
+    //     hljs.highlightAll();
+    //     hljs.initLineNumbersOnLoad();
+    // }
     for(let i=0;i<$file.files.length;i++){
         let r = new FileReader()
-        r.onload = function (e) {
+        r.onload =async function (e) {
             let t=r._filename.split('.')
             var c=e.target.result
-            if(t[1]=='py'){
+            if($useTreeSitter.checked){
+                gAst[r._filename]=await TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
+            }else if(t[1]=='py'){
                 gAst[r._filename]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else if(t[1]=='js'){
                 gAst[r._filename]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
@@ -67,8 +74,8 @@ function load() {
 
 var gMermaid;
 
-
 function genMermaid(){
+    var $useTreeSitter=document.getElementById('useTreeSitter')
     mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
     var r={
         UML:'classDiagram\n',
@@ -90,11 +97,16 @@ function genMermaid(){
         sameName:document.getElementById('mmdop_samename').checked,
         FDPNode:{},
         FDPLinks:[],
+        namespace:''
     }
     for(let file in gAst){//generate FlowNode FlowOne UMLClass FDPNode Flow
         r.Flow+=`  subgraph ${file}\n   direction TB\n`;
-        let namespace=null;
-        if(gAst[file].filetype=='js'){
+        if($useTreeSitter.checked){
+                TreeSitter.setCode(gAst[file].code)
+                TreeSitter.traverseAst(gAst[file],(node)=>{
+                    return TreeSitter.analysisMermaid(node,file,r)
+                })
+        }else if(gAst[file].filetype=='js'){
             try{
                 ESTREEJS.setCode(gAst[file].code)
                 ESTREEJS.traverseAst(gAst[file],(node)=>{
@@ -128,7 +140,7 @@ function genMermaid(){
             }
         }
         
-        if(namespace)r.Flow+=`  end\n`
+        if(r.namespace)r.Flow+=`  end\n`
         r.Flow+=`  end\n`
     }
     if(r.showRelation&&gMermaid){//第一次不渲染依赖 generate UML
@@ -137,7 +149,7 @@ function genMermaid(){
                 if(gMermaid&&gMermaid.FlowFilter[x]==false)continue
                 if(ucls===x||ucls===x.split('_')[0])continue
                 var v=r.UMLClass[ucls][x]
-                if(v.type=='NewExpression'){
+                if(v.type=='NewExpression'||v.type=='New'){
                     r.UML+=`${ucls}..>${v.value||v._value}\n`
                 }
             }
@@ -149,12 +161,12 @@ function genMermaid(){
             let node=r.FlowNode[nk]
             if(r.FlowFilter[node._flow_id]===false)continue
             // 连接方法内部细节调用线 click twice
-            if(node.type=='NewExpression'||node.type=='CallExpression'){
+            if(node.type=='NewExpression'||node.type=='CallExpression'||node.type=="Call"||node.type=="New"){
                 let flow_ones=r.FlowOne[node.value||node._value]
                 if(r.idone&&flow_ones){
                     r.Flow=r.Flow.replaceAll(node._flow_str,'')
                     delete r.FDPNode[node._flow_id]
-                    if(node.type=='CallExpression'&&r.sameName){//for same name function call
+                    if((node.type=='CallExpression'||node.type=="Call")&&r.sameName){//for same name function call
                         if(!node._flow_callee)node._flow_callee=flow_ones[0]
                         // console.log('samename',node._flow_callee,flow_ones) 
                         for(let i=0;i<flow_ones.length;i++){
@@ -175,7 +187,7 @@ function genMermaid(){
                     r.FDPLinks.push({source:node._flow_from,target:node._flow_id,value:2,dash:"5,5",dist:100,strength:0.1})
                 }
             }else if(r.showIf
-                    &&(node.type=="IfStatement"||node.type=="LoopStatement"||
+                    &&(node.type=="IfStatement"||node.type=="LoopStatement"||node.type=="If"||node.type=="Loop"||
                     node.type=="ForStatement"||node.type=="WhileStatement"||node.type=="DoWhileStatement"||node.type=="ForInStatement"||node.type=="ForOfStatement")
                 ){
                 //todo bug click mermaid first then check if and loop target undefined
@@ -211,18 +223,34 @@ var level_symbol={
     "static":'$',
 }
 function genD3(){
+    var $useTreeSitter=document.getElementById('useTreeSitter')
     var r={name:'file',children:[]}
     gD3.conf={
         scastops:getSCASTD3Option(),
         estreeops:getESTreeD3Option(),
+        treesitterops:getTreeSitterD3Option(),
         fontsize:gD3fontSize,
     }
     
-    console.log('D3 config',gD3.conf)
+    var D3Select=document.getElementById('D3Select').value;
+    gD3.select=D3Select;
+    gD3.tree=r;
+    console.log('gD3',gD3)
 
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
-        if(file.indexOf('.js')>=0){
+        if($useTreeSitter.checked){
+            TreeSitter.setCode(gAst[file].code)
+            TreeSitter.setD3Config(gD3.conf)
+            d3node=TreeSitter.getTopTree(TreeSitter.filterTree(d3node));
+            TreeSitter.traverseAst(d3node,(node)=>{
+                if(D3Select!=="IndentedTree"){
+                    node.name=node.value
+                    return
+                }
+                return TreeSitter.analysisD3(node)
+            })
+        }else if(file.indexOf('.js')>=0){
             ESTREEJS.setCode(gAst[file].code)
             ESTREEJS.setD3Config(gD3.conf)
             ESTREEJS.traverseAst(d3node,(node)=>{
@@ -242,11 +270,8 @@ function genD3(){
         }
         r.children.push(d3node)
     }
-    gD3.tree=r;
     
-    var D3Select=document.getElementById('D3Select').value;
-    gD3.select=D3Select;
-    console.log('gD3',gD3)
+    
 
     renderD3(D3Select,gD3.tree)
     scrollToView('D3Select',-window.innerHeight/2-20)

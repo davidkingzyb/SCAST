@@ -2,7 +2,7 @@
 
 **代码静态分析可视化工具**
 
-2024/9/27 by DKZ
+2026/3/6 by DKZ
 
 [English](./README.md)/中文
 
@@ -15,10 +15,13 @@
 [📺MCP](https://www.bilibili.com/video/BV1fkoyY3EB5/)  
 
 多种语言支持
-- javascript (使用[acorn](https://github.com/acornjs/acorn))
-- typescript (目前使用 [typescript](https://www.typescriptlang.org/) 之后可能迁移到 [estree](https://typescript-eslint.io/) 版本)
-- csharp (定制的解析器，之后不再支持)
-- python (定制解析器功能较全，之后可能迁移到 [filbert](https://github.com/differentmatt/filbert) 目前功能不全)
+- csharp
+- javascript
+- python
+- typescript
+- c
+- cpp
+- 使用 [TreeSitter](https://tree-sitter.github.io/tree-sitter/index.html) 你可以找到更多语言解析器,或定制自己的语言.
 
 原理是将输入代码整理为AST树并对其进行静态分析，最后输出使用[Mermaid](https://github.com/mermaid-js/mermaid-live-editor) 和 [D3](https://github.com/d3/d3) 输出可视化图表.
 
@@ -26,8 +29,6 @@
 对于开发者可使用 `npm run server` 将它部署在服务器中. 或者作为 **MCP** server 使用将它集成到你的 AI 客户端中.
 
 ![scast_uml](https://github.com/user-attachments/assets/0185738e-0815-4c92-8770-e9ff2b0da1d5)
-
-## 更新
 
 ### MCP
 
@@ -67,27 +68,9 @@ SCAST 是一个帮助用户分析总结代码并将可视化的工具.
 
 #### Ollama AI
 
-请先安装[ollama](https://ollama.com/)
+请先安装[ollama](https://ollama.com/)  
 [ai.js](./js/ai.js)中查看更多详情
 
 ![ollama](https://github.com/user-attachments/assets/afe8f504-17f7-4897-9990-4baa4f66213d)
 
-#### ESTree
 
-兼容ESTree规范的AST paser
-
-#### 力导引图
-
-![FDP](https://github.com/user-attachments/assets/6a34b405-492e-4966-a075-fce60330bccf)
-
-#### 其他 D3 图表
-
-- Indented tree
-- Tidy tree
-- Cluster tree
-- Tadial tidy tree
-- Radial cluster tree
-- Force directed tree
-- Edge bundling
-
-![scast_d3](https://github.com/user-attachments/assets/11c4e11f-05e6-48b0-a3ee-c1e5f6a0816d)
