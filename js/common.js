@@ -76,9 +76,10 @@ function showJson(){
 function storageAstJson(){
     localStorage.setItem('SCAST_gAst',JSON.stringify(gAst))
 }
-function loadAstJson(aststr){
+async function loadAstJson(aststr){
     gAst=JSON.parse(aststr||localStorage.getItem('SCAST_gAst'))
     var $code=document.getElementById('code')
+    var $useTreeSitter=document.getElementById('useTreeSitter')
     var html=''
     var isautosave=false;
     for(let ast in gAst){
@@ -86,10 +87,14 @@ function loadAstJson(aststr){
                 <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
-        if(!gAst[ast].body){//for mcp
+        if(!gAst[ast].body&&!gAst[ast].children){//for mcp
             let t=ast.split('.')
             let c=gAst[ast].code
-            if(t[1]=='py'){
+            if($useTreeSitter.checked){
+                gAst[ast]=await TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
+                console.log('TreeSitter mcp',gAst)
+            }
+            else if(t[1]=='py'){
                 gAst[ast]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else if(t[1]=='js'){
                 gAst[ast]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])

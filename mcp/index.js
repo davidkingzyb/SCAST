@@ -192,7 +192,7 @@ function updateAst(ast,oldast){
     }
 }
 
-const KEYWORDTYPE={'ClassDefine':'🆑','InterfaceDefine':'🔌','MethodDefine':'Ⓜ️','FunctionDefine':'🟦','FunctionDeclaration':'🟦','ClassDeclaration':'🆑'}
+const KEYWORDTYPE={'ClassDefine':'🆑','InterfaceDefine':'🔌','MethodDefine':'Ⓜ️','FunctionDefine':'🟦','FunctionDeclaration':'🟦','ClassDeclaration':'🆑','Class':'🆑','Interface':'🔌','Method':'Ⓜ️','Function':'🟦'}
 function getKeyword(ast){
     var keyword={}
     for(let file in ast){
@@ -250,6 +250,10 @@ function traverseScast(node,callback){
     if(isreturn===true)return
     if(node.body&&node.body.length>0){
         for(let n of node.body){
+            traverseScast(n,callback)
+        }
+    }else if(!node.body&&node.children&&node.children.length>0){//TreeSitter
+        for(let n of node.children){
             traverseScast(n,callback)
         }
     }
