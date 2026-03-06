@@ -88,7 +88,7 @@ window.TreeSitter=(function(){
     }
 
     function getTopTree(tree){
-        var result={type:"top"}
+        var result={type:"tree"}
         if (Array.isArray(tree)) {
             result['children']=tree
         }else{
@@ -273,7 +273,7 @@ window.TreeSitter=(function(){
 
         else if(node.type==="object_creation_expression"){//cs new
             n.value=getChildByType(node)?.text
-            if(!n.value)n.value=getChildByType(node,"generic_name")?.text;
+            // if(!n.value)n.value=getChildByType(node,"generic_name")?.text;//List or Dictionary mermaid bug
             let argument_list=getChildByType(node,'argument_list')
             n.arg=argument_list?.text
             n.arguments=getChildrenTextByType(argument_list,'argument')
@@ -352,6 +352,7 @@ window.TreeSitter=(function(){
                 n.type="Function"
             }
         }
+        n.value=mermaidRepl(n.value)
         
         return n;
 
@@ -611,7 +612,7 @@ window.TreeSitter=(function(){
 
     function analysisD3(node){
         switch(node.type){
-            case "top":
+            case "tree":
                 node.name=node.filename
                 break;
             case "Interface":
@@ -646,7 +647,7 @@ window.TreeSitter=(function(){
 
     function mermaidRepl(s){
         if(!s)return 'null'
-        return s.replaceAll('|','‼').replaceAll('[','⌈').replaceAll(']','⌋').replaceAll('(','⟪').replaceAll(')','⟫').replaceAll('{','⟪').replaceAll('}','⟫')
+        return s.replaceAll('|','‼').replaceAll('[','⌈').replaceAll(']','⌋').replaceAll('(','〖').replaceAll(')','〗').replaceAll('{','【').replaceAll('}','】').replaceAll('<','⟪').replaceAll('>','⟫')
     }
 
     return {

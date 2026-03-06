@@ -79,6 +79,7 @@ function storageAstJson(){
 function loadAstJson(aststr){
     gAst=JSON.parse(aststr||localStorage.getItem('SCAST_gAst'))
     var $code=document.getElementById('code')
+    var $useTreeSitter=document.getElementById('useTreeSitter')
     var html=''
     var isautosave=false;
     for(let ast in gAst){
@@ -86,10 +87,13 @@ function loadAstJson(aststr){
                 <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
-        if(!gAst[ast].body){//for mcp
+        if(!gAst[ast].body&&!gAst[ast].children){//for mcp
             let t=ast.split('.')
             let c=gAst[ast].code
-            if(t[1]=='py'){
+            if($useTreeSitter.checked){
+                gAst[ast]=TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
+            }
+            else if(t[1]=='py'){
                 gAst[ast]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
             }else if(t[1]=='js'){
                 gAst[ast]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
@@ -106,10 +110,10 @@ function loadAstJson(aststr){
     hljs.highlightAll();
     hljs.initLineNumbersOnLoad();
     showJson()
-    setTimeout(()=>{
-        genMermaid()
-        if(isautosave)_saveServer(JSON.stringify(gAst),'tmp.ast')
-    },1000);//for mermaid script load
+    // setTimeout(()=>{
+    //     genMermaid()
+    //     if(isautosave)_saveServer(JSON.stringify(gAst),'tmp.ast')
+    // },1000);//for mermaid script load
 }
 
 function fixedCon(idname,status){
