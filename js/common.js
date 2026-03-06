@@ -76,7 +76,7 @@ function showJson(){
 function storageAstJson(){
     localStorage.setItem('SCAST_gAst',JSON.stringify(gAst))
 }
-function loadAstJson(aststr){
+async function loadAstJson(aststr){
     gAst=JSON.parse(aststr||localStorage.getItem('SCAST_gAst'))
     var $code=document.getElementById('code')
     var $useTreeSitter=document.getElementById('useTreeSitter')
@@ -91,7 +91,8 @@ function loadAstJson(aststr){
             let t=ast.split('.')
             let c=gAst[ast].code
             if($useTreeSitter.checked){
-                gAst[ast]=TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
+                gAst[ast]=await TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
+                console.log('TreeSitter mcp',gAst)
             }
             else if(t[1]=='py'){
                 gAst[ast]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
@@ -110,10 +111,10 @@ function loadAstJson(aststr){
     hljs.highlightAll();
     hljs.initLineNumbersOnLoad();
     showJson()
-    // setTimeout(()=>{
-    //     genMermaid()
-    //     if(isautosave)_saveServer(JSON.stringify(gAst),'tmp.ast')
-    // },1000);//for mermaid script load
+    setTimeout(()=>{
+        genMermaid()
+        if(isautosave)_saveServer(JSON.stringify(gAst),'tmp.ast')
+    },1000);//for mermaid script load
 }
 
 function fixedCon(idname,status){
