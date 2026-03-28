@@ -2,7 +2,7 @@ var gAst={}
 
 
 
-function load() {
+async function load() {
     var $file = document.getElementById('codefile')
     var $code=document.getElementById('code')
     var $codetext=document.getElementById('codetext')
@@ -17,7 +17,7 @@ function load() {
         let c=gAst[ast].code
         console.log('useTreeSitter',$useTreeSitter.checked)
         if($useTreeSitter.checked){
-            gAst[ast]=TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
+            gAst[ast]=await TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
         }else if(t[1]=='py'){
             gAst[ast]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }else if(t[1]=='js'){
