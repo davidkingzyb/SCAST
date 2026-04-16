@@ -1,5 +1,6 @@
 
 const LIBPATH='../lib/TreeSitter/'
+//const LIBPATH='/sf/SCAST/lib/TreeSitter/'
 window.TreeSitter=(function(){
     var Code='';
     var types={
@@ -24,6 +25,7 @@ window.TreeSitter=(function(){
         'cpp':LIBPATH+'tree-sitter-cpp.wasm',
         'c':LIBPATH+'tree-sitter-c.wasm',
         'hlsl':LIBPATH+'tree-sitter-c.wasm',
+        'glsl':LIBPATH+'tree-sitter-c.wasm',
         'shader':LIBPATH+'tree-sitter-c.wasm',
         'compute':LIBPATH+'tree-sitter-c.wasm',
     }
@@ -37,6 +39,7 @@ window.TreeSitter=(function(){
         'cpp':null,
         'c':null,
         'hlsl':null,
+        'glsl':null,
         'shader':null,
         'compute':null,
     }

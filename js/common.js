@@ -455,10 +455,12 @@ function initCodeScaler(){
         if(isCodeScaler){
             var cx = e.clientX;
             var cy = e.clientY;
-            $codepanel.style.width=(cx-15)+'px'
-            $codepanel.style.height=(cy-15)+'px'
-            $codescroll.style.width=(cx-15)+'px'
-            $codescroll.style.height=(cy-15)+'px'
+            var top=parseInt($codepanel.style.top)||50;
+            var left=parseInt($codepanel.style.left)||document.body.width-720;
+            $codepanel.style.width=(cx-15-left)+'px'
+            $codepanel.style.height=(cy-15-top)+'px'
+            $codescroll.style.width=(cx-15-left)+'px'
+            $codescroll.style.height=(cy-15-top)+'px'
         }
         if(isCodeMove){
             var cx = e.clientX;
@@ -471,14 +473,14 @@ function initCodeScaler(){
     $scaler.addEventListener('touchend',()=>{
         if(isMax){
             isMax=false
-            $codepanel.style.width='625px'
+            $codepanel.style.width='720px'
             $codepanel.style.height='430px'
-            $codescroll.style.width='625px'
+            $codescroll.style.width='729px'
             $codescroll.style.height='430px'
         }else{
-            $codepanel.style.width='100vw'
+            // $codepanel.style.width='100vw'
             $codepanel.style.height=(window.screen.height-110)+'px'
-            $codescroll.style.width='100vw'
+            // $codescroll.style.width='100vw'
             $codescroll.style.height=(window.screen.height-110)+'px'
             isMax=true
         }
@@ -501,5 +503,72 @@ function wtfmsg(m,time=3000){
         setTimeout(()=>{
             document.body.removeChild(elem)
         },time)
+    }
+}
+
+function find() {
+    var p = prompt('🔍find ', '')
+    if (p === null) return
+    findHighlight(p, 'code')
+}
+
+var the_find = ''
+var find_index = 0;
+var $prev_find = null
+function findHighlight(search, con_id) {
+    var $searchs = document.querySelectorAll('.find_highlight')
+    for (let $s of $searchs) {
+        $s.classList.remove('find_highlight')
+        $s.style.backgroundColor = ''
+    }
+    $prev_find = null
+    find_index = 0
+    the_find = search;
+    _traverseDOM(document.getElementById(con_id), function (node) {
+        if (node.nodeType == Node.TEXT_NODE && node.textContent.indexOf(search) >= 0) {
+            var span = document.createElement('span')
+            span.innerHTML = node.textContent.replaceAll(search, '<span class="find_highlight">' + search + '</span>')
+            span.style.fontSize=getComputedStyle(node.parentNode)['fontSize']
+            node.parentNode.replaceChild(span, node)
+            return true
+        }
+    })
+    $searchs = document.querySelectorAll('.find_highlight')
+    if ($searchs.length !== 0) {
+        document.querySelector('.find_highlight').scrollIntoView({ behavior: 'smooth', 'block': "center" })
+        var $details=document.querySelectorAll('#code > details')
+        for(let d of $details)d.open=true
+    } else {
+        wtfmsg('not find ' + search)
+    }
+
+}
+function findNext(isprev) {
+    var $searchs = document.querySelectorAll('.find_highlight')
+    if($searchs.length==0){
+        find()
+        return
+    }
+    if (isprev) find_index--;
+    else { find_index++; }
+    if (find_index >= $searchs.length) find_index = 0;
+    if (find_index < 0) find_index = $searchs.length - 1;
+    $searchs[find_index].scrollIntoView({ behavior: 'smooth', block: "center" })
+    if ($prev_find) $prev_find.style.color = '#ffb02e'
+    $prev_find = $searchs[find_index]
+    $prev_find.style.color = 'rgb(255, 95, 46)'
+}
+
+window.onkeydown=function(e){
+    if (e.keyCode == 27) {//esc
+    }else if(e.keyCode==191){//vim /
+        window.event.preventDefault()
+        find()
+    }else if(e.keyCode==78&&!e.shiftKey){//vim n 
+        window.event.preventDefault()
+        findNext()
+    }else if(e.keyCode==78&&e.shiftKey){//vim n shift
+        window.event.preventDefault()
+        findNext(true)
     }
 }
