@@ -107,7 +107,7 @@ async function startServer(mcpdir,lastdir){
     const runserver=await checkPort('localhost',5305)
     if(runserver){
         if (process.platform === 'win32') {
-            spawn('start',['/min','node',path.join(mcpdir,'server.js'),mcpdir.replace('mcp','')],{detached:true,stdio: 'ignore',shell:true})
+            spawn('start',['/min','node',path.join(mcpdir,'server.js'),mcpdir.replace(/\\?\/?mcp/,'')],{detached:true,stdio: 'ignore',shell:true})
         } else{
             spawn('nohup',['node',path.join(mcpdir,'server.js'),mcpdir.replace('mcp',''),'&'],{detached:true,stdio: 'ignore',shell:true})
         }
