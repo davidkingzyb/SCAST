@@ -15,7 +15,7 @@ import {spawn,exec} from 'child_process'
 var mcpdirpath=import.meta.url.replace('index.js','')
 const _TreeSitter = (await import(mcpdirpath.replace("mcp/",'js/TreeSitter.js'))).default;
 for(let language in _TreeSitter.LANGUAGE_WASM){
-    _TreeSitter.LANGUAGE_WASM[language]=path.join(mcpdirpath.replace('file:///',''),_TreeSitter.LANGUAGE_WASM[language])
+    _TreeSitter.LANGUAGE_WASM[language]=path.join(mcpdirpath.replace('file://',''),_TreeSitter.LANGUAGE_WASM[language])
 }
 
 // Command line argument parsing
@@ -211,7 +211,7 @@ function getKeyword(ast){
         var lines=ast[file].code.split('\n')
 
         traverseScast(ast[file],(node)=>{
-            if(KEYWORDTYPE[node.type]){
+            if(node&&node.type&&KEYWORDTYPE[node.type]){
                 var lastnode;
                 traverseScast(node,(n)=>{
                     lastnode=n
@@ -232,11 +232,11 @@ function getKeyword(ast){
 function traverseScast(node,callback){
     var isreturn=callback(node)
     if(isreturn===true)return
-    if(node.body&&node.body.length>0){
+    if(node&&node.body&&node.body.length>0){
         for(let n of node.body){
             traverseScast(n,callback)
         }
-    }else if(!node.body&&node.children&&node.children.length>0){//TreeSitter
+    }else if(node&&!node.body&&node.children&&node.children.length>0){//TreeSitter
         for(let n of node.children){
             traverseScast(n,callback)
         }
