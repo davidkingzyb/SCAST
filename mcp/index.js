@@ -165,13 +165,13 @@ async function scastAnalysis(dir){
     //headless
     await doHeadless(ast)
     await fs.writeFile(dirjson, JSON.stringify(ast), 'utf8');
-    // var ourl=await startServer(mcpdir)   
+    var ourl=await startServer(mcpdir)   
 
     // wait browser autosave 
     // await fs.writeFile(dirjson, JSON.stringify(ast), 'utf8');
     // await new Promise(resolve => setTimeout(resolve, 2000))
     // ast=JSON.parse(await fs.readFile(dirjson,'utf-8'))
-    var ourl=await startServer(mcpdir,lastdir) 
+    // var ourl=await startServer(mcpdir,lastdir) 
 
     var keyword=getKeyword(ast)
     var keywordstr=""
@@ -182,7 +182,7 @@ async function scastAnalysis(dir){
 --------
 open [${ourl}](${ourl}) in browser to preview the analysis results. Click on the bottom-right corner to further analyze using ollama AI if needed.`
 }
-scastAnalysis('C:\\Users\\DKZ\\workspace\\SCAST\\test')//dev
+// scastAnalysis('C:\\Users\\DKZ\\workspace\\SCAST\\test')//dev
 
 async function doHeadless(ast){
     for(let file in ast){
