@@ -956,4 +956,13 @@ function setD3Config(conf){
         types:types,
         setD3Config:setD3Config,
     }
-    })()
+})()
+
+export default {
+    getAst:SCAST.getAst,
+    traverseAst:SCAST.traverseAst,
+    analysisMermaid:SCAST.analysisMermaid,
+    analysisD3:SCAST.analysisD3,
+    types:SCAST.types,
+    setD3Config:SCAST.setD3Config,
+}

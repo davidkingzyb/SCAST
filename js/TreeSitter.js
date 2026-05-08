@@ -1,7 +1,7 @@
 
 const LIBPATH='../lib/TreeSitter/'
 //const LIBPATH='/sf/SCAST/lib/TreeSitter/'
-window.TreeSitter=(function(){
+globalThis.TreeSitter=(function(){
     var Code='';
     var types={
         "Namespace":true,
@@ -16,7 +16,7 @@ window.TreeSitter=(function(){
         "Loop":true,
         "If":true
     }
-    const LANGUAGE_WASM={
+    var LANGUAGE_WASM={
         'js':LIBPATH+'tree-sitter-javascript.wasm',
         'ts':LIBPATH+'tree-sitter-typescript.wasm',
         'py':LIBPATH+'tree-sitter-python.wasm',
@@ -663,8 +663,23 @@ window.TreeSitter=(function(){
         setCode:setCode,
         getTopTree:getTopTree,
         filterTree:filterTree,
+        LANGUAGE_WASM:LANGUAGE_WASM
     }
 })()
+
+export default {
+    getAst:TreeSitter.getAst,
+    traverseAst:TreeSitter.traverseAst,
+    analysisMermaid:TreeSitter.analysisMermaid,
+    analysisD3:TreeSitter.analysisD3,
+    setD3Config:TreeSitter.setD3Config,
+    types:TreeSitter.types,
+    setCode:TreeSitter.setCode,
+    getTopTree:TreeSitter.getTopTree,
+    filterTree:TreeSitter.filterTree,
+    LANGUAGE_WASM:TreeSitter.LANGUAGE_WASM
+
+}
 
 import { Parser,Language }  from '../lib/TreeSitter/web-tree-sitter.js';
 await Parser.init().then(() => {

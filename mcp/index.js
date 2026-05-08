@@ -11,7 +11,15 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import net from "net";
 import {spawn,exec} from 'child_process'
 
-// import { minimatch } from 'minimatch';
+// import _SCAST from "../js/SCAST.js"
+
+// import work node and npm run dev but not work as mcp WHY?
+var mcpdirpath=import.meta.url.replace('index.js','')
+const _TreeSitter = (await import(mcpdirpath.replace("mcp/",'js/TreeSitter.js'))).default;
+for(let language in _TreeSitter.LANGUAGE_WASM){
+    _TreeSitter.LANGUAGE_WASM[language]=path.join(mcpdirpath.replace('file:///',''),_TreeSitter.LANGUAGE_WASM[language])
+}
+
 // Command line argument parsing
 const args = process.argv.slice(2);
 if (args.length === 0) {
@@ -99,10 +107,6 @@ function checkPort(host, port) {
     });
 }
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 async function startServer(mcpdir,lastdir){
     const runserver=await checkPort('localhost',5305)
     if(runserver){
@@ -112,7 +116,7 @@ async function startServer(mcpdir,lastdir){
             spawn('nohup',['node',path.join(mcpdir,'server.js'),mcpdir.replace('mcp',''),'&'],{detached:true,stdio: 'ignore',shell:true})
         }
     }
-    var ourl=`http://localhost:5305?file=/tmp/${lastdir}.json`
+    var ourl=lastdir?`http://localhost:5305?file=/tmp/${lastdir}.json`:"http://localhost:5305"
     try{
         if (process.platform === 'win32') {
             exec('start '+ourl)
@@ -157,11 +161,19 @@ async function scastAnalysis(dir){
         const oldast=JSON.parse(await fs.readFile(dirjson, 'utf8'));
         updateAst(ast,oldast)
     }
+
+    //headless
+    await doHeadless(ast)
     await fs.writeFile(dirjson, JSON.stringify(ast), 'utf8');
-    var ourl=await startServer(mcpdir,lastdir)   
-    await sleep(2000)//wait browser autosave
-    var autosave_ast=JSON.parse(await fs.readFile(dirjson,'utf-8'))
-    var keyword=getKeyword(autosave_ast)
+    // var ourl=await startServer(mcpdir)   
+
+    // wait browser autosave 
+    // await fs.writeFile(dirjson, JSON.stringify(ast), 'utf8');
+    // await new Promise(resolve => setTimeout(resolve, 2000))
+    // ast=JSON.parse(await fs.readFile(dirjson,'utf-8'))
+    var ourl=await startServer(mcpdir,lastdir) 
+
+    var keyword=getKeyword(ast)
     var keywordstr=""
     for(let k in keyword){
         keywordstr+=`- ${k} (${keyword[k].type}) ${keyword[k].analysis||''} \n`
@@ -169,6 +181,22 @@ async function scastAnalysis(dir){
     return `${keywordstr}
 --------
 open [${ourl}](${ourl}) in browser to preview the analysis results. Click on the bottom-right corner to further analyze using ollama AI if needed.`
+}
+scastAnalysis('C:\\Users\\DKZ\\workspace\\SCAST\\test')//dev
+
+async function doHeadless(ast){
+    for(let file in ast){
+        let c=ast[file].code
+        let filetype=ast[file].filetype
+        let filename=ast[file].filename
+        if(!ast[file].body&&!ast[file].children){
+            ast[file]=await _TreeSitter.getAst(c,filename,filetype);
+            // ast[file]=_SCAST.getAst(c,filename,filetype);
+            ast[file]['code']=c
+            ast[file]['filetype']=filetype
+            ast[file]['filename']=filename
+        }
+    }
 }
 
 function updateAst(ast,oldast){
