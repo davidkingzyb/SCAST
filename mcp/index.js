@@ -11,7 +11,13 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import net from "net";
 import {spawn,exec} from 'child_process'
 
-// import { minimatch } from 'minimatch';
+// import work node and npm run dev but not work as mcp WHY?
+var mcpdirpath=import.meta.url.replace('index.js','')
+const _TreeSitter = (await import(mcpdirpath.replace("mcp/",'js/TreeSitter.js'))).default;
+for(let language in _TreeSitter.LANGUAGE_WASM){
+    _TreeSitter.LANGUAGE_WASM[language]=path.join(mcpdirpath.replace('file://',''),_TreeSitter.LANGUAGE_WASM[language])
+}
+
 // Command line argument parsing
 const args = process.argv.slice(2);
 if (args.length === 0) {
@@ -99,10 +105,6 @@ function checkPort(host, port) {
     });
 }
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 async function startServer(mcpdir,lastdir){
     const runserver=await checkPort('localhost',5305)
     if(runserver){
@@ -112,7 +114,7 @@ async function startServer(mcpdir,lastdir){
             spawn('nohup',['node',path.join(mcpdir,'server.js'),mcpdir.replace('mcp',''),'&'],{detached:true,stdio: 'ignore',shell:true})
         }
     }
-    var ourl=`http://localhost:5305?file=/tmp/${lastdir}.json`
+    var ourl=lastdir?`http://localhost:5305?file=/tmp/${lastdir}.json`:"http://localhost:5305"
     try{
         if (process.platform === 'win32') {
             exec('start '+ourl)
@@ -122,14 +124,13 @@ async function startServer(mcpdir,lastdir){
     return ourl
 }
 
-const SUPPORT_TYPE=['.js','.py','.cs','.ts']
 
 async function scastAnalysis(dir){
     var files=[]
     const entries = await fs.readdir(dir, { withFileTypes: true });
     for(let entry of entries){
         let t=String(path.extname(entry.name)).toLocaleLowerCase();
-        if(!entry.isDirectory()&&SUPPORT_TYPE.indexOf(t)>=0)files.push(entry.name);
+        if(!entry.isDirectory()&&_TreeSitter.LANGUAGE_WASM[t.slice(1)])files.push(entry.name);
     }
     var ast={}
     const results = await Promise.all(files.map(async (file) => {
@@ -157,11 +158,20 @@ async function scastAnalysis(dir){
         const oldast=JSON.parse(await fs.readFile(dirjson, 'utf8'));
         updateAst(ast,oldast)
     }
+
+    //headless
+    await doHeadless(ast)
     await fs.writeFile(dirjson, JSON.stringify(ast), 'utf8');
-    var ourl=await startServer(mcpdir,lastdir)   
-    await sleep(2000)//wait browser autosave
-    var autosave_ast=JSON.parse(await fs.readFile(dirjson,'utf-8'))
-    var keyword=getKeyword(autosave_ast)
+    // var ourl=await startServer(mcpdir)//dev   
+
+    // wait browser autosave 
+    // await fs.writeFile(dirjson, JSON.stringify(ast), 'utf8');
+    // await new Promise(resolve => setTimeout(resolve, 2000))
+    // ast=JSON.parse(await fs.readFile(dirjson,'utf-8'))
+
+    var ourl=await startServer(mcpdir,lastdir) 
+
+    var keyword=getKeyword(ast)
     var keywordstr=""
     var sortkeys=Object.keys(keyword).sort((a,b)=>{
         
@@ -183,6 +193,21 @@ Open [${ourl}](${ourl}) in browser to preview the analysis results. Click on the
 Click 🧜‍♀️ to get more details. click 🦙 to use ollama analyze code, click 💾 to save result, Then use scast_analysis again to obtain the AI report.
 `
 }
+// scastAnalysis('C:\\Users\\DKZ\\workspace\\SCAST\\test')//dev
+
+async function doHeadless(ast){
+    for(let file in ast){
+        let c=ast[file].code
+        let filetype=ast[file].filetype
+        let filename=ast[file].filename
+        if(!ast[file].body&&!ast[file].children){
+            ast[file]=await _TreeSitter.getAst(c,filename,filetype);
+            ast[file]['code']=c
+            ast[file]['filetype']=filetype
+            ast[file]['filename']=filename
+        }
+    }
+}
 
 function updateAst(ast,oldast){
     for(let file in ast){
@@ -196,63 +221,35 @@ const KEYWORDTYPE={'ClassDefine':'🆑','InterfaceDefine':'🔌','MethodDefine':
 function getKeyword(ast){
     var keyword={}
     for(let file in ast){
-            if(ast[file].filetype=='js'){
-                traverseESTree(ast[file],(node=>{
-                    if(node._value&&KEYWORDTYPE[node.type]){
-                        keyword[node._value]={
-                            type:node.type,
-                            analysis:node._analysis,
-                            file:file,
-                            t:ast[file].filetype,
-                            code:ast[file].code.slice(node.range[0],node.range[1])
-                        }
-                    }
-                }))
-            }else{
-                var lines=ast[file].code.split('\n')
+        var lines=ast[file].code.split('\n')
 
-                traverseScast(ast[file],(node)=>{
-                    if(KEYWORDTYPE[node.type]){
-                        var lastnode;
-                        traverseScast(node,(n)=>{
-                            lastnode=n
-                        })
-                        keyword[node.value]={
-                            type:node.type,
-                            analysis:node._analysis,
-                            file:file,
-                            t:ast[file].filetype,
-                            code:lines.slice(node.poi.line-1,lastnode.poi.line+1).join('\n')
-                        }
-                    }
+        traverseScast(ast[file],(node)=>{
+            if(node&&node.type&&KEYWORDTYPE[node.type]){
+                var lastnode;
+                traverseScast(node,(n)=>{
+                    lastnode=n
                 })
+                keyword[node.value]={
+                    type:node.type,
+                    analysis:node._analysis,
+                    file:file,
+                    t:ast[file].filetype,
+                    code:lines.slice(node.poi.line-1,lastnode.poi.line+1).join('\n')
+                }
             }
+        })
     }
     return keyword
 }
 
-function traverseESTree(node,callback){
-    // console.log('traverseAst js', node);
-    var isreturn=callback(node)
-    if(isreturn===true)return
-    Object.keys(node).forEach((key) => {
-        const item = node[key]
-        if (Array.isArray(item)&&key!='children'&&key!='range') {
-          item.forEach((sub) => {
-            sub!==null&&sub.type && traverseESTree(sub, callback)
-          })
-        }
-        item && item.type && traverseESTree(item, callback)
-    })
-}
 function traverseScast(node,callback){
     var isreturn=callback(node)
     if(isreturn===true)return
-    if(node.body&&node.body.length>0){
+    if(node&&node.body&&node.body.length>0){
         for(let n of node.body){
             traverseScast(n,callback)
         }
-    }else if(!node.body&&node.children&&node.children.length>0){//TreeSitter
+    }else if(node&&!node.body&&node.children&&node.children.length>0){//TreeSitter
         for(let n of node.children){
             traverseScast(n,callback)
         }
