@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/davidkingzyb-scast-badge.png)](https://mseep.ai/app/davidkingzyb-scast)
+
 # 🔱SCAST
 
 **Static Code Analysis and Visualization**
