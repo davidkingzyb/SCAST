@@ -10,7 +10,7 @@ async function load() {
     var html=''
     for(let ast in gAst){
         html+=`<details id="detail_${ast.replace('.','_')}">
-                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
+                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}</summary>
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
         let t=ast.split('.')
@@ -60,7 +60,7 @@ async function load() {
             gAst[r._filename]['filetype']=t[1]
             gAst[r._filename]['filename']=t[0]
             html+=`<details id="detail_${t[0]}_${t[1]}">
-                <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} <a onclick="jumpOllama('${r._filename}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
+                <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} </summary>
                 <pre><code class="language-${t[1]}" id="${t[0]}">${c.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
             $code.innerHTML=html;
