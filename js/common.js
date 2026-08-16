@@ -84,7 +84,7 @@ async function loadAstJson(aststr){
     var isautosave=false;
     for(let ast in gAst){
         html+=`<details id="detail_${ast.replace('.','_')}">
-                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
+                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}</summary>
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
         if(!gAst[ast].body&&!gAst[ast].children){//for mcp
