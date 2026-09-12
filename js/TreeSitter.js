@@ -82,6 +82,7 @@ globalThis.TreeSitter=(function(){
     }
 
     function traverseAst(node,callback){
+	if(node===null)return;
         callback&&callback(node)
         if(node.children&&node.children.length>0){
             for(let n of node.children){
