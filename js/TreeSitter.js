@@ -265,6 +265,7 @@ globalThis.TreeSitter=(function(){
                 n.value=getChildByType(c_func,'identifier',true)?.text
                 if(!n.value)n.value=getChildByType(c_func,'field_identifier',true)?.text//cpp
                 if(!n.value)n.value=getChildByType(c_func,'destructor_name',true)?.text//cpp interface
+                if(!n.value)n.value=getChildByType(c_func,'qualified_identifier',true)?.text.split('::')[1]//cpp class
                 if(n.value)n.value=n.value.replaceAll('~','')//cpp for mermaid flow
                 parameter_list=getChildByType(c_func,"parameter_list")
                 n.return_type=getChildByType(node,"primitive_type")?.text
