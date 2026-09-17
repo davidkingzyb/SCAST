@@ -15,7 +15,7 @@ import {spawn,exec} from 'child_process'
 var mcpdirpath=import.meta.url.replace('index.js','')
 const _TreeSitter = (await import(mcpdirpath.replace("mcp/",'js/TreeSitter.js'))).default;
 for(let language in _TreeSitter.LANGUAGE_WASM){
-    _TreeSitter.LANGUAGE_WASM[language]=path.join(mcpdirpath.replace('file://',''),_TreeSitter.LANGUAGE_WASM[language])
+    _TreeSitter.LANGUAGE_WASM[language]=path.join(mcpdirpath.replace('file:///',''),_TreeSitter.LANGUAGE_WASM[language])
 }
 
 // Command line argument parsing
