@@ -1,4 +1,5 @@
-
+import json
+from importfile import func 
 g=Gog(1,"s")
 # 定义 Animal 父类
 class Animal:
