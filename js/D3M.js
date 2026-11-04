@@ -303,13 +303,33 @@ var D3M = (function () {
         return svg.node();
     }
 
-    function EdgeBundling(d) {
+    function EdgeBundling(d,importfiled) {
         function _D3Tree2Network(d) {
+            var $useTreeSitter=document.getElementById('useTreeSitter')
             var r = []
             var map = {}
             for (let n of d.children) {
-                console.log('tree2network',n)
-                if(n.filetype=='js'){
+                if($useTreeSitter.checked){
+                    TreeSitter.traverseAst(n,function(node){
+                        if(!node.value)return
+                        var nodename=node.value.replace(/[^0-9a-zA-Z]/g, '_')
+                        if(gD3.conf.treesitterops[node.type]||gD3.conf.treesitterops.all){
+                            if (!map['network.' + nodename]) {
+                                map['network.' + nodename] = []
+                            }
+                            if (node.children && node.children.length > 0) {
+                                for (let child of node.children) {
+                                    if(!child||!child.value)continue
+                                    let childname=child.value.replace(/[^0-9a-zA-Z]/g, '_')
+                                    if (!map['network.' + childname]) {
+                                        map['network.' + childname] = []
+                                    }
+                                    map['network.' + nodename].push('network.' + childname)
+                                }
+                            }
+                        }
+                    })
+                }else if(n.filetype=='js'){
                     ESTREEJS.traverseAst(n, function (node) {
                         if(!node.name)return
                         var nodename=node.name.replace(/[^0-9a-zA-Z]/g, '_')
@@ -353,7 +373,7 @@ var D3M = (function () {
             for (let k in map) {
                 r.push({ name: k, imports: map[k] })
             }
-            console.log('2network', r)
+            // console.log('2network', r,map)
             return r
         }
 
@@ -365,7 +385,15 @@ var D3M = (function () {
             { name: 'm.b', imports: ['m.c'] },
             { name: 'm.c', imports: ['m.a'] },
         ]
-        var data = hierarchy(_D3Tree2Network(d))
+        var data
+        if(d){
+            data=hierarchy(_D3Tree2Network(d))
+        }
+        else if(importfiled){
+            d={}
+            data=hierarchy(importfiled)
+        }
+        // console.log('edgeBundling',d,importfiled)
         function id(node) {
             return `${node.parent ? id(node.parent) + "." : ""}${node.data.name}`;
         }
@@ -523,7 +551,7 @@ var D3M = (function () {
             .attr("style", `font: ${gD3fontSize}px monospace;`);
 
         text.on("dblclick", function (event, d) {
-            console.log(d);
+            // console.log(d);
             dbClickCallback(d.id)
         });
 

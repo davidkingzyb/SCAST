@@ -1,3 +1,10 @@
+// import 示例
+import { func1, func2 } from './myModule.js';
+import defaultExport from './myModule.js';
+
+// require 示例
+const myModule = require('./myModule.js');
+
 var varfunc=function(a){
     if(a==0)return
 }

@@ -1,3 +1,5 @@
+import helloWorld from "./hello.js"
+
 // 接口定义
 // namespace AA{
 namespace OOP {

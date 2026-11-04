@@ -1,4 +1,5 @@
 var gAst={}
+var gMermaid={Flow:'flowchart LR\n',UML:'flowchart LR\n',FlowLink:'',FDPNode:{},FDPLinks:[],FlowNode:{},};
 
 
 
@@ -10,7 +11,7 @@ async function load() {
     var html=''
     for(let ast in gAst){
         html+=`<details id="detail_${ast.replace('.','_')}">
-                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}<a onclick="jumpOllama('${ast}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
+                <summary onclick="scrollToView('detail_${ast.replace('.','_')}')">${ast}</summary>
                 <pre><code class="language-${gAst[ast].filetype}" id="${ast}">${gAst[ast].code.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
         let t=ast.split('.')
@@ -23,25 +24,15 @@ async function load() {
         }else if(t[1]=='js'){
             gAst[ast]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }else{
-            console.log('use SCAST')
+            // console.log('use SCAST')
             gAst[ast]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }
         gAst[ast]['code']=c.replace(/\r\n/g,'\n')
         gAst[ast]['filetype']=t[1]
         gAst[ast]['filename']=t[0]
     }
-    // if($codetext&&$codetext.value){
-    //     html=`<details id="detail_code">
-    //         <summary>code</summary>
-    //         <pre><code class="" id="codetext">${$codetext.value.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
-    //     </details>`;
-    //     gAst.code=SCAST.getAst($codetext.value,'code')
-    //     gAst.code['code']=$codetext.value
-    //     gAst.code['filetype']=''
-    //     $code.innerHTML=html;
-    //     hljs.highlightAll();
-    //     hljs.initLineNumbersOnLoad();
-    // }
+    genImportGraph()
+
     for(let i=0;i<$file.files.length;i++){
         let r = new FileReader()
         r.onload =async function (e) {
@@ -60,23 +51,68 @@ async function load() {
             gAst[r._filename]['filetype']=t[1]
             gAst[r._filename]['filename']=t[0]
             html+=`<details id="detail_${t[0]}_${t[1]}">
-                <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} <a onclick="jumpOllama('${r._filename}')">${location.href.indexOf('davidkingzyb.tech')>=0?'🦙':''}</a></summary>
+                <summary onclick="scrollToView('detail_${t[0]}_${t[1]}')">${r._filename} </summary>
                 <pre><code class="language-${t[1]}" id="${t[0]}">${c.replaceAll('<','&lt;').replaceAll('>',"&gt;")}</code></pre>
                 </details>`
             $code.innerHTML=html;
             hljs.highlightAll();
             hljs.initLineNumbersOnLoad();
+            genImportGraph()
         }
         r.readAsText($file.files[i])
         r._filename=$file.files[i].name
     }
 }
 
-var gMermaid;
+function genImportGraph(){
+        try{
+    mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
+    var canclick=document.getElementById('mmdop_click').checked;
+    var $useTreeSitter=document.getElementById('useTreeSitter')
+    if($useTreeSitter.checked){
+        var filenames=Object.keys(gAst).map(v=>{return v.split('.')[0]})
+        var edgebundings=[]
+        const regex = /[^.\\/\\a-zA-Z0-9]/g;
+        gMermaid.FlowLink=''
+        gMermaid.Flow='flowchart LR\n'
+        gMermaid.UML='flowchart LR\n'
+        for(let k in gAst){
+            let ast=gAst[k]
+            var eb={"name":'network.'+ast.filename,"imports":[]}
+            if(ast.importfiles)gMermaid.FlowNode[ast.filename]=ast.importfiles[0]
+            gMermaid.Flow+=`  ${ast.filename}[${ast.filename}]\n`
+            if(canclick)gMermaid.Flow+=`click ${ast.filename} "javascript:void(onFlowClick('${ast.filename}','${k}'))"\n`
+            gMermaid.FDPNode[ast.filename]={id:ast.filename,w:ast.filename.length * gD3fontSize / 1.6 + gD3fontSize * 2,text:`${ast.filename}`}
+            gMermaid.UML+=`  ${ast.filename}[${ast.filename}]\n`
+            if(canclick)gMermaid.UML+=`click ${ast.filename} "javascript:void(onFlowClick('${ast.filename}','${k}'))"\n`
+            for(let im of ast.importfiles){
+                gMermaid.UML+=`${im.value.replace(regex,'')}([${im.value.replace(regex,'')}])\n`
+                gMermaid.UML+=`${ast.filename} -..-> ${im.value.replace(regex,'')}\n`
+                for(let f of filenames){
+                    if(im.value.indexOf(f)>=0){
+                        eb.imports.push('network.'+f)
+                        gMermaid.FlowLink+=`${ast.filename} --> ${f}`
+                        gMermaid.FDPLinks.push({source:ast.filename,target:f,value:2,strength:0.1,dash:'5,5',dist:100})
+                    }
+                }
+            }
+            edgebundings.push(eb)
+        }
+        var $con=document.getElementById('D3Diagram')
+        $con.innerHTML=''
+        var ebsvg=D3M.EdgeBundling(null,edgebundings)
+        $con.appendChild(ebsvg)
+        renderMermaid()
+        scrollToView('mermaidPane',-window.innerHeight/2-20)
+    }
+    }catch(err){
+        console.warn("genImortGraph error",err)
+    }
+}
+
 
 function genMermaid(){
     var $useTreeSitter=document.getElementById('useTreeSitter')
-    mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
     var r={
         UML:'classDiagram\n',
         Flow:'flowchart LR\n',
@@ -156,7 +192,7 @@ function genMermaid(){
         }
     }
 
-    if(gMermaid&&r.showCall){//traverse FlowNode update FlowLink FDPLinks, replace _flow_str in Flow
+    if(gMermaid.showCall&&r.showCall){//traverse FlowNode update FlowLink FDPLinks, replace _flow_str in Flow
         for(let nk in r.FlowNode){
             let node=r.FlowNode[nk]
             if(r.FlowFilter[node._flow_id]===false)continue
@@ -207,7 +243,7 @@ function genMermaid(){
         }
     }
     gMermaid=r;
-    console.log('gMermaid',gMermaid)
+    // console.log('gMermaid',gMermaid)
     renderMermaid()
     renderMermaidFilter()
     scrollToView('mermaidPane',-window.innerHeight/2-20)
@@ -235,7 +271,7 @@ function genD3(){
     var D3Select=document.getElementById('D3Select').value;
     gD3.select=D3Select;
     gD3.tree=r;
-    console.log('gD3',gD3)
+    // console.log('gD3',gD3)
 
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
@@ -271,8 +307,6 @@ function genD3(){
         r.children.push(d3node)
     }
     
-    
-
     renderD3(D3Select,gD3.tree)
     scrollToView('D3Select',-window.innerHeight/2-20)
 }

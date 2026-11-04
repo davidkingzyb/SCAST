@@ -55,6 +55,7 @@ input[type="text"]{
     width: 170px;
 }
 input[type="checkbox"] {
+    cursor: pointer;
     appearance: none;
     border: 1px solid black;
     background-color: white;
@@ -359,3 +360,106 @@ json-viewer {
 .find_highlight{
     color:#ffb02e;
 }
+
+
+
+#repo_url{
+    margin-top: 10px;
+}
+#repo_btn{
+    display: none;
+}
+
+
+.tree-root,
+.tree-node > ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.tree-node > ul {
+  padding-left: 18px;
+}
+
+.tree-node {
+  white-space: nowrap;
+}
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  /* border-radius: 4px; */
+  cursor: pointer;
+  user-select: none;
+}
+
+.tree-row:hover {
+  background: #ffb02e;
+}
+
+.tree-row input[type="checkbox"] {
+  cursor: pointer;
+  flex-shrink: 0;
+  appearance: none;
+  border: 1px solid black;
+  background-color: white;
+  width: 14px;
+  height: 14px;
+}
+
+.tree-row input[type="checkbox"]:checked{
+    /* appearance: none; */
+    background-color: #ffb02e;
+}
+
+.tree-arrow {
+  width: 14px;
+  flex-shrink: 0;
+  display: inline-block;
+  color: white;
+  font-size: 11px;
+  text-align: center;
+}
+
+.tree-arrow.collapsed::before {
+  content: "\25B6";
+}
+
+.tree-arrow.expanded::before {
+  content: "\25BC";
+}
+
+.tree-arrow.empty{
+    width: 0;
+}
+
+.tree-arrow.empty::before {
+  content: "\00A0";
+}
+
+.tree-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+
+.tree-label.dir {
+  font-weight: 600;
+}
+
+.tree-loading {
+  padding: 4px 0 4px 24px;
+  color: #8b949e;
+  font-size: 12px;
+}
+
+.tree-error {
+  padding: 4px 0 4px 24px;
+  color: #ff702e;
+  font-size: 12px;
+}
+

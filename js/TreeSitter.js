@@ -49,6 +49,7 @@ globalThis.TreeSitter=(function(){
         d3config=conf
         console.log('Tree Sitter d3config',d3config)
     }
+    var _importfiles=[]
     function setCode(code){
         Code = code;
     }
@@ -76,12 +77,15 @@ globalThis.TreeSitter=(function(){
             }
             return n 
         }
+        _importfiles=[]
         result=getTopTree(filterTree(result))//dev
-        console.log("TreeSitter getAst",filename,filetype,result)
+        result.importfiles=JSON.parse(JSON.stringify(_importfiles))
+        // console.log("TreeSitter getAst",filename,filetype,result)
         return result;
     }
 
     function traverseAst(node,callback){
+	    if(node===null)return;
         callback&&callback(node)
         if(node.children&&node.children.length>0){
             for(let n of node.children){
@@ -99,9 +103,13 @@ globalThis.TreeSitter=(function(){
         }
         return result;
     }
-
     function filterTree(node) {
         if (!node) return null;
+
+        if(node.type=="Import"){
+            _importfiles.push(node)
+            return null;
+        }
         
         if (types[node.type]&&d3config.treesitterops[node.type]) {
             const new_node = {
@@ -156,7 +164,28 @@ globalThis.TreeSitter=(function(){
             line:node.startPosition.row+1
         }
         // n.node=node;//dev
-
+        // console.log('getNodeValue',node.type,node.text)
+        // Import Graph
+        if(node.type==="import_statement"
+            ||node.type==="import_prefix"||node.type==="import_from_statement"//python
+            ||node.type==="preproc_include"//c
+            ||node.type==="using_directive"//csharp
+        ){
+            n.type="Import"
+            n.value=getChildByType(node,"string")?.text
+            if(!n.value)n.value=getChildByType(node,"string_literal")?.text//c
+            if(!n.value)n.value=getChildByType(node,"system_lib_string")?.text//c <string>
+            if(!n.value)n.value=getChildByType(node,"dotted_name",true)?.text//py
+            if(!n.value)n.value=getChildByType(node,"qualified_name")?.text//csharp
+            if(!n.value)n.value=getChildByType(node)?.text//csharp
+            return n
+        }
+        if(node.type==="call_expression"&&getChildByType(node)?.text==="require"){
+            n.type="Import"
+            n.value=getChildByType(getChildByType(node,"arguments"),"string")?.text
+            return n
+        }
+        // mermaid
         if(node.type==="namespace_declaration"||node.type==="internal_module"||node.type==="namespace_definition"){//cs ts cpp
             n.value=getChildByType(node)?.text
             if(!n.value)n.value=getChildByType(node,"namespace_identifier")?.text //cpp
@@ -265,6 +294,7 @@ globalThis.TreeSitter=(function(){
                 n.value=getChildByType(c_func,'identifier',true)?.text
                 if(!n.value)n.value=getChildByType(c_func,'field_identifier',true)?.text//cpp
                 if(!n.value)n.value=getChildByType(c_func,'destructor_name',true)?.text//cpp interface
+                if(!n.value)n.value=getChildByType(c_func,'qualified_identifier',true)?.text.split('::')[1]//cpp class
                 if(n.value)n.value=n.value.replaceAll('~','')//cpp for mermaid flow
                 parameter_list=getChildByType(c_func,"parameter_list")
                 n.return_type=getChildByType(node,"primitive_type")?.text
@@ -356,7 +386,6 @@ globalThis.TreeSitter=(function(){
             }
         }
         n.value=mermaidRepl(n.value)
-        
         return n;
 
         function getChildByType(node,type='identifier',isfirst=false){
@@ -421,7 +450,7 @@ globalThis.TreeSitter=(function(){
                 break;
             case "Function":
                 if(r.showMethod)break
-                console.log('function define',node)
+                //console.log('function define',node)
                 traverseMethod(node,{},file)
                 break
 
@@ -663,7 +692,7 @@ globalThis.TreeSitter=(function(){
         setCode:setCode,
         getTopTree:getTopTree,
         filterTree:filterTree,
-        LANGUAGE_WASM:LANGUAGE_WASM
+        LANGUAGE_WASM:LANGUAGE_WASM,
     }
 })()
 
@@ -683,6 +712,6 @@ export default {
 
 import { Parser,Language }  from '../lib/TreeSitter/web-tree-sitter.js';
 await Parser.init().then(() => {
-    console.log("Parser init")
+    console.log("TreeSitter Parser init")
     
 });
