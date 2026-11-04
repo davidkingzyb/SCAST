@@ -14,7 +14,7 @@ function searchMermaid(){
     var s=document.getElementById('searchMermaid').value;
     var $uml=document.getElementById('mermaidUML')
     var $flow=document.getElementById('mermaidFlow')
-    var $fdp=document.getElementById('FDP')
+    var $fdp=document.getElementById('D3Diagram')
     var $d3=document.getElementById('D3Diagram')
     _traverseDOM($uml,function(node){
         if(node.nodeType==Node.TEXT_NODE&&node.textContent.indexOf(s)>=0){
@@ -36,7 +36,7 @@ function searchMermaid(){
     })
     _traverseDOM($fdp,function(node){
         if(node.nodeType==Node.TEXT_NODE&&node.textContent.indexOf(s)>=0){
-            console.log(node)
+            // console.log(node)
             node.parentNode.style.fill='#ff702e'
             setTimeout(()=>{
                 node.parentNode.style.fill='#ffb02e'
@@ -46,7 +46,7 @@ function searchMermaid(){
     })
     _traverseDOM($d3,function(node){
         if(node.nodeType==Node.TEXT_NODE&&node.textContent.indexOf(s)>=0){
-            console.log(node)
+            // console.log(node)
             node.parentNode.style.fill='#ff702e'
             setTimeout(()=>{
                 node.parentNode.style.fill='#ffb02e'
@@ -69,7 +69,7 @@ function _traverseDOM(element,callback) {
 }
 
 function showJson(){
-    console.log('gAst',gAst)
+    // console.log('gAst',gAst)
     var $json=document.getElementById('json')
     $json.data=JSON.parse(JSON.stringify(gAst))
 }
@@ -92,7 +92,7 @@ async function loadAstJson(aststr){
             let c=gAst[ast].code
             if($useTreeSitter.checked){
                 gAst[ast]=await TreeSitter.getAst(c.replace(/\r\n/g,'\n'),t[0],t.slice(-1)[0])
-                console.log('TreeSitter mcp',gAst)
+                // console.log('TreeSitter mcp',gAst)
             }
             else if(t[1]=='py'){
                 gAst[ast]=ESTREEPY.getAst(c.replace(/\r\n/g,'\n'),t[0])
@@ -136,7 +136,7 @@ function scrollToView(id,dst){
     setTimeout(
         function(){
             if(dst&&document.getElementById('code_con').open){
-                console.log('dst',dst)
+                // console.log('dst',dst)
                 document.getElementById(id).scrollIntoView()
                 window.scrollBy(0,dst)
             }else{
@@ -187,7 +187,7 @@ function initFile(){
     var q = RegExp('[?&]file=([^&]*)').exec(location.href); 
     var file=q && decodeURIComponent(q[1].replace(/\+/g, ' '))
     if(file){
-        console.log('file',file)
+        // console.log('file',file)
         fetch('/rawtext?file='+file,{method:'GET'}).then(resp=>{
             return resp.text()
         }).then(text=>{
@@ -247,14 +247,14 @@ function reMermaid(){
 }
 function onFDPClick(id){
     var node=gMermaid.FlowNode[id]
-    console.log(node)
+    // console.log(node)
     onFlowClick(id,node._file)
 }
 function onFlowClick(n,file,time=5000){
     var node=gMermaid.FlowNode[n]
     if(!node)return
     var fileid=file.replace('.','_')
-    console.log(`flow click ${n} ${fileid} ${file}(${node.poi.line}:${node.poi.start})`,node)
+    // console.log(`flow click ${n} ${fileid} ${file}(${node.poi.line}:${node.poi.start})`,node)
     document.getElementById('code_con').open=open;
     var $detail=document.getElementById('detail_'+fileid)
     $detail.open=true
@@ -324,7 +324,7 @@ function onMermaidFilter(v){
 function renderMermaid(){
     var $textUML=document.getElementById('textUML')
     var $textFlow=document.getElementById('textFlow')
-    var $FDP=document.getElementById('FDP')
+    var $FDP=document.getElementById('D3Diagram')
     var $mermaidPane=document.getElementById('mermaidPane')
     $textUML.value=gMermaid.UML;
     $textFlow.value=gMermaid.Flow+'\n'+gMermaid.FlowLink;
@@ -339,8 +339,8 @@ function renderMermaid(){
         console.warn('render mermaid fail')
     }
     
-    $FDP.innerHTML=''
-    $FDP.append(D3M.disjointForce({nodes:Object.values(gMermaid.FDPNode),links:gMermaid.FDPLinks},onFDPClick))
+    // $FDP.innerHTML=''
+    $FDP.insertBefore(D3M.disjointForce({nodes:Object.values(gMermaid.FDPNode),links:gMermaid.FDPLinks},onFDPClick),$FDP.firstChild)
 }
 // =========== D3 ==============
 var gD3Scale=1
@@ -406,7 +406,7 @@ function clearD3(){
 }
 function renderD3(type,data){
     var svgnode=D3M[type](data)
-    document.getElementById('D3Diagram').append(svgnode)
+    document.getElementById('D3Diagram').insertBefore(svgnode,document.getElementById('D3Diagram').firstChild)
 }
 function saveD3(){//svg not work
     var svgnode=D3M[gD3.select](gD3.tree)
@@ -516,11 +516,7 @@ var the_find = ''
 var find_index = 0;
 var $prev_find = null
 function findHighlight(search, con_id) {
-    var $searchs = document.querySelectorAll('.find_highlight')
-    for (let $s of $searchs) {
-        $s.classList.remove('find_highlight')
-        $s.style.backgroundColor = ''
-    }
+    var $searchs = removeSearch()
     $prev_find = null
     find_index = 0
     the_find = search;
@@ -541,14 +537,22 @@ function findHighlight(search, con_id) {
     } else {
         wtfmsg('not find ' + search)
     }
-
+}
+function removeSearch(){
+    var $searchs = document.querySelectorAll('.find_highlight')
+    for (let $s of $searchs) {
+        $s.classList.remove('find_highlight')
+        $s.style.backgroundColor = ''
+    }
+    return $searchs
 }
 function findNext(isprev) {
     var $searchs = document.querySelectorAll('.find_highlight')
     if($searchs.length==0){
-        find()
+        // find()
         return
     }
+    window.event.preventDefault()
     if (isprev) find_index--;
     else { find_index++; }
     if (find_index >= $searchs.length) find_index = 0;
@@ -561,14 +565,13 @@ function findNext(isprev) {
 
 window.onkeydown=function(e){
     if (e.keyCode == 27) {//esc
-    }else if(e.keyCode==191){//vim /
+        removeSearch()
+    }else if(e.keyCode==75&&e.ctrlKey){//vim /
         window.event.preventDefault()
         find()
     }else if(e.keyCode==78&&!e.shiftKey){//vim n 
-        window.event.preventDefault()
         findNext()
     }else if(e.keyCode==78&&e.shiftKey){//vim n shift
-        window.event.preventDefault()
         findNext(true)
     }
 }

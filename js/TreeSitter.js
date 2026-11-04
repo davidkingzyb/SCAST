@@ -49,7 +49,7 @@ globalThis.TreeSitter=(function(){
         d3config=conf
         console.log('Tree Sitter d3config',d3config)
     }
-    var _imports=[]
+    var _importfiles=[]
     function setCode(code){
         Code = code;
     }
@@ -77,10 +77,10 @@ globalThis.TreeSitter=(function(){
             }
             return n 
         }
-        _imports=[]
+        _importfiles=[]
         result=getTopTree(filterTree(result))//dev
-        result.imports=JSON.parse(JSON.stringify(_imports))
-        console.log("TreeSitter getAst",filename,filetype,result)
+        result.importfiles=JSON.parse(JSON.stringify(_importfiles))
+        // console.log("TreeSitter getAst",filename,filetype,result)
         return result;
     }
 
@@ -107,7 +107,7 @@ globalThis.TreeSitter=(function(){
         if (!node) return null;
 
         if(node.type=="Import"){
-            _imports.push(node)
+            _importfiles.push(node)
             return null;
         }
         
@@ -712,6 +712,6 @@ export default {
 
 import { Parser,Language }  from '../lib/TreeSitter/web-tree-sitter.js';
 await Parser.init().then(() => {
-    console.log("Parser init")
+    console.log("TreeSitter Parser init")
     
 });

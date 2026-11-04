@@ -24,7 +24,7 @@ async function load() {
         }else if(t[1]=='js'){
             gAst[ast]=ESTREEJS.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }else{
-            console.log('use SCAST')
+            // console.log('use SCAST')
             gAst[ast]=SCAST.getAst(c.replace(/\r\n/g,'\n'),t[0])
         }
         gAst[ast]['code']=c.replace(/\r\n/g,'\n')
@@ -65,35 +65,48 @@ async function load() {
 }
 
 function genImportGraph(){
+        try{
     mermaid.initialize({ startOnLoad: false,securityLevel: 'loose', });
+    var canclick=document.getElementById('mmdop_click').checked;
     var $useTreeSitter=document.getElementById('useTreeSitter')
     if($useTreeSitter.checked){
         var filenames=Object.keys(gAst).map(v=>{return v.split('.')[0]})
+        var edgebundings=[]
         const regex = /[^.\\/\\a-zA-Z0-9]/g;
         gMermaid.FlowLink=''
         gMermaid.Flow='flowchart LR\n'
         gMermaid.UML='flowchart LR\n'
         for(let k in gAst){
             let ast=gAst[k]
-            if(ast.imports)gMermaid.FlowNode[ast.filename]=ast.imports[0]
+            var eb={"name":'network.'+ast.filename,"imports":[]}
+            if(ast.importfiles)gMermaid.FlowNode[ast.filename]=ast.importfiles[0]
             gMermaid.Flow+=`  ${ast.filename}[${ast.filename}]\n`
-            //`click ${ast.filename} "javascript:void(onFlowClick('${ast.filename}','${k}'))"\n`
+            if(canclick)gMermaid.Flow+=`click ${ast.filename} "javascript:void(onFlowClick('${ast.filename}','${k}'))"\n`
             gMermaid.FDPNode[ast.filename]={id:ast.filename,w:ast.filename.length * gD3fontSize / 1.6 + gD3fontSize * 2,text:`${ast.filename}`}
             gMermaid.UML+=`  ${ast.filename}[${ast.filename}]\n`
-            for(let im of ast.imports){
+            if(canclick)gMermaid.UML+=`click ${ast.filename} "javascript:void(onFlowClick('${ast.filename}','${k}'))"\n`
+            for(let im of ast.importfiles){
                 gMermaid.UML+=`${im.value.replace(regex,'')}([${im.value.replace(regex,'')}])\n`
                 gMermaid.UML+=`${ast.filename} -..-> ${im.value.replace(regex,'')}\n`
                 for(let f of filenames){
                     if(im.value.indexOf(f)>=0){
+                        eb.imports.push('network.'+f)
                         gMermaid.FlowLink+=`${ast.filename} --> ${f}`
                         gMermaid.FDPLinks.push({source:ast.filename,target:f,value:2,strength:0.1,dash:'5,5',dist:100})
                     }
                 }
             }
+            edgebundings.push(eb)
         }
-        
+        var $con=document.getElementById('D3Diagram')
+        $con.innerHTML=''
+        var ebsvg=D3M.EdgeBundling(null,edgebundings)
+        $con.appendChild(ebsvg)
         renderMermaid()
         scrollToView('mermaidPane',-window.innerHeight/2-20)
+    }
+    }catch(err){
+        console.warn("genImortGraph error",err)
     }
 }
 
@@ -230,7 +243,7 @@ function genMermaid(){
         }
     }
     gMermaid=r;
-    console.log('gMermaid',gMermaid)
+    // console.log('gMermaid',gMermaid)
     renderMermaid()
     renderMermaidFilter()
     scrollToView('mermaidPane',-window.innerHeight/2-20)
@@ -258,7 +271,7 @@ function genD3(){
     var D3Select=document.getElementById('D3Select').value;
     gD3.select=D3Select;
     gD3.tree=r;
-    console.log('gD3',gD3)
+    // console.log('gD3',gD3)
 
     for(let file in gAst){
         let d3node=JSON.parse(JSON.stringify(gAst[file]))
@@ -294,8 +307,6 @@ function genD3(){
         r.children.push(d3node)
     }
     
-    
-
     renderD3(D3Select,gD3.tree)
     scrollToView('D3Select',-window.innerHeight/2-20)
 }
